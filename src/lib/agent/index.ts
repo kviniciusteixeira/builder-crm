@@ -22,13 +22,13 @@ export interface RunAgentResult {
 }
 
 /**
- * Ejecuta el agente para UNA conversacion:
- * 1. Carga el historial de ese hilo (no del contacto: WhatsApp e Instagram no se mezclan)
- * 2. Resuelve prompt, tools y modelo del canal; agrega CONTEXTO (cliente, pipeline,
- *    datos a averiguar) y EQUIPO (si puede asignar)
- * 3. Loop de tool_calls hasta finish_reason=stop (o hasta una tool con `stop`)
- * 4. Responde por `deliverMessage`, el unico camino de salida: el conector de la
- *    conversacion decide si eso es Zernio, Meta o el simulador.
+ * Executa o agente para UMA conversa:
+ * 1. Carrega o histórico desse fio (não do contato: WhatsApp e Instagram não se misturam)
+ * 2. Resolve prompt, tools e modelo do canal; acrescenta CONTEXTO (cliente, pipeline,
+ *    dados a descobrir) e EQUIPO (se pode atribuir)
+ * 3. Loop de tool_calls até finish_reason=stop (ou até uma tool com `stop`)
+ * 4. Responde por `deliverMessage`, o único caminho de saída: o conector da
+ *    conversa decide se isso é Zernio, Meta ou o simulador.
  */
 export async function runAgentForConversation(conversationId: string): Promise<RunAgentResult> {
   const conversation = await getConversationRow(conversationId);
@@ -38,7 +38,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
   const [contact] = await db.select().from(contacts).where(eq(contacts.id, conversation.contactId)).limit(1);
   if (!contact) return { ok: false, reason: "contact_not_found" };
 
-  // El contacto es el kill-switch global; la conversacion pausa solo este hilo.
+  // O contato é o kill-switch global; a conversa pausa só este fio.
   if (!contact.aiEnabled) return { ok: false, reason: "ai_disabled" };
   if (contact.needsHuman) return { ok: false, reason: "needs_human" };
   if (!conversation.aiEnabled) return { ok: false, reason: "ai_disabled_conversation" };
@@ -103,7 +103,7 @@ export async function runAgentForConversation(conversationId: string): Promise<R
         try {
           args = JSON.parse(tc.function.arguments);
         } catch {
-          // si no parsea, la tool recibe {} y responde su propio error
+          // se não parseia, a tool recebe {} e responde o próprio erro
         }
 
         const result = await executeTool(tc.function.name, args, ctx);
@@ -141,8 +141,8 @@ export async function runAgentForConversation(conversationId: string): Promise<R
 }
 
 /**
- * Compatibilidad: resuelve la conversacion mas reciente del contacto y delega. Lo usan
- * los jobs viejos que solo traen contacto.
+ * Compatibilidade: resolve a conversa mais recente do contato e delega. Usam
+ * os jobs velhos que só trazem contato.
  */
 export async function runAgentForContact(contactId: string): Promise<RunAgentResult> {
   const [conv] = await db
@@ -157,7 +157,7 @@ export async function runAgentForContact(contactId: string): Promise<RunAgentRes
 
 type CollapsedHistory = Array<{ role: "user" | "assistant"; content: string }> | "empty" | "no_user" | "already_replied";
 
-/** Seccion EQUIPO: a quien puede asignar y quien tiene hoy el contacto. */
+/** Seção EQUIPO: a quem pode atribuir e quem tem hoje o contato. */
 async function renderTeamBlock(currentOwnerId: string | null): Promise<string> {
   const members = await listMembers({ onlyActive: true });
   if (members.length === 0) return "";

@@ -4,12 +4,12 @@ import { capabilitiesFor, isOutsideFreeFormWindow, type Channel } from "../types
 import type { Conector, EstadoConector } from "../conector";
 
 /**
- * Conector Zernio: WhatsApp, Instagram DM y Facebook Messenger por una sola API y un
- * solo webhook. Es el camino normal del CRM.
+ * Conector Zernio: WhatsApp, Instagram DM e Facebook Messenger por uma só API e um
+ * só webhook. É o caminho normal do CRM.
  *
- * Este modulo importa solo lo liviano (firma HMAC, capacidades): lo usa la ruta del
- * webhook, que tiene 5 segundos para responder. El envio y la ingesta se importan
- * dinamicamente cuando hacen falta.
+ * Este módulo importa só o leve (assinatura HMAC, capacidades): usa-o a rota do
+ * webhook, que tem 5 segundos para responder. O envio e a ingestão se importam
+ * dinamicamente quando fazem falta.
  */
 export const zernio: Conector = {
   id: "zernio",
@@ -33,9 +33,9 @@ export const zernio: Conector = {
 
     const { sendMessage, extractMessageId } = await import("@/lib/zernio/inbox");
 
-    // La etiqueta la decide el servidor, no el cliente: es politica de Meta y el front
-    // no es confiable para cumplirla. Fuera de las 24h, IG y Messenger solo aceptan
-    // HUMAN_AGENT (valida 7 dias); en WhatsApp la unica salida es una plantilla.
+    // A etiqueta a decide o servidor, não o cliente: é política da Meta e o front
+    // não é confiável para cumpri-la. Fora das 24h, IG e Messenger só aceitam
+    // HUMAN_AGENT (válida 7 dias); no WhatsApp a única saída é um template.
     const caps = capabilitiesFor(ctx.channel);
     const needsTag =
       caps.humanAgentTag &&

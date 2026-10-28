@@ -3,20 +3,20 @@ import { redirect } from "next/navigation";
 import { getCurrentMember } from "@/lib/team";
 
 /**
- * Puerta de acceso para una pagina.
+ * Porta de acesso para uma página.
  *
- * Las paginas que son componentes de servidor resuelven el miembro ellas mismas y
- * redirigen. Las que son de cliente no pueden: se renderizan igual y el candado queda
- * solo en las rutas de API, asi que alguien con sesion de Auth pero sin fila en
- * `team_members` veia el armazon de la aplicacion en vez de `/sin-acceso`. No se
- * escapaba ningun dato, porque toda ruta de datos exige membresia, pero la puerta tiene
- * que ser la misma en todas.
+ * As páginas que são componentes de servidor resolvem o membro elas mesmas e
+ * redirecionam. As que são de cliente não podem: renderizam-se igual e o cadeado fica
+ * só nas rotas de API, então alguém com sessão de Auth mas sem linha em
+ * `team_members` via o esqueleto da aplicação em vez de `/sin-acceso`. Não se
+ * escapava nenhum dado, porque toda rota de dados exige membresia, mas a porta tem
+ * que ser a mesma em todas.
  *
- * Uso, en un `layout.tsx` al lado de la pagina:
+ * Uso, num `layout.tsx` ao lado da página:
  *
  *   export default layoutSoloMiembros();
  *
- * Con `soloAdmin` ademas exige rol de administrador.
+ * Com `soloAdmin` além disso exige papel de administrador.
  */
 export function layoutSoloMiembros(opciones: { soloAdmin?: boolean } = {}) {
   return async function Layout({ children }: { children: ReactNode }) {

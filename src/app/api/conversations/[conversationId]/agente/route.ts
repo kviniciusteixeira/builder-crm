@@ -11,14 +11,14 @@ interface Body {
 }
 
 /**
- * Pausa y reactivacion del agente POR CONVERSACION (handoff humano).
+ * Pausa e reativação do agente POR CONVERSA (handoff humano).
  *
- * - { enabled: false }                       -> pausa solo este hilo
- * - { enabled: true } o { clearNeedsHuman }  -> reactiva este hilo; si el contacto tenia
- *   el kill-switch global apagado o marcado "necesita humano", tambien lo limpia (si
- *   alguien reactiva un hilo es porque quiere que el agente vuelva a responder).
+ * - { enabled: false }                       -> pausa só este fio
+ * - { enabled: true } ou { clearNeedsHuman }  -> reativa este fio; se o contato tinha
+ *   o kill-switch global desligado ou marcado "precisa de humano", também o limpa (se
+ *   alguém reativa um fio é porque quer que o agente volte a responder).
  *
- * Devuelve el estado combinado (contacto y conversacion), que es lo que muestra el chat.
+ * Devolve o estado combinado (contato e conversa), que é o que o chat mostra.
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
   const auth = await requireMember();

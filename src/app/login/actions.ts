@@ -23,10 +23,10 @@ export async function signIn(formData: FormData) {
 }
 
 /**
- * El registro publico esta abierto SOLO mientras no exista ningun miembro: la primera
- * cuenta de una instancia nueva queda como administrador (trigger
- * `on_auth_user_created`) y despues el registro se cierra solo. Los asesores se crean
- * desde Ajustes -> Equipo. `ALLOW_PUBLIC_SIGNUP=true` lo deja abierto siempre.
+ * O cadastro público está aberto SÓ enquanto não existir nenhum membro: a primeira
+ * conta de uma instância nova fica como administrador (trigger
+ * `on_auth_user_created`) e depois o cadastro se fecha sozinho. Os assessores se criam
+ * em Ajustes -> Equipo. `ALLOW_PUBLIC_SIGNUP=true` o deixa aberto sempre.
  */
 export async function registroAbierto(): Promise<boolean> {
   if (process.env.ALLOW_PUBLIC_SIGNUP === "true") return true;

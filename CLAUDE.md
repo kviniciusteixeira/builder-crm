@@ -1,233 +1,234 @@
-# Builder CRM — guia para Claude Code
+# Builder CRM — guia para o Claude Code
 
-Builder CRM es el CRM que los miembros de **IA Builder Lab** entregan a sus clientes:
-una bandeja unica de **WhatsApp, Instagram y Messenger** con un **agente de IA** que
-califica leads, mueve el pipeline y deja la ficha al dia. Cada miembro clona este repo,
-despliega **una instancia por cliente** (Coolify + Supabase) y la adapta con Claude
-Code sin tocar el nucleo. Este archivo es lo primero que lees en cada sesion.
+O Builder CRM é o CRM que os membros do **IA Builder Lab** entregam aos seus clientes:
+uma caixa de entrada única de **WhatsApp, Instagram e Messenger** com um **agente de IA** que
+qualifica leads, move o pipeline e deixa a ficha em dia. Cada membro clona este repositório,
+implanta **uma instância por cliente** (Coolify + Supabase) e a adapta com Claude
+Code sem tocar no núcleo. Este arquivo é o primeiro que você lê em cada sessão.
 
-**Principio rector: agent first.** El nucleo es minimo y generico; todo lo del cliente
-va en configuracion o en modulos, y lo hace Claude guiado por las skills de
-`.claude/skills/`. La constitucion manda: [`specs/CONSTITUCION.md`](specs/CONSTITUCION.md).
+**Princípio reitor: agent first.** O núcleo é mínimo e genérico; tudo do cliente
+vai em configuração ou em módulos, e quem faz isso é o Claude guiado pelas skills de
+`.claude/skills/`. A constituição manda: [`specs/CONSTITUICAO.md`](specs/CONSTITUICAO.md).
 
-## Stack y arquitectura
+## Stack e arquitetura
 
 Next.js 16 (App Router) + React 19 + TypeScript strict · Tailwind 4 + shadcn/ui ·
-Drizzle ORM sobre **Supabase Postgres** (RLS en todas las tablas) · **Supabase Auth**
-(email + password; roles `admin` / `asesor` en `team_members`) · mensajeria por
-**Zernio** (un webhook para los tres canales) · agente por **OpenRouter** (modelo por
-`AGENT_MODEL`) · Web Push + PWA · Docker multi-stage para **Coolify** (migraciones al
-arrancar, `/api/health`).
+Drizzle ORM sobre **Supabase Postgres** (RLS em todas as tabelas) · **Supabase Auth**
+(e-mail + senha; papéis `admin` / `asesor` em `team_members`) · mensagens por
+**Zernio** (um webhook para os três canais) · agente por **OpenRouter** (modelo por
+`AGENT_MODEL`) · Web Push + PWA · Docker multi-stage para **Coolify** (migrações ao
+iniciar, `/api/health`).
 
 ```
 Cliente (WhatsApp/IG/Messenger) -> Zernio -> POST /api/webhooks/zernio
-   -> src/lib/channels/webhook.ts (firma, idempotencia en webhook_events, after())
-   -> conector.webhook.procesar -> ingest.ts (contacto, conversacion, mensaje, job)
+   -> src/lib/channels/webhook.ts (assinatura, idempotência em webhook_events, after())
+   -> conector.webhook.procesar -> ingest.ts (contato, conversa, mensagem, job)
    -> worker /api/agent/process -> src/lib/agent (prompt + CONTEXTO + tools)
    -> deliverMessage -> conector.enviar (Zernio | Meta | simulador)
 ```
 
-| Carpeta | Que es |
+| Pasta | O que é |
 |---|---|
-| `src/app/` | Paginas y rutas de API del nucleo. `/m/[modulo]` y `/api/m/[modulo]` despachan a los modulos. |
-| `src/lib/config/` | Lectura y validacion de `config/cliente.ts`; marca -> CSS vars; campos personalizados. |
-| `src/lib/channels/` | `conector.ts` (interfaz), `conectores/` (zernio, meta-cloud parcial, simulador), `webhook.ts`, `deliver.ts`, `ingest.ts`. |
-| `src/lib/agent/` | Loop, prompt generico, registro de tools (nucleo + modulos), config por canal. |
-| `src/lib/modules/` | Tipos del contrato de modulo, registro generado, resolucion de rutas. |
-| `src/lib/reportes.ts`, `seed-demo.ts`, `simulador.ts` | Reportes reales, datos demo, simulador. |
-| `supabase/migrations/` | Migraciones del nucleo (base, RLS, primer admin). Las aplica `scripts/migrar.mjs`, y `scripts/local.mjs` las mismas sobre la base embebida. |
-| `scripts/` | migrar, crear-admin, seed-demo, verificar-instancia, zernio:*, generar-registro-modulos, pwa-icons. |
+| `src/app/` | Páginas e rotas de API do núcleo. `/m/[modulo]` e `/api/m/[modulo]` despacham para os módulos. |
+| `src/lib/config/` | Leitura e validação de `config/cliente.ts`; marca -> CSS vars; campos personalizados. |
+| `src/lib/channels/` | `conector.ts` (interface), `conectores/` (zernio, meta-cloud parcial, simulador), `webhook.ts`, `deliver.ts`, `ingest.ts`. |
+| `src/lib/agent/` | Loop, prompt genérico, registro de tools (núcleo + módulos), config por canal. |
+| `src/lib/modules/` | Tipos do contrato de módulo, registro gerado, resolução de rotas. |
+| `src/lib/reportes.ts`, `seed-demo.ts`, `simulador.ts` | Relatórios reais, dados demo, simulador. |
+| `supabase/migrations/` | Migrações do núcleo (base, RLS, primeiro admin). Aplica `scripts/migrar.mjs`, e `scripts/local.mjs` as mesmas sobre a base embutida. |
+| `scripts/` | migrar, criar-admin, seed-demo, verificar-instancia, zernio:*, generar-registro-modulos, pwa-icons. |
 
-## Zonas: que se toca y que no
+## Zonas: o que se toca e o que não
 
-| Zona | Carpetas | Regla |
+| Zona | Pastas | Regra |
 |---|---|---|
-| **NUCLEO (no se toca para un cliente)** | `src/`, `supabase/`, `scripts/`, `docker/`, `Dockerfile`, `docker-compose.yml`, `next.config.ts`, `package.json` | Solo cambia con una version nueva del repo original. Si una adaptacion necesita tocarlo, es una mejora generica: se propone al repo original, no se parchea en la instancia. |
-| **ZONA DEL CLIENTE** | `config/cliente.ts`, `config/modulos.json`, `config/plantillas/`, `modules/<nombre>/`, `public/marca/`, `public/icons/`, `specs/<cliente>/`, `.env.local` (nunca al repo) | Aqui va TODO lo especifico: marca, pipeline, campos, prompt, modulos, assets, specs. |
-| **Compartido** | `specs/CONSTITUCION.md`, `specs/_plantilla.md`, `specs/nucleo/`, `.claude/`, `docs/` | Documentacion y arnes. Se actualizan con el nucleo. |
+| **NÚCLEO (não se toca para um cliente)** | `src/`, `supabase/`, `scripts/`, `docker/`, `Dockerfile`, `docker-compose.yml`, `next.config.ts`, `package.json` | Só muda com uma versão nova do repositório original. Se uma adaptação precisar tocá-lo, é uma melhoria genérica: propõe-se ao repositório original, não se corrige na instância. |
+| **ZONA DO CLIENTE** | `config/cliente.ts`, `config/modulos.json`, `config/plantillas/`, `modules/<nombre>/`, `public/marca/`, `public/icons/`, `specs/<cliente>/`, `.env.local` (nunca no repositório) | Aqui vai TUDO o específico: marca, pipeline, campos, prompt, módulos, assets, specs. |
+| **Compartilhado** | `specs/CONSTITUICAO.md`, `specs/_modelo.md`, `specs/nucleo/`, `.claude/`, `docs/` | Documentação e arnês. Atualizam-se com o núcleo. |
 
-Criterio de aceptacion: cambiar nombre, logo, colores, pipeline y campos de un cliente
-**sin editar ningun archivo del nucleo**. `git status` despues de una adaptacion solo
-muestra la zona del cliente.
+Critério de aceitação: mudar nome, logo, cores, pipeline e campos de um cliente
+**sem editar nenhum arquivo do núcleo**. `git status` depois de uma adaptação só
+mostra a zona do cliente.
 
-## Flujo one-shot (de un prompt a una instancia funcionando)
+## Fluxo one-shot (de um prompt a uma instância funcionando)
 
-Prompt tipico: *"Adapta Builder CRM para una inmobiliaria llamada Casa Sur, con modulo
-de propiedades y agendamiento de visitas, y despliegalo en mi Coolify."*
+Prompt típico: *"Adapta o Builder CRM para uma imobiliária chamada Casa Sur, com módulo
+de imóveis e agendamento de visitas, e implanta no meu Coolify."*
 
-| Paso | Que pasa | Skill |
+| Passo | O que acontece | Skill |
 |---|---|---|
-| 1. Entender | Leer el brief ([`specs/_brief.md`](specs/_brief.md) es que preguntarle al cliente); maximo 3 preguntas si falta algo critico (dominio, credenciales, nicho). | `adaptar-a-cliente` |
-| 2. Especificar | `specs/<cliente>/spec.md` desde `specs/_plantilla.md`. | `adaptar-a-cliente` |
-| 3. Configurar | `config/cliente.ts` (desde una plantilla de `config/plantillas/` o desde cero), `config/modulos.json`, `public/marca/`, `npm run pwa:icons`. | `adaptar-a-cliente` |
-| 4. Construir | Modulos nuevos en `modules/` que la spec requiera. | `crear-modulo` |
-| 5. Desplegar | Proyecto Supabase, migraciones, primer admin, app en Coolify, variables, deploy. | `deploy-coolify` |
-| 6. Conectar | WhatsApp / Instagram / Messenger via Zernio (puede ser despues de la demo). | `conectar-zernio` |
-| 7. Probar | `scripts/verificar-instancia.mjs`: health, login, marca, pipeline, simulador -> agente -> etapa, modulos. Corregir hasta verde. | `probar-instancia` |
-| 8. Entregar | URL, credenciales de la cuenta demo, resumen de lo construido y lo pendiente. | `adaptar-a-cliente` |
+| 1. Entender | Ler o brief ([`specs/_brief.md`](specs/_brief.md) é o que perguntar ao cliente); no máximo 3 perguntas se faltar algo crítico (domínio, credenciais, nicho). | `adaptar-a-cliente` |
+| 2. Especificar | `specs/<cliente>/spec.md` a partir de `specs/_modelo.md`. | `adaptar-a-cliente` |
+| 3. Configurar | `config/cliente.ts` (a partir de um modelo de `config/plantillas/` ou do zero), `config/modulos.json`, `public/marca/`, `npm run pwa:icons`. | `adaptar-a-cliente` |
+| 4. Construir | Módulos novos em `modules/` que a spec exija. | `crear-modulo` |
+| 5. Implantar | Projeto Supabase, migrações, primeiro admin, app no Coolify, variáveis, deploy. | `deploy-coolify` |
+| 6. Conectar | WhatsApp / Instagram / Messenger via Zernio (pode ser depois da demo). | `conectar-zernio` |
+| 7. Testar | `scripts/verificar-instancia.mjs`: health, login, marca, pipeline, simulador -> agente -> etapa, módulos. Corrigir até verde. | `probar-instancia` |
+| 8. Entregar | URL, credenciais da conta demo, resumo do que se construiu e do pendente. | `adaptar-a-cliente` |
 
-Otras skills: `nueva-plantilla-nicho` (convertir una adaptacion exitosa en plantilla
-reutilizable), `actualizar-desde-original` (traer una version nueva del nucleo a una
-instancia adaptada). Las skills `supabase`, `playwright-cli` y `memory-manager` son de
-apoyo.
+Outras skills: `nueva-plantilla-nicho` (converter uma adaptação bem-sucedida em modelo
+reutilizável), `actualizar-desde-original` (trazer uma versão nova do núcleo a uma
+instância adaptada). As skills `supabase`, `playwright-cli` e `memory-manager` são de
+apoio.
 
-**Definicion de hecho**: `npm test && npm run typecheck && npm run lint && npm run build`
-es el piso, y lo mismo corre el CI. Una instancia esta terminada cuando
-`probar-instancia` pasa en verde contra la URL desplegada. No se delega la prueba al
-miembro ni al cliente.
+**Definição de pronto**: `npm test && npm run typecheck && npm run lint && npm run build`
+é o piso, e o mesmo roda o CI. Uma instância está terminada quando
+`probar-instancia` passa em verde contra a URL implantada. A prova não se delega ao
+membro nem ao cliente.
 
-Los tests de `tests/` cubren los invariantes que **fallan en silencio**: la firma del
-webhook, la ventana de 24 h, el filtro por rol, la validacion de `config/cliente.ts`, el
-bloque de configuracion publica y las plantillas de correo. Corren sin base y sin red en
-un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`.
+Os testes de `tests/` cobrem os invariantes que **falham em silêncio**: a assinatura do
+webhook, a janela de 24 h, o filtro por papel, a validação de `config/cliente.ts`, o
+bloco de configuração pública e os templates de e-mail. Rodam sem base e sem rede em
+um segundo. O que precisa de base ou navegador se testa com `verificar-instancia`.
 
-## Convenciones
+## Convenções
 
-- **Idioma**: UI y comentarios en espanol sin acentos obligatorios (consistencia con
-  el codigo existente); nombres de archivos y simbolos nuevos en espanol
-  (`conector.ts`, `moverEtapa`), los heredados en ingles se dejan como estan.
-- **Componentes** de ~300 lineas maximo; iconos de `lucide-react` (los de canal son
-  SVG inline en `src/components/icons/channels.tsx`); forms con `react-hook-form` +
-  `zod`; drag & drop con `@dnd-kit`; montos en **centavos** y `formatCurrency()` (moneda
-  de la config); fechas con `date-fns`.
-- **Rutas de API**: `requireMember()` / `requireAdmin()` de `src/lib/api-auth.ts` al
-  inicio; acceso por contacto con `canAccessContactId`; lo ajeno responde **404**, no 403.
-- **Version**: se sube con `npm version <nueva> --no-git-tag-version`, que actualiza
-  `package.json` y `package-lock.json` a la vez. A mano se desincronizan.
-- **Commits**: uno por cambio logico, en espanol, primera linea imperativa y
-  concreta ("Agregar modulo pedidos", "Corregir ventana de 24h en Messenger"); sin
-  backticks en el mensaje. Nunca `.env*`, `.mcp.json` ni datos reales.
-- **Specs antes que codigo**: toda funcionalidad nueva nace en `specs/` (carril
-  completo si toca datos o contratos; ligero si es config, modulo o UI).
+- **Idioma**: a documentação Markdown e os comentários do código estão em português
+  brasileiro. A interface continua em espanhol (consistência com o código existente);
+  nomes de arquivos e símbolos novos em espanhol (`conector.ts`, `moverEtapa`); os
+  herdados em inglês ficam como estão.
+- **Componentes** de ~300 linhas no máximo; ícones de `lucide-react` (os de canal são
+  SVG inline em `src/components/icons/channels.tsx`); forms com `react-hook-form` +
+  `zod`; drag & drop com `@dnd-kit`; valores em **centavos** e `formatCurrency()` (moeda
+  da config); datas com `date-fns`.
+- **Rotas de API**: `requireMember()` / `requireAdmin()` de `src/lib/api-auth.ts` no
+  início; acesso por contato com `canAccessContactId`; o alheio responde **404**, não 403.
+- **Versão**: sobe-se com `npm version <nova> --no-git-tag-version`, que atualiza
+  `package.json` e `package-lock.json` ao mesmo tempo. À mão se desalinham.
+- **Commits**: um por mudança lógica, em espanhol, primeira linha imperativa e
+  concreta ("Agregar modulo pedidos", "Corregir ventana de 24h en Messenger"); sem
+  backticks na mensagem. Nunca `.env*`, `.mcp.json` nem dados reais.
+- **Specs antes do código**: toda funcionalidade nova nasce em `specs/` (trilho
+  completo se mexe em dados ou contratos; leve se é config, módulo ou UI).
 
-## Lo que NO es obvio (leer antes de tocar)
+## O que NÃO é óbvio (ler antes de tocar)
 
-- **`deliverMessage` es el unico camino de salida.** El agente, el chat y las
-  plantillas pasan por ahi; el conector se elige por `conversations.provider`.
-- **La conversacion no es el contacto.** Una persona puede tener hilo de WhatsApp y de
-  Instagram; la ruta es `/conversations/[conversationId]`.
-- **Idempotencia de mensajes**: indice unico parcial sobre `messages.external_id`
-  (a proposito NO compuesto con provider). Los webhooks reclaman el evento en
-  `webhook_events` antes de responder 2xx; el barrido (`GET` con
-  `AGENT_WORKER_SECRET`) reprocesa lo colgado.
-- **Zernio exige 2xx en 5 s**: la ruta del webhook importa lo minimo y procesa en
-  `after()`; lo pesado entra por `import()` dinamico. 10 fallos seguidos y Zernio apaga
-  la suscripcion (`npm run zernio:webhook` la reactiva).
-- **`ZERNIO_WEBHOOK_SECRET` debe ser identico** en la instancia y en la suscripcion
-  de Zernio; si no, 401 silencioso y "no entran mensajes".
-- **Un agente por canal** (`agent_configs`): Instagram y Messenger arrancan apagados.
-  Cascada del prompt: canal -> global (Ajustes) -> `config.agente.prompt` -> default.
-  El agente agrega CONTEXTO (contacto, etapa, pipeline, datos a averiguar) y EQUIPO.
-- **La ventana de 24 h la decide el servidor** (`conversations.last_inbound_at`):
-  IG/Messenger fuera de ventana van con `HUMAN_AGENT`; WhatsApp solo con plantilla.
-- **Pausa del agente**: por conversacion (`PATCH /api/conversations/:id/agente`);
-  el contacto tiene ademas un kill-switch global. `derivar_asesor` pausa solo el hilo.
-- **El proceso corre en UTC; la zona horaria sale de la configuracion.** El contenedor no
-  define `TZ` a proposito: una imagen compartida por muchas instancias no puede traer la
-  zona horneada. Por eso `config.zonaHoraria` (IANA, default `UTC`) es la que manda, y
-  todo lo que resuelva un dia o una hora tiene que pasarsela a `Intl`: el prompt del
-  agente (`{{fecha}}`) y `formatDate` / `formatRelativeDate` ya lo hacen. Si se omite, el
-  sintoma no es un error sino un agente que nombra el dia equivocado de noche, y en la
-  maquina de un miembro chileno no se reproduce. Los tests corren tambien con `TZ=UTC`
-  por eso. Ver `specs/nucleo/11-zona-horaria.md`.
-- **Nunca pasar un `Date` dentro de `db.execute(sql\`...\`)`.** Ese camino llega al
-  driver por `unsafe()`, que no serializa fechas, y la consulta muere con
-  `ERR_INVALID_ARG_TYPE` antes de salir. En SQL crudo las fechas van como texto ISO con
-  cast (`${fecha.toISOString()}::timestamptz`); con el constructor de Drizzle se pasa el
-  `Date` tal cual, porque ahi si se conoce el tipo de la columna.
-- **El cliente de base es perezoso.** `src/db/index.ts` exporta un proxy que arma la
-  conexion en el primer uso. `next build` importa cada route handler, y el build NO
-  debe pedir `DATABASE_URL`: en el Dockerfile solo las `NEXT_PUBLIC_*` son build args,
-  porque la base de cada instancia se conoce al desplegar. Si un modulo consulta la
-  base al importarse, el build se rompe de nuevo: las consultas van dentro de la
-  funcion. El CI corre `build` sin `DATABASE_URL` justamente para detectarlo.
-- **RLS protege la API publica de Supabase, no a Drizzle**: la app entra como
-  `postgres` (bypass). `anon` no tiene privilegios; `authenticated` solo lectura
-  segun `team_members`. Toda tabla nueva (tambien de modulos) con RLS; el runner lo
-  fuerza si falta.
-- **Migraciones**: `supabase/migrations/` + `modules/<activo>/migrations/`, en orden,
-  registradas en `_migraciones`. Hasta 1.0.0 `0000_base.sql` se regenera desde el
-  schema; desde 1.0.0 solo se agregan archivos. Corren solas al arrancar el contenedor.
-- **Registro de modulos generado**: `config/modulos.json` ->
-  `src/lib/modules/*.generated.ts` (lo escribe `next.config.ts` y `npm run
-  typecheck`). Un modulo inactivo no entra al bundle; sus rutas dan 404. Esos dos
-  archivos **no se versionan**: si se versionaran, activar un modulo dejaria cambios
-  dentro de `src/` y chocarian en cada actualizacion del nucleo.
-- **Primera cuenta**: el disparador `on_auth_user_created` da de alta en
-  `team_members` SOLO a la primera cuenta de la instancia, como admin. A partir de ahi
-  nadie entra solo: un usuario de Auth sin fila en `team_members` cae en `/sin-acceso`.
-  Esto no es cosmetico, es la unica puerta: el endpoint `/auth/v1/signup` del proveedor
-  es publico y la pagina `/signup` del CRM no puede impedir que lo llamen a mano. Las
-  altas reales van por Ajustes -> Equipo, que inserta la fila con su rol, o por
+- **`deliverMessage` é o único caminho de saída.** O agente, o chat e os
+  templates passam por ali; o conector se escolhe por `conversations.provider`.
+- **A conversa não é o contato.** Uma pessoa pode ter fio de WhatsApp e de
+  Instagram; a rota é `/conversations/[conversationId]`.
+- **Idempotência de mensagens**: índice único parcial sobre `messages.external_id`
+  (de propósito NÃO composto com provider). Os webhooks reivindicam o evento em
+  `webhook_events` antes de responder 2xx; a varredura (`GET` com
+  `AGENT_WORKER_SECRET`) reprocessa o que ficou pendente.
+- **O Zernio exige 2xx em 5 s**: a rota do webhook importa o mínimo e processa em
+  `after()`; o pesado entra por `import()` dinâmico. 10 falhas seguidas e o Zernio desliga
+  a assinatura (`npm run zernio:webhook` a reativa).
+- **`ZERNIO_WEBHOOK_SECRET` tem que ser idêntico** na instância e na assinatura
+  do Zernio; se não, 401 silencioso e "não entram mensagens".
+- **Um agente por canal** (`agent_configs`): Instagram e Messenger começam desligados.
+  Cascata do prompt: canal -> global (Ajustes) -> `config.agente.prompt` -> default.
+  O agente acrescenta CONTEXTO (contato, etapa, pipeline, dados a descobrir) e EQUIPE.
+- **A janela de 24 h o servidor decide** (`conversations.last_inbound_at`):
+  IG/Messenger fora da janela vão com `HUMAN_AGENT`; WhatsApp só com template.
+- **Pausa do agente**: por conversa (`PATCH /api/conversations/:id/agente`);
+  o contato tem além disso um kill-switch global. `derivar_asesor` pausa só o fio.
+- **O processo roda em UTC; o fuso horário sai da configuração.** O contêiner não
+  define `TZ` de propósito: uma imagem compartilhada por muitas instâncias não pode trazer o
+  fuso gravado nela. Por isso `config.zonaHoraria` (IANA, default `UTC`) é a que manda, e
+  tudo o que resolva um dia ou uma hora tem que passá-la ao `Intl`: o prompt do
+  agente (`{{fecha}}`) e `formatDate` / `formatRelativeDate` já fazem isso. Se se omitir, o
+  sintoma não é um erro e sim um agente que nomeia o dia errado de noite, e na
+  máquina de um membro chileno não se reproduz. Os testes rodam também com `TZ=UTC`
+  por isso. Ver `specs/nucleo/11-fuso-horario.md`.
+- **Nunca passar um `Date` dentro de `db.execute(sql\`...\`)`.** Esse caminho chega ao
+  driver por `unsafe()`, que não serializa datas, e a consulta morre com
+  `ERR_INVALID_ARG_TYPE` antes de sair. Em SQL cru as datas vão como texto ISO com
+  cast (`${fecha.toISOString()}::timestamptz`); com o construtor do Drizzle se passa o
+  `Date` tal qual, porque aí sim se conhece o tipo da coluna.
+- **O cliente de base é preguiçoso.** `src/db/index.ts` exporta um proxy que monta a
+  conexão no primeiro uso. `next build` importa cada route handler, e o build NÃO
+  deve pedir `DATABASE_URL`: no Dockerfile só as `NEXT_PUBLIC_*` são build args,
+  porque a base de cada instância se conhece ao implantar. Se um módulo consulta a
+  base ao se importar, o build quebra de novo: as consultas vão dentro da
+  função. O CI roda `build` sem `DATABASE_URL` justamente para detectar isso.
+- **RLS protege a API pública do Supabase, não o Drizzle**: o app entra como
+  `postgres` (bypass). `anon` não tem privilégios; `authenticated` só leitura
+  conforme `team_members`. Toda tabela nova (também de módulos) com RLS; o runner
+  força se faltar.
+- **Migrações**: `supabase/migrations/` + `modules/<activo>/migrations/`, em ordem,
+  registradas em `_migraciones`. Até 1.0.0 `0000_base.sql` se regenera a partir do
+  schema; a partir de 1.0.0 só se adicionam arquivos. Rodam sozinhas ao iniciar o contêiner.
+- **Registro de módulos gerado**: `config/modulos.json` ->
+  `src/lib/modules/*.generated.ts` (escrevem `next.config.ts` e `npm run
+  typecheck`). Um módulo inativo não entra no bundle; as rotas dão 404. Esses dois
+  arquivos **não se versionam**: se se versionassem, ativar um módulo deixaria mudanças
+  dentro de `src/` e chocariam em cada atualização do núcleo.
+- **Primeira conta**: o gatilho `on_auth_user_created` cadastra em
+  `team_members` SÓ a primeira conta da instância, como admin. A partir daí
+  ninguém entra sozinho: um usuário de Auth sem linha em `team_members` cai em `/sin-acceso`.
+  Isso não é cosmético, é a única porta: o endpoint `/auth/v1/signup` do provedor
+  é público e a página `/signup` do CRM não pode impedir que o chamem à mão. Os
+  cadastros reais vão por Ajustes -> Equipo, que insere a linha com o papel, ou por
   `npm run admin:crear`.
-- **Los correos de acceso los manda el proveedor, no el CRM.** Invitaciones y "olvide mi
-  contrasena" salen de GoTrue con su SMTP; el CRM solo declara la capacidad con
-  `AUTH_ENVIA_CORREOS=true` y ofrece los botones. Es un interruptor manual porque GoTrue
-  sin SMTP no falla: se traga el correo y responde 200, y la UI diria "enviado" sobre
-  nada. Los tres caminos aterrizan en `/auth/definir-clave`, que lee la sesion del
-  fragmento de la URL (por eso corre en el navegador) y limpia la barra. Las plantillas
-  las sirve el propio CRM en `/correo/*.html`, publicas porque las descarga GoTrue.
-  Ver `docs/CORREO.md`.
-- **Lo que el navegador necesita se sirve en EJECUCION, no en el build.** Next hornea
-  las `NEXT_PUBLIC_*` al compilar, y en una imagen compartida por muchas instancias eso
-  no sirve: el layout escribe la URL de Supabase, su clave anonima y las capacidades en
-  un bloque JSON (`src/lib/config-publica.ts`) y el navegador lo lee de ahi. Ningun
-  componente cliente lee `process.env` directo, y lo que falte (la clave VAPID) sale de
-  una ruta de API. Consecuencia practica: en Coolify TODAS las variables van en runtime y
-  no hay que marcar ninguna como build. El `Dockerfile` las sigue aceptando como build
-  args para plataformas que las hornean. Nada de secretos en el codigo ni en `.mcp.json`
-  (solo `.mcp.json.example`).
-- **Las rutas internas fallan CERRADAS y `AGENT_WORKER_SECRET` es obligatoria.**
-  `/api/agent/process`, los dos barridos y el seed demo son publicos en el middleware
-  (los llama un cron o el propio servidor, sin sesion), asi que ese secreto es lo unico
-  que los separa de internet. Hasta 1.6.1 la comprobacion era `if (secret) {...}` y una
-  instancia sin la variable los dejaba abiertos sin ningun sintoma. Guardian unico en
-  `src/lib/secreto-worker.ts`, en tiempo constante. Nunca volver al patron viejo: en
-  modo local la variable no hace falta (no hay cron ni internet) y por eso esta en
+- **Os e-mails de acesso os manda o provedor, não o CRM.** Convites e "esqueci a
+  senha" saem do GoTrue com o SMTP dele; o CRM só declara a capacidade com
+  `AUTH_ENVIA_CORREOS=true` e oferece os botões. É um interruptor manual porque o GoTrue
+  sem SMTP não falha: engole o e-mail e responde 200, e a UI diria "enviado" sobre
+  nada. Os três caminhos aterrissam em `/auth/definir-clave`, que lê a sessão do
+  fragmento da URL (por isso roda no navegador) e limpa a barra. Os templates
+  o próprio CRM serve em `/correo/*.html`, públicos porque o GoTrue os baixa.
+  Ver `docs/CORREIO.md`.
+- **O que o navegador precisa se serve em EXECUÇÃO, não no build.** O Next grava
+  as `NEXT_PUBLIC_*` ao compilar, e numa imagem compartilhada por muitas instâncias isso
+  não serve: o layout escreve a URL do Supabase, a chave anônima e as capacidades num
+  bloco JSON (`src/lib/config-publica.ts`) e o navegador lê dali. Nenhum
+  componente cliente lê `process.env` direto, e o que faltar (a chave VAPID) sai de
+  uma rota de API. Consequência prática: no Coolify TODAS as variáveis vão em runtime e
+  não há que marcar nenhuma como build. O `Dockerfile` continua aceitando-as como build
+  args para plataformas que as gravam na imagem. Nada de segredos no código nem em `.mcp.json`
+  (só `.mcp.json.example`).
+- **As rotas internas falham FECHADAS e `AGENT_WORKER_SECRET` é obrigatória.**
+  `/api/agent/process`, as duas varreduras e o seed demo são públicos no middleware
+  (chama-os um cron ou o próprio servidor, sem sessão), então esse segredo é o único
+  que os separa da internet. Até 1.6.1 a checagem era `if (secret) {...}` e uma
+  instância sem a variável os deixava abertos sem nenhum sintoma. Guardião único em
+  `src/lib/secreto-worker.ts`, em tempo constante. Nunca voltar ao padrão velho: no
+  modo local a variável não faz falta (não há cron nem internet) e por isso está em
   `NO_HACEN_FALTA_EN_LOCAL`.
-- **TLS y cookies no se heredan de la plataforma.** `postgres-js` deja `ssl` en false si
-  la URL no trae `sslmode` y la de Supabase no lo trae: va `ssl: "require"` en
-  `src/db/index.ts` (`DATABASE_SSL=off` para una base sin certificado). `@supabase/ssr`
-  no pone `secure` en las cookies: va en `src/lib/supabase/cookies.ts`, compartido por
-  middleware y servidor. Las cabeceras (HSTS y companhia) en `next.config.ts`, solo en
-  produccion.
-- **El arbol de produccion se mantiene limpio.** `npm audit --omit=dev` en 0 es parte de
-  entregar. Las herramientas de linea de comandos (shadcn) van en `devDependencies`: en
-  `dependencies` arrastran su propio arbol a la imagen del cliente.
-- **El modo local apaga la autenticacion entera.** `npm run local` levanta un Postgres
-  embebido (`.local/db`) y entra sin sesion: quien abre la URL es admin. Por eso tiene
-  dos candados y el segundo es el que importa: `MODO_LOCAL=true` (lo pone solo ese
-  script) **y** `NODE_ENV` distinto de `production`, que no depende de configuracion y
-  hace imposible encenderlo en una imagen desplegada. Si se encendiera por error no
-  fallaria nada: el unico sintoma seria que cualquiera entra. Ver `src/lib/modo-local.ts`
-  y `specs/nucleo/10-modo-local.md`.
-- **`db.execute` devuelve cosas distintas segun el driver**: el array de filas con
-  `postgres`, `{ rows }` con el embebido. El proxy de `src/db/index.ts` lo normaliza en
-  modo local porque media docena de lugares hacen `resultado[0]`; sin eso los reportes
-  salen en cero sin un solo error.
-- **Datos demo** por `POST /api/seed/demo` (admin o `AGENT_WORKER_SECRET`): usan el
-  conector `simulador` para que la demo responda; los reportes solo excluyen a los
-  contactos creados desde `/simulador`.
-- **En Vercel** los barridos van por `vercel.json` + `.github/workflows/sweepers.yml`
-  (Hobby no permite crons frecuentes); en Coolify corren dentro del proceso
+- **TLS e cookies não se herdam da plataforma.** `postgres-js` deixa `ssl` em false se
+  a URL não traz `sslmode` e a do Supabase não traz: vai `ssl: "require"` em
+  `src/db/index.ts` (`DATABASE_SSL=off` para uma base sem certificado). `@supabase/ssr`
+  não põe `secure` nos cookies: vai em `src/lib/supabase/cookies.ts`, compartilhado por
+  middleware e servidor. Os cabeçalhos (HSTS e companhia) em `next.config.ts`, só em
+  produção.
+- **A árvore de produção se mantém limpa.** `npm audit --omit=dev` em 0 faz parte de
+  entregar. As ferramentas de linha de comando (shadcn) vão em `devDependencies`: em
+  `dependencies` arrastam a própria árvore para a imagem do cliente.
+- **O modo local desliga a autenticação inteira.** `npm run local` sobe um Postgres
+  embutido (`.local/db`) e entra sem sessão: quem abre a URL é admin. Por isso tem
+  dois cadeados e o segundo é o que importa: `MODO_LOCAL=true` (só esse
+  script põe) **e** `NODE_ENV` diferente de `production`, que não depende de configuração e
+  torna impossível ligá-lo numa imagem implantada. Se se ligasse por erro não
+  falharia nada: o único sintoma seria que qualquer um entra. Ver `src/lib/modo-local.ts`
+  e `specs/nucleo/10-modo-local.md`.
+- **`db.execute` devolve coisas diferentes conforme o driver**: o array de linhas com
+  `postgres`, `{ rows }` com o embutido. O proxy de `src/db/index.ts` normaliza no
+  modo local porque meia dúzia de lugares fazem `resultado[0]`; sem isso os relatórios
+  saem em zero sem um único erro.
+- **Dados demo** por `POST /api/seed/demo` (admin ou `AGENT_WORKER_SECRET`): usam o
+  conector `simulador` para que a demo responda; os relatórios só excluem os
+  contatos criados a partir de `/simulador`.
+- **Na Vercel** as varreduras vão por `vercel.json` + `.github/workflows/sweepers.yml`
+  (Hobby não permite crons frequentes); no Coolify rodam dentro do processo
   (`src/lib/barridos.ts`).
 
 ## Comandos
 
 ```bash
-npm run local               # probarlo sin cuentas: Postgres embebido + demo, sin login
-npm run dev                 # contra tu Supabase (http://localhost:3000)
-npm test                    # invariantes del nucleo (vitest, sin base ni red)
+npm run local               # testar sem contas: Postgres embutido + demo, sem login
+npm run dev                 # contra o seu Supabase (http://localhost:3000)
+npm test                    # invariantes do núcleo (vitest, sem base nem rede)
 npm run typecheck && npm run lint && npm run build
-npm run db:migrar           # aplica migraciones pendientes (nucleo + modulos activos)
-npm run db:status           # que esta aplicado y que falta
+npm run db:migrar           # aplica migrações pendentes (núcleo + módulos ativos)
+npm run db:status           # o que está aplicado e o que falta
 npm run admin:crear -- --email a@b.com --password 'xxxxxxxx'
-npm run seed                # datos de demostracion (via POST /api/seed/demo)
+npm run seed                # dados de demonstração (via POST /api/seed/demo)
 node scripts/verificar-instancia.mjs --url https://crm.cliente.com --email ... --password ...
 npm run zernio:setup -- --sync | npm run zernio:webhook -- --url https://... | npm run zernio:whatsapp
-npm run pwa:icons           # iconos desde public/marca/icono.png
+npm run pwa:icons           # ícones a partir de public/marca/icono.png
 ```
 
-Variables: ver `.env.example` (cada una explicada). MCP: `.mcp.json.example` y
-[`docs/MCP.md`](docs/MCP.md). Memoria del proyecto: `.claude/memory/` (skill
+Variáveis: ver `.env.example` (cada uma explicada). MCP: `.mcp.json.example` e
+[`docs/MCP.md`](docs/MCP.md). Memória do projeto: `.claude/memory/` (skill
 `memory-manager`).

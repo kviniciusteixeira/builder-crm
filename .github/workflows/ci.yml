@@ -1,10 +1,10 @@
-# CI de Builder CRM: tests + typecheck + lint + build, con modulos apagados y con la
-# plantilla inmobiliaria activa (los dos extremos que un cliente puede desplegar).
+# CI do Builder CRM: tests + typecheck + lint + build, com módulos apagados e com o
+# modelo imobiliário ativo (os dois extremos que um cliente pode implantar).
 #
-# No necesita credenciales, y la falta de DATABASE_URL es a proposito: el build no debe
-# necesitar la base (en el Dockerfile solo las NEXT_PUBLIC_* son build args). Si alguien
-# consulta la base al importar un modulo, este workflow lo detecta. Las NEXT_PUBLIC_*
-# van con valores de relleno porque Next las hornea en el bundle.
+# Não precisa de credenciais, e a falta de DATABASE_URL é de propósito: o build não deve
+# precisar da base (no Dockerfile só as NEXT_PUBLIC_* são build args). Se alguém
+# consultar a base ao importar um módulo, este workflow detecta. As NEXT_PUBLIC_*
+# vão com valores de preenchimento porque o Next as horneia no bundle.
 
 name: CI
 

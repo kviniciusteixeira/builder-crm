@@ -7,9 +7,9 @@ import manifiesto from "./manifiesto";
 import { Tareas, type Tarea } from "./componentes/Tareas";
 
 /**
- * Lado servidor del modulo de ejemplo: paginas, API, una tool para el agente y seed.
- * Las tablas del modulo no estan en src/db/schema.ts (es zona del cliente): se
- * consultan con SQL tipado via `sql` de drizzle.
+ * Lado servidor do módulo de exemplo: páginas, API, uma tool para o agente e seed.
+ * As tabelas do módulo não estão em src/db/schema.ts (é zona do cliente):
+ * consultam-se com SQL tipado via `sql` do drizzle.
  */
 
 async function listar(memberId: string): Promise<Tarea[]> {

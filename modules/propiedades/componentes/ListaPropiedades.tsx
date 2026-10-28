@@ -25,7 +25,7 @@ function precio(f: Fila): string {
   return `${f.moneda ?? ""} ${Number.isFinite(n) ? n.toLocaleString("es") : f.precio}`.trim();
 }
 
-/** Listado del catalogo (server component: recibe las filas ya consultadas). */
+/** Listagem do catálogo (server component: recebe as linhas já consultadas). */
 export function ListaPropiedades({ filas }: { filas: Fila[] }) {
   return (
     <div>

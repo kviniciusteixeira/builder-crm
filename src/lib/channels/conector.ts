@@ -3,18 +3,18 @@ import type { ChannelAccount } from "./accounts";
 import type { Channel, Provider } from "./types";
 
 /**
- * Interfaz comun de los conectores de canal.
+ * Interface comum dos conectores de canal.
  *
- * Un conector es POR DONDE viaja un mensaje (Zernio, Meta Cloud API, el simulador...).
- * El canal (WhatsApp, Instagram, Messenger) es QUE red ve el usuario; un conector puede
- * servir varios. La bandeja y el agente solo conocen esta interfaz:
+ * Um conector é POR ONDE viaja uma mensagem (Zernio, Meta Cloud API, o simulador...).
+ * O canal (WhatsApp, Instagram, Messenger) é QUE rede vê o usuário; um conector pode
+ * servir vários. A caixa de entrada e o agente só conhecem esta interface:
  *
- *   enviar   -> lo llama `deliverMessage`, el unico camino de salida.
- *   webhook  -> lo usa `src/lib/channels/webhook.ts` para verificar, deduplicar y
- *               procesar lo que entra (la ruta /api/webhooks/<id> es de 5 lineas).
- *   estado   -> lo muestra Ajustes -> Canales.
+ *   enviar   -> chama-o `deliverMessage`, o único caminho de saída.
+ *   webhook  -> usa-o `src/lib/channels/webhook.ts` para verificar, deduplicar e
+ *               processar o que entra (a rota /api/webhooks/<id> tem 5 linhas).
+ *   estado   -> mostra-o Ajustes -> Canales.
  *
- * Para agregar un conector (por ejemplo la API oficial de WhatsApp como Tech Provider):
+ * Para adicionar um conector (por exemplo a API oficial de WhatsApp como Tech Provider):
  * ver src/lib/channels/conectores/README.md.
  */
 
@@ -36,7 +36,7 @@ export interface SendOutcome {
   success: boolean;
   externalId?: string | null;
   error?: { message?: string; code?: string | number };
-  /** Mensaje legible para mostrar en la UI cuando el envio falla. */
+  /** Mensagem legível para mostrar na UI quando o envio falha. */
   hint?: string;
 }
 
@@ -46,26 +46,26 @@ export interface DeliveryContext {
   channel: Channel;
 }
 
-/** Resultado de procesar un evento entrante. `retry` = llego fuera de orden, reintentar. */
+/** Resultado de processar um evento entrante. `retry` = chegou fora de ordem, tentar de novo. */
 export interface ResultadoWebhook {
   status: "processed" | "ignored" | "retry";
   reason?: string;
-  /** Jobs del agente encolados por la ingesta: el webhook los dispara al worker. */
+  /** Jobs do agente enfileirados pela ingestão: o webhook os dispara ao worker. */
   jobIds: string[];
 }
 
 export interface WebhookConector {
-  /** Firma del proveedor sobre el cuerpo crudo. Fail-closed si falta el secreto. */
+  /** Assinatura do provedor sobre o corpo cru. Fail-closed se falta o segredo. */
   verificar(rawBody: string, headers: Headers): boolean;
   /**
-   * Id unico del evento para deduplicar entre reintentos (header o campo del payload).
-   * null = el nucleo usa el hash del cuerpo.
+   * Id único do evento para deduplicar entre novas tentativas (header ou campo do payload).
+   * null = o núcleo usa o hash do corpo.
    */
   idEvento(rawBody: string, headers: Headers, payload: unknown): string | null;
   /**
-   * Normaliza el payload y persiste con las funciones de `ingest.ts`. Corre dentro de
-   * `after()`: lo pesado (ingesta, agente) debe importarse dinamicamente aqui adentro
-   * para no engordar el cold start de la ruta.
+   * Normaliza o payload e persiste com as funções de `ingest.ts`. Corre dentro de
+   * `after()`: o pesado (ingestão, agente) deve importar-se dinamicamente aqui dentro
+   * para não engordar o cold start da rota.
    */
   procesar(payload: unknown): Promise<ResultadoWebhook>;
 }
@@ -80,22 +80,22 @@ export interface CuentaConectada {
 export interface EstadoConector {
   id: Provider;
   nombre: string;
-  /** true si tiene lo minimo para operar (credenciales por entorno). */
+  /** true se tem o mínimo para operar (credenciais por ambiente). */
   configurado: boolean;
-  /** Variables de entorno que faltan. */
+  /** Variáveis de ambiente que faltam. */
   faltan: string[];
   cuentas: CuentaConectada[];
-  /** Avisos para el administrador (modo, limitaciones, pasos pendientes). */
+  /** Avisos para o administrador (modo, limitações, passos pendentes). */
   notas: string[];
 }
 
 export interface Conector {
-  /** Coincide con `conversations.provider` y `messages.provider`. */
+  /** Coincide com `conversations.provider` e `messages.provider`. */
   id: Provider;
   nombre: string;
   canales: readonly Channel[];
   enviar(ctx: DeliveryContext, msg: OutboundMessage): Promise<SendOutcome>;
-  /** Sin `webhook`, el conector solo envia (o su ingesta vive en una ruta legacy). */
+  /** Sem `webhook`, o conector só envia (ou a sua ingestão vive numa rota legacy). */
   webhook?: WebhookConector;
   estado(): Promise<EstadoConector>;
 }

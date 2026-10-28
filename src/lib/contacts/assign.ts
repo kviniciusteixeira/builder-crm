@@ -7,11 +7,11 @@ import type { ContactAssignedPayload } from "@/lib/automations/triggers";
 import { displayName, getMember, type TeamMember } from "@/lib/team";
 
 /**
- * Asigna (o desasigna) el propietario de un contacto.
+ * Atribui (ou desatribui) o proprietário de um contato.
  *
- * Es el UNICO camino: la ficha del contacto, el panel de la conversacion y la tool
- * `asignar_asesor` del agente pasan todos por aca. Asi el evento `contact.assigned`
- * se emite una sola vez y de la misma forma, venga de donde venga.
+ * É o ÚNICO caminho: a ficha do contato, o painel da conversa e a tool
+ * `asignar_asesor` do agente passam todos por aqui. Assim o evento `contact.assigned`
+ * se emite uma única vez e da mesma forma, venha de onde vier.
  */
 
 export type AssignedBy =
@@ -21,7 +21,7 @@ export type AssignedBy =
 
 export interface AssignResult {
   ok: boolean;
-  /** true si el propietario ya era ese: no se toca nada ni se emite evento. */
+  /** true se o proprietário já era esse: não se toca nada nem se emite evento. */
   unchanged?: boolean;
   owner: TeamMember | null;
   error?: string;
@@ -31,9 +31,9 @@ export async function assignContact(input: {
   contactId: string;
   ownerId: string | null;
   by: AssignedBy;
-  /** Se guarda en la actividad, para que quede por que se asigno. */
+  /** Guarda-se na atividade, para que fique por que se atribuiu. */
   reason?: string;
-  /** Profundidad del evento cuando la asignacion viene de otra automatizacion. */
+  /** Profundidade do evento quando a atribuição vem de outra automação. */
   depth?: number;
 }): Promise<AssignResult> {
   const [contact] = await db

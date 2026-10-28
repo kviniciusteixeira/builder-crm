@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 /**
- * Esquema de la configuracion por cliente (`config/cliente.ts`).
+ * Esquema da configuração por cliente (`config/cliente.ts`).
  *
- * Este archivo NO importa nada server-only a proposito: los componentes cliente
- * (sidebar, formularios) leen la marca y los campos directamente. Aqui no va ninguna
- * credencial; eso es entorno (.env), no configuracion.
+ * Este arquivo NÃO importa nada server-only de propósito: os componentes cliente
+ * (sidebar, formulários) leem a marca e os campos diretamente. Aqui não vai nenhuma
+ * credencial; isso é ambiente (.env), não configuração.
  */
 
 const hex = z
@@ -18,10 +18,10 @@ const clave = z
   .regex(/^[a-z][a-z0-9_]*$/, "Clave en snake_case, empieza con letra (ej. tipo_operacion)");
 
 /**
- * Zona horaria IANA. Se valida contra el propio entorno (`Intl` existe igual en Node y
- * en el navegador) porque una zona mal escrita no falla sola: `Intl` la rechaza al
- * formatear y el error aparece lejos de aqui, o peor, alguien la captura y la fecha sale
- * en UTC sin que nadie se entere.
+ * Fuso horário IANA. Valida-se contra o próprio ambiente (`Intl` existe igual no Node e
+ * no navegador) porque um fuso mal escrito não falha sozinho: o `Intl` o rejeita ao
+ * formatar e o erro aparece longe daqui, ou pior, alguém o captura e a data sai
+ * em UTC sem que ninguém perceba.
  */
 const zonaIana = z
   .string()
@@ -38,18 +38,18 @@ const zonaIana = z
   });
 
 export const esquemaMarca = z.object({
-  /** Nombre completo: pestana, login, sidebar, X-Title del agente. */
+  /** Nome completo: aba, login, sidebar, X-Title do agente. */
   nombre: z.string().min(1).max(60),
-  /** Nombre corto para el icono de la PWA y las notificaciones (max 12). */
+  /** Nome curto para o ícone da PWA e as notificações (máx. 12). */
   nombreCorto: z.string().min(1).max(12),
-  /** Una frase: aparece en el login y en la descripcion de la PWA. */
+  /** Uma frase: aparece no login e na descrição da PWA. */
   descripcion: z.string().max(200).default("CRM multicanal con agente de IA."),
-  /** Rutas publicas (dentro de public/marca/). */
+  /** Rotas públicas (dentro de public/marca/). */
   logo: z.string().min(1).default("/marca/logo.png"),
   icono: z.string().min(1).default("/marca/icono.png"),
-  /** Color de los botones y acciones primarias. */
+  /** Cor dos botões e ações primárias. */
   colorPrimario: hex.default("#2E4A47"),
-  /** Color de fondo del sidebar y de la barra del telefono (theme_color). */
+  /** Cor de fundo da sidebar e da barra do telefone (theme_color). */
   colorSidebar: hex.default("#0F1419"),
 });
 
@@ -80,16 +80,16 @@ export const esquemaCampo = z
     clave: clave,
     etiqueta: z.string().min(1).max(60),
     tipo: z.enum(TIPOS_CAMPO),
-    /** Solo para tipo `seleccion`. */
+    /** Só para o tipo `seleccion`. */
     opciones: z.array(z.string().min(1)).optional(),
     requerido: z.boolean().default(false),
-    /** Mostrar como columna en la tabla de contactos. */
+    /** Mostrar como coluna na tabela de contatos. */
     enTabla: z.boolean().default(false),
-    /** Texto de ayuda en el formulario. */
+    /** Texto de ajuda no formulário. */
     ayuda: z.string().max(200).optional(),
     /**
-     * Si el agente de IA debe averiguar este dato en la conversacion. La descripcion
-     * le dice al modelo que preguntar ("presupuesto maximo en dolares").
+     * Se o agente de IA deve descobrir este dado na conversa. A descrição
+     * diz ao modelo o que perguntar ("orçamento máximo em dólares").
      */
     agente: z
       .object({
@@ -104,13 +104,13 @@ export const esquemaCampo = z
   );
 
 export const esquemaAgente = z.object({
-  /** Como se presenta el agente en la conversacion. */
+  /** Como o agente se apresenta na conversa. */
   nombre: z.string().max(40).default("Asistente"),
-  /** Prompt base. Si falta, se usa el default del nucleo (src/lib/agent/prompt.ts). */
+  /** Prompt base. Se faltar, usa-se o default do núcleo (src/lib/agent/prompt.ts). */
   prompt: z.string().optional(),
-  /** Modelo de OpenRouter. AGENT_MODEL (entorno) manda sobre este valor. */
+  /** Modelo do OpenRouter. AGENT_MODEL (ambiente) manda sobre este valor. */
   modelo: z.string().optional(),
-  /** Lo que se le dice al cliente cuando el agente deriva a una persona. */
+  /** O que se diz ao cliente quando o agente transfere para uma pessoa. */
   mensajeDerivacion: z
     .string()
     .min(1)
@@ -124,28 +124,28 @@ export const esquemaModulosNucleo = z.object({
   plantillas: z.boolean().default(true),
   push: z.boolean().default(true),
   reportes: z.boolean().default(true),
-  /** Simulador de conversaciones (solo admin). */
+  /** Simulador de conversas (só admin). */
   simulador: z.boolean().default(true),
 });
 
 export const esquemaConfig = z.object({
   marca: esquemaMarca,
   idioma: z.enum(["es", "en"]).default("es"),
-  /** Codigo ISO 4217 para formatear montos. */
+  /** Código ISO 4217 para formatar valores. */
   moneda: z.string().length(3).default("USD"),
   /**
-   * Zona horaria del negocio: con que zona se resuelve el dia y la hora, en pantalla y
-   * en el prompt del agente. El proceso corre en UTC a proposito (una imagen compartida
-   * por muchas instancias no puede traer la zona horneada), asi que sin esto el agente
-   * nombra el dia equivocado de noche. Ver `specs/nucleo/11-zona-horaria.md`.
+   * Fuso horário do negócio: com que fuso se resolve o dia e a hora, na tela e
+   * no prompt do agente. O processo roda em UTC de propósito (uma imagem compartilhada
+   * por muitas instâncias não pode trazer o fuso gravado nela), então sem isto o agente
+   * nomeia o dia errado de noite. Ver `specs/nucleo/11-fuso-horario.md`.
    *
-   * El default es UTC para no mover las fechas de una instancia ya desplegada que
-   * actualice el nucleo sin tocar su configuracion.
+   * O default é UTC para não mover as datas de uma instância já implantada que
+   * atualize o núcleo sem tocar na sua configuração.
    */
   zonaHoraria: zonaIana.default("UTC"),
   roles: z
     .object({
-      /** Como se llama al rol `asesor` en pantalla (Asesor, Agente, Vendedor...). */
+      /** Como se chama o papel `asesor` na tela (Asesor, Agente, Vendedor...). */
       etiquetaAsesor: z.string().min(1).max(30).default("Asesor"),
     })
     .default({ etiquetaAsesor: "Asesor" }),
@@ -165,7 +165,7 @@ export const esquemaConfig = z.object({
     nombre: "Asistente",
     mensajeDerivacion: "Te paso con una persona del equipo que te va a ayudar con esto. Un momento.",
   }),
-  /** Funciones del nucleo apagables + modulos de `modules/` por nombre de carpeta. */
+  /** Funções do núcleo que se podem desligar + módulos de `modules/` pelo nome da pasta. */
   modulos: z
     .object({
       nucleo: esquemaModulosNucleo.default({
@@ -176,7 +176,7 @@ export const esquemaConfig = z.object({
         reportes: true,
         simulador: true,
       }),
-      /** Nombres de carpetas dentro de modules/ que estan activas. */
+      /** Nomes de pastas dentro de modules/ que estão ativas. */
       activos: z.array(clave).default([]),
     })
     .default({
@@ -199,9 +199,9 @@ export type EtapaConfig = z.infer<typeof esquemaEtapa>;
 export type CampoConfig = z.infer<typeof esquemaCampo>;
 
 /**
- * Se usa en config/cliente.ts. No valida aqui (lo hace `src/lib/config` una sola vez)
- * para que un error de configuracion no rompa el import, sino que se reporte con
- * contexto al arrancar y en /api/health.
+ * Usa-se em config/cliente.ts. Não valida aqui (isso faz `src/lib/config` uma única vez)
+ * para que um erro de configuração não quebre o import, e sim que se reporte com
+ * contexto ao iniciar e em /api/health.
  */
 export function definirConfig(entrada: ConfigClienteEntrada): ConfigClienteEntrada {
   return entrada;

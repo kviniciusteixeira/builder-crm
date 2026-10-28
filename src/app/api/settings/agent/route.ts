@@ -24,9 +24,9 @@ import { requireMember } from "@/lib/api-auth";
 const MIN_PROMPT_LENGTH = 50;
 
 /**
- * Sin `?channel=` opera sobre la config GLOBAL (`crm_settings`), que sigue siendo el
- * fallback de todos los canales. Con `?channel=instagram` opera sobre la fila de
- * `agent_configs` de ese canal, que es lo que permite tener un agente distinto por red.
+ * Sem `?channel=` opera sobre a config GLOBAL (`crm_settings`), que continua sendo o
+ * fallback de todos os canais. Com `?channel=instagram` opera sobre a linha de
+ * `agent_configs` desse canal, que é o que permite ter um agente distinto por rede.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
@@ -111,7 +111,7 @@ export async function PUT(request: NextRequest) {
 
   const channel = request.nextUrl.searchParams.get("channel");
   if (isChannel(channel)) {
-    // Prompt vacio = volver a heredar del global, no un prompt invalido.
+    // Prompt vazio = voltar a herdar do global, não um prompt inválido.
     const prompt = body.systemPrompt?.trim();
     if (prompt && prompt.length < MIN_PROMPT_LENGTH) {
       return NextResponse.json(
@@ -182,7 +182,7 @@ export async function PUT(request: NextRequest) {
 }
 
 /**
- * DELETE: limpia los overrides y vuelve a defaults.
+ * DELETE: limpa os overrides e volta aos defaults.
  */
 export async function DELETE(request: NextRequest) {
   const auth = await requireMember();

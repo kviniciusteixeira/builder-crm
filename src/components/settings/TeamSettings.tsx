@@ -50,8 +50,8 @@ function label(m: Member) {
 }
 
 /**
- * Equipo: quien esta, con que rol, y el alta de asesores. El signup publico esta
- * cerrado: la unica puerta de entrada es esta pantalla.
+ * Equipe: quem está, com que papel, e o cadastro de assessores. O signup público está
+ * fechado: a única porta de entrada é esta tela.
  */
 export function TeamSettings() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -84,8 +84,8 @@ export function TeamSettings() {
   }, [load, apply]);
 
   const isAdmin = me?.role === "admin";
-  // Si el servidor de autenticacion manda correos, el alta puede invitar; si no, la
-  // unica via es una contrasena temporal que el admin pasa a mano.
+  // Se o servidor de autenticação envia e-mails, o cadastro pode convidar; se não, a
+  // única via é uma senha temporária que o admin passa à mão.
   const { authEnviaCorreos } = leerConfigPublica();
 
   const reenviarAcceso = async (m: Member) => {

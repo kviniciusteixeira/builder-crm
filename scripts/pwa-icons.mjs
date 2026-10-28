@@ -1,11 +1,11 @@
-// Genera los iconos de la PWA a partir del icono de la marca (public/marca/icono.png).
+// Gera os ícones da PWA a partir do ícone da marca (public/marca/icono.png).
 //
 //   node scripts/pwa-icons.mjs [--src public/marca/icono.png] [--bg "#0F1419"]
 //
-// Correrlo cada vez que cambie el icono del cliente; el resultado (public/icons/) se
-// versiona con el repo del cliente.
-// Se generan con margen ("padding") para que en Android, que recorta el icono en
-// circulo o cuadrado redondeado (maskable), el logo no quede cortado.
+// Rodar cada vez que o ícone do cliente mude; o resultado (public/icons/) se
+// versiona com o repositório do cliente.
+// Geram-se com margem ("padding") para que no Android, que recorta o ícone em
+// círculo ou quadrado arredondado (maskable), o logo não fique cortado.
 
 import sharp from "sharp";
 import { mkdirSync } from "fs";
@@ -24,7 +24,7 @@ const BG = {
   g: parseInt(hex.slice(2, 4), 16),
   b: parseInt(hex.slice(4, 6), 16),
   alpha: 1,
-}; // fondo del icono: el color del sidebar de la marca
+}; // fundo do ícone: a cor do sidebar da marca
 
 mkdirSync(OUT, { recursive: true });
 
@@ -42,7 +42,7 @@ for (const size of SIZES) {
   console.log(`icon-${size}.png`);
 }
 
-// iOS no usa el manifest para el icono de la pantalla de inicio: usa apple-icon.
+// O iOS não usa o manifest para o ícone da tela inicial: usa apple-icon.
 const appleInner = Math.round(180 * 0.72);
 const appleLogo = await sharp(SRC)
   .resize(appleInner, appleInner, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })

@@ -3,14 +3,14 @@ import type { NextRequest } from "next/server";
 import { autorizadoPorSecreto } from "@/lib/secreto-worker";
 
 /**
- * `/api/agent/process`, los dos barridos y la carga de datos demo son publicas en el
- * middleware: las llama un cron o el propio servidor, sin sesion. Este secreto es lo
- * UNICO que las separa de internet.
+ * `/api/agent/process`, as duas varreduras e a carga de dados demo são públicas no
+ * middleware: chama-as um cron ou o próprio servidor, sem sessão. Este segredo é o
+ * ÚNICO que as separa da internet.
  *
- * Hasta 1.6.1 la comprobacion era `if (secret) { ...comprobar... }`, asi que una
- * instancia sin la variable las dejaba abiertas y no habia ningun sintoma: el CRM
- * funcionaba igual. Eso es lo que prueba el primer caso, y es el que no puede volver a
- * romperse.
+ * Até 1.6.1 a checagem era `if (secret) { ...comprobar... }`, então uma
+ * instância sem a variável as deixava abertas e não havia nenhum sintoma: o CRM
+ * funcionava igual. É isso que o primeiro caso prova, e é o que não pode voltar a
+ * quebrar.
  */
 
 const ORIGINAL = { ...process.env };
@@ -50,7 +50,7 @@ describe("secreto de las rutas internas", () => {
   });
 
   it("no revienta con secretos de otra longitud", () => {
-    // timingSafeEqual lanza si los buffers no miden igual: hay que cortar antes.
+    // timingSafeEqual lança se os buffers não medem igual: há que cortar antes.
     process.env.AGENT_WORKER_SECRET = "a".repeat(64);
     expect(autorizadoPorSecreto(peticion({ "x-agent-secret": "a" }))).toBe(false);
     expect(autorizadoPorSecreto(peticion({ "x-agent-secret": "a".repeat(200) }))).toBe(false);

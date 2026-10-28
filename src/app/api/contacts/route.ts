@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   const conditions: SQL[] = [];
 
-  // Un asesor ve solo lo suyo. Se filtra aca, en el servidor, no en la tabla.
+  // Um assessor vê só o que é dele. Filtra-se aqui, no servidor, não na tabela.
   const visibility = ownerFilter(auth.member);
   if (visibility) conditions.push(visibility);
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(results);
 }
 
-/** Todas las columnas de `contacts`, para poder sumarle las del join. */
+/** Todas as colunas de `contacts`, para poder somar as do join. */
 function contactColumns() {
   return {
     id: contacts.id,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       .returning();
     const result = resultRows[0];
 
-    // Un asesor que crea un contacto se lo queda; el admin elige (o lo deja libre).
+    // Um assessor que cria um contato fica com ele; o admin escolhe (ou o deixa livre).
     const owner =
       auth.member.role === "admin"
         ? typeof ownerId === "string" && ownerId

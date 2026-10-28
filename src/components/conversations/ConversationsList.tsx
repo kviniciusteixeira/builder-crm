@@ -50,8 +50,8 @@ export function ConversationsList({ conversations, selectedId }: Props) {
     <aside
       className={cn(
         "w-full md:w-[340px] shrink-0 border-r border-border h-full flex-col bg-card",
-        // En telefono no hay lugar para lista + chat: con un hilo abierto se ve solo el
-        // chat (y el boton de volver en su cabecera). Sin eso, el chat colapsaba a 0 px.
+        // No telefone não há lugar para lista + chat: com um fio aberto se vê só o
+        // chat (e o botão de voltar no cabeçalho). Sem isso, o chat colapsava a 0 px.
         selectedId ? "hidden md:flex" : "flex"
       )}
     >

@@ -3,10 +3,10 @@ import crypto from "node:crypto";
 import { verifyZernioSignature } from "@/lib/zernio/webhooks";
 
 /**
- * La firma del webhook es la unica puerta de `/api/webhooks/zernio`, que es publica por
- * necesidad. Si deja de validar, cualquiera puede inyectar mensajes falsos en la bandeja
- * de un cliente, hacer que el agente les conteste y mover su pipeline. Y no se nota:
- * los mensajes entran, se ven normales.
+ * A assinatura do webhook é a única porta de `/api/webhooks/zernio`, que é pública por
+ * necessidade. Se deixar de validar, qualquer um pode injetar mensagens falsas na caixa de entrada
+ * de um cliente, fazer o agente respondê-las e mover o pipeline. E não se nota:
+ * as mensagens entram, parecem normais.
  */
 
 const SECRETO = "un-secreto-de-prueba";
@@ -22,8 +22,8 @@ describe("firma del webhook de Zernio", () => {
   });
 
   it("rechaza si no hay secreto configurado (fail-closed)", () => {
-    // El caso que importa: una instancia a la que se le olvido la variable NO debe
-    // quedar abierta. Antes que entren mensajes falsos, que no entre ninguno.
+    // O caso que importa: uma instância que esqueceu a variável NÃO deve
+    // ficar aberta. Antes que entrem mensagens falsas, que não entre nenhuma.
     expect(verifyZernioSignature(CUERPO, firmar(CUERPO), "")).toBe(false);
   });
 
@@ -43,15 +43,15 @@ describe("firma del webhook de Zernio", () => {
   });
 
   it("rechaza una firma de largo distinto sin romperse", () => {
-    // timingSafeEqual lanza si los buffers miden distinto: comparar el largo antes no es
-    // cosmetico, es lo que evita que una firma corta tire una excepcion en el webhook.
+    // timingSafeEqual lança se os buffers medem diferente: comparar o tamanho antes não é
+    // cosmético, é o que evita que uma assinatura curta dispare uma exceção no webhook.
     expect(() => verifyZernioSignature(CUERPO, "abc123", SECRETO)).not.toThrow();
     expect(verifyZernioSignature(CUERPO, "abc123", SECRETO)).toBe(false);
   });
 
   it("tolera el prefijo sha256= y las mayusculas", () => {
-    // Meta lo manda asi y Zernio no; aceptar las dos formas evita un 401 silencioso el
-    // dia que se cambie de proveedor.
+    // A Meta manda assim e o Zernio não; aceitar as duas formas evita um 401 silencioso no
+    // dia em que se trocar de provedor.
     const firma = firmar(CUERPO);
     expect(verifyZernioSignature(CUERPO, `sha256=${firma}`, SECRETO)).toBe(true);
     expect(verifyZernioSignature(CUERPO, firma.toUpperCase(), SECRETO)).toBe(true);

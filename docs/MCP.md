@@ -1,43 +1,43 @@
-# Conectar Claude Code con la infraestructura (MCP y credenciales)
+# Conectar o Claude Code à infraestrutura (MCP e credenciais)
 
-Para que Claude opere Supabase y Coolify desde el chat (flujo one-shot) hace falta
-`.mcp.json` en la raiz, que **esta ignorado por git**. Se parte de
+Para o Claude operar Supabase e Coolify a partir do chat (fluxo one-shot) é preciso
+`.mcp.json` na raiz, que **está ignorado pelo git**. Parte-se de
 `.mcp.json.example`:
 
 ```bash
 cp .mcp.json.example .mcp.json
 ```
 
-Los valores `${VAR}` se resuelven desde el entorno de la terminal donde corre Claude
-Code: exporta las variables antes de abrirlo. Nunca pegues tokens en claro en el
-archivo de ejemplo ni en el repo.
+Os valores `${VAR}` se resolvem a partir do ambiente do terminal onde roda o Claude
+Code: exporte as variáveis antes de abri-lo. Nunca cole tokens em claro no
+arquivo de exemplo nem no repositório.
 
-| Servicio | Credencial | Donde se obtiene | Para que la usa Claude |
+| Serviço | Credencial | Onde se obtém | Para que o Claude usa |
 |---|---|---|---|
-| **Supabase** | Inicio de sesion OAuth (lo pide el MCP remoto al abrirse) | supabase.com (la cuenta del miembro) | Crear el proyecto del cliente, aplicar migraciones, leer URL y anon key, revisar `get_advisors` |
-| Supabase | `SUPABASE_SERVICE_ROLE_KEY` del proyecto | Dashboard -> Project Settings -> API | `npm run admin:crear` y variables de la instancia (no la expone el MCP) |
-| Supabase | `DATABASE_URL` (pooler 6543) y `DIRECT_URL` (5432) | Dashboard -> Connect | `npm run db:migrar`, variables de la instancia |
-| **Coolify** | URL del panel + API token (scope de escritura o deploy) | Coolify -> Keys & Tokens -> API tokens | Crear la app, variables y deploy (MCP comunitario o `curl` a `/api/v1`) |
-| **OpenRouter** | `OPENROUTER_API_KEY` | openrouter.ai -> Keys | El agente de IA (variable de la instancia) |
-| **Zernio** | `ZERNIO_API_KEY` (+ `ZERNIO_PROFILE_ID`) | zernio.com -> Settings -> API Keys | `npm run zernio:*`, variables de la instancia |
-| **GitHub** | Acceso al repo del cliente (publico, o deploy key en Coolify) | github.com | Coolify construye desde el repo |
+| **Supabase** | Login OAuth (o MCP remoto pede ao abrir) | supabase.com (a conta do membro) | Criar o projeto do cliente, aplicar migrações, ler URL e anon key, revisar `get_advisors` |
+| Supabase | `SUPABASE_SERVICE_ROLE_KEY` do projeto | Dashboard -> Project Settings -> API | `npm run admin:crear` e variáveis da instância (o MCP não a expõe) |
+| Supabase | `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (5432) | Dashboard -> Connect | `npm run db:migrar`, variáveis da instância |
+| **Coolify** | URL do painel + API token (escopo de escrita ou deploy) | Coolify -> Keys & Tokens -> API tokens | Criar o app, variáveis e deploy (MCP comunitário ou `curl` em `/api/v1`) |
+| **OpenRouter** | `OPENROUTER_API_KEY` | openrouter.ai -> Keys | O agente de IA (variável da instância) |
+| **Zernio** | `ZERNIO_API_KEY` (+ `ZERNIO_PROFILE_ID`) | zernio.com -> Settings -> API Keys | `npm run zernio:*`, variáveis da instância |
+| **GitHub** | Acesso ao repositório do cliente (público, ou deploy key no Coolify) | github.com | O Coolify constrói a partir do repositório |
 
-## Modo cuenta vs modo proyecto en Supabase
+## Modo conta vs modo projeto no Supabase
 
-- `https://mcp.supabase.com/mcp` (sin `project_ref`): herramientas de **cuenta**
-  (`list_organizations`, `create_project`, `get_cost`, `confirm_cost`) + base de datos.
-  Es lo que necesita `deploy-coolify` para crear el proyecto del cliente.
-- `...?project_ref=<ref>`: solo ese proyecto; las de cuenta desaparecen. Util para
-  trabajar sobre una instancia ya creada. Agregar `&read_only=true` para inspeccion
+- `https://mcp.supabase.com/mcp` (sem `project_ref`): ferramentas de **conta**
+  (`list_organizations`, `create_project`, `get_cost`, `confirm_cost`) + banco de dados.
+  É o que `deploy-coolify` precisa para criar o projeto do cliente.
+- `...?project_ref=<ref>`: só esse projeto; as de conta somem. Útil para
+  trabalhar sobre uma instância já criada. Adicionar `&read_only=true` para inspeção
   segura.
 
-## Coolify sin MCP
+## Coolify sem MCP
 
-`deploy-coolify` funciona con la REST API y `curl`; solo hacen falta
-`COOLIFY_URL` y `COOLIFY_TOKEN` en el entorno. La referencia de endpoints esta en
-`<COOLIFY_URL>/docs/api` de la instalacion (varia por version).
+`deploy-coolify` funciona com a REST API e `curl`; só fazem falta
+`COOLIFY_URL` e `COOLIFY_TOKEN` no ambiente. A referência de endpoints está em
+`<COOLIFY_URL>/docs/api` da instalação (varia por versão).
 
-## Que no hace falta
+## O que não faz falta
 
-Vercel, Firebase, un VPS aparte para el agente, ni n8n/Make: el agente corre dentro
-de la app (webhook -> `after()` -> worker) y los barridos dentro del proceso en Coolify.
+Vercel, Firebase, um VPS à parte para o agente, nem n8n/Make: o agente roda dentro
+do app (webhook -> `after()` -> worker) e as varreduras dentro do processo no Coolify.

@@ -5,8 +5,8 @@ import { metaCloud } from "./meta-cloud";
 import { simulador } from "./simulador";
 
 /**
- * Registro de conectores. La clave es `conversations.provider`.
- * Para agregar uno: crear el archivo al lado, importarlo y sumarlo aqui (ver README.md).
+ * Registro de conectores. A chave é `conversations.provider`.
+ * Para adicionar um: criar o arquivo ao lado, importá-lo e somá-lo aqui (ver README.md).
  */
 const CONECTORES: Record<string, Conector> = {
   [zernio.id]: zernio,
@@ -26,7 +26,7 @@ export function conectorParaConversacion(conversation: ConversationRow): Conecto
   return obtenerConector(conversation.provider);
 }
 
-/** Estado de todos los conectores, para Ajustes -> Canales y para probar-instancia. */
+/** Estado de todos os conectores, para Ajustes -> Canales e para probar-instancia. */
 export async function estadoConectores(): Promise<EstadoConector[]> {
   return Promise.all(listarConectores().map((c) => c.estado()));
 }

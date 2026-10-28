@@ -17,13 +17,13 @@ import type {
 } from "@/lib/zernio/types";
 
 /**
- * Dispatch de los webhooks de Zernio a la persistencia del CRM.
+ * Dispatch dos webhooks do Zernio para a persistência do CRM.
  *
- * Vive fuera del route handler a proposito: el handler lo importa dinamicamente dentro
- * de `after()` para no arrastrar el grafo de imports del agente (embeddings -> sheets ->
- * tokko -> openai) al cold start. Zernio exige 2xx en 5 segundos y ese grafo se los come.
+ * Vive fora do route handler de propósito: o handler o importa dinamicamente dentro
+ * de `after()` para não arrastar o grafo de imports do agente (embeddings -> sheets ->
+ * tokko -> openai) ao cold start. O Zernio exige 2xx em 5 segundos e esse grafo os come.
  *
- * El envelope es `{ id, event, message, conversation, account, timestamp }`.
+ * O envelope é `{ id, event, message, conversation, account, timestamp }`.
  */
 
 export type ProcessStatus = "processed" | "ignored" | "retry";
@@ -63,7 +63,7 @@ export async function processZernioEvent(
 }
 
 // ============================================================
-// Cuentas
+// Contas
 // ============================================================
 
 async function handleAccountConnected(
@@ -104,7 +104,7 @@ async function handleAccountDisconnected(
 }
 
 // ============================================================
-// Mensajes
+// Mensagens
 // ============================================================
 
 async function handleMessageEvent(
@@ -121,8 +121,8 @@ async function handleMessageEvent(
   const zernioAccountId = payload.account?.accountId ?? payload.account?.id;
   const account = await getAccountByZernioId(zernioAccountId);
   if (!account) {
-    // Igual que el webhook de Meta con phone_number_id: una cuenta que no esta en
-    // nuestra tabla no es nuestra, y crear contactos con sus mensajes seria basura.
+    // Igual ao webhook da Meta com phone_number_id: uma conta que não está na
+    // nossa tabela não é nossa, e criar contatos com as suas mensagens seria lixo.
     return ignored(`cuenta de Zernio no registrada: ${zernioAccountId}`);
   }
 
@@ -143,9 +143,9 @@ async function handleMessageEvent(
     name: identity.name,
   });
 
-  // WhatsApp esta migrando a BSUID: un usuario con username puede escribir sin exponer
-  // el telefono. Guardar el BSUID como segunda identidad hace que esos mensajes
-  // futuros caigan en el mismo contacto en vez de crear uno nuevo.
+  // O WhatsApp está migrando para BSUID: um usuário com username pode escrever sem expor
+  // o telefone. Guardar o BSUID como segunda identidade faz com que essas mensagens
+  // futuras caiam no mesmo contato em vez de criar um novo.
   if (identity.bsuid && identity.bsuid !== identity.externalId) {
     await linkExtraIdentity(contactId, platform, identity.bsuid, identity.handle);
   }
@@ -164,15 +164,15 @@ async function handleMessageEvent(
     metadata: conv?.metadata,
   });
 
-  // conversation.started puede venir sin mensaje: solo abre el hilo (y guarda la
-  // atribucion del anuncio, que es de donde sale de que aviso vino el lead).
+  // conversation.started pode vir sem mensagem: só abre o fio (e guarda a
+  // atribuição do anúncio, que é de onde sai de que anúncio veio o lead).
   if (!msg) return { status: "processed", jobIds: [] };
 
   const result = await ingestMessage({
     conversation,
     direction,
-    // platformMessageId (wamid.* en WhatsApp) y no el id interno de Zernio: mantiene la
-    // deduplicacion contra los mensajes que pudo haber guardado el webhook de Meta.
+    // platformMessageId (wamid.* no WhatsApp) e não o id interno do Zernio: mantém a
+    // deduplicação contra as mensagens que o webhook da Meta possa ter guardado.
     externalId: msg.platformMessageId ?? msg.id ?? null,
     body: extractBody(msg),
     type: messageType(msg),
@@ -213,8 +213,8 @@ async function handleStatusEvent(
 
   const found = await updateMessageStatus({ externalId, ...patch });
   if (!found) {
-    // El estado llego antes que el mensaje. Se marca para reintento en vez de
-    // descartarlo en silencio, que es lo que hace hoy el webhook de Meta.
+    // O estado chegou antes da mensagem. Marca-se para nova tentativa em vez de
+    // descartá-lo em silêncio, que é o que faz hoje o webhook da Meta.
     return { status: "retry", reason: "mensaje todavia no persistido", jobIds: [] };
   }
 
@@ -233,10 +233,10 @@ interface ResolvedParticipant {
 }
 
 /**
- * Quien es el cliente en esta conversacion.
+ * Quem é o cliente nesta conversa.
  *
- * En los mensajes salientes el `sender` es el negocio, no el contacto: por eso la
- * conversacion manda y el sender solo se usa como respaldo en los entrantes.
+ * Nas mensagens de saída o `sender` é o negócio, não o contato: por isso a
+ * conversa manda e o sender só se usa como respaldo nas entrantes.
  */
 function resolveParticipant(
   channel: Channel,
@@ -263,7 +263,7 @@ function resolveParticipant(
   };
 }
 
-/** Espeja `extractMessageBody` del webhook de Meta para que el chat se lea igual. */
+/** Espelha `extractMessageBody` do webhook da Meta para que o chat se leia igual. */
 function extractBody(msg: ZernioMessage): string {
   const text = msg.text?.trim();
   if (text) return text;

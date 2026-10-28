@@ -3,7 +3,7 @@ import { requireMember } from "@/lib/api-auth";
 import { canAccessContact } from "@/lib/team";
 import { confirmUpload, documentContact, getDocument } from "@/lib/documents";
 
-/** Paso 2 de la subida: el navegador termino el PUT; el servidor verifica y publica. */
+/** Passo 2 do upload: o navegador terminou o PUT; o servidor verifica e publica. */
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -1,100 +1,100 @@
 ---
 name: adaptar-a-cliente
 description: |
-  Del brief de un cliente a una instancia de Builder CRM adaptada, desplegada y probada,
-  en un solo flujo: entender, especificar, configurar, construir modulos, desplegar en
-  Coolify, probar y entregar. Es la skill orquestadora del flujo one-shot.
-  Activar cuando el usuario dice: adapta el CRM para <cliente>, nuevo cliente, quiero un
-  CRM para una <nicho>, personaliza Builder CRM, despliega una instancia para <cliente>,
-  o pega un brief de cliente.
+  Do brief de um cliente a uma instância do Builder CRM adaptada, implantada e testada,
+  num único fluxo: entender, especificar, configurar, construir módulos, implantar no
+  Coolify, testar e entregar. É a skill orquestradora do fluxo one-shot.
+  Ativar quando o usuário diz: adapta o CRM para <cliente>, cliente novo, quero um
+  CRM para um <nicho>, personaliza o Builder CRM, implanta uma instância para <cliente>,
+  ou cola um brief de cliente.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-# Adaptar Builder CRM a un cliente
+# Adaptar o Builder CRM a um cliente
 
-> Entrada: $ARGUMENTS (brief, prompt o nombre del cliente)
+> Entrada: $ARGUMENTS (brief, prompt ou nome do cliente)
 
-Tu trabajo termina con una **URL funcionando**, credenciales de demo y un resumen. No
-termina con "listo para desplegar". Sigue los pasos en orden; cada paso deja un commit.
+O seu trabalho termina com uma **URL funcionando**, credenciais de demo e um resumo. Não
+termina com "pronto para implantar". Siga os passos em ordem; cada passo deixa um commit.
 
-## 0. Reglas que no se negocian
+## 0. Regras que não se negociam
 
-- **Nunca edites el nucleo** (`src/`, `supabase/`, `scripts/`, Docker). Todo va en
-  `config/`, `modules/`, `public/marca/`, `specs/<cliente>/`. Si crees que hace falta
-  tocar el nucleo, para y explicalo: es una mejora para el repo original.
-- Secretos solo en `.env.local` (local) y en las variables de Coolify. Nada en el repo.
-- Cero datos reales en seeds, specs o commits.
-- Si el repo tiene `.claude/memory/`, lee `MEMORY.md` antes de empezar.
+- **Nunca edite o núcleo** (`src/`, `supabase/`, `scripts/`, Docker). Tudo vai em
+  `config/`, `modules/`, `public/marca/`, `specs/<cliente>/`. Se você achar que faz falta
+  tocar no núcleo, pare e explique: é uma melhoria para o repositório original.
+- Segredos só em `.env.local` (local) e nas variáveis do Coolify. Nada no repositório.
+- Zero dados reais em seeds, specs ou commits.
+- Se o repositório tem `.claude/memory/`, leia `MEMORY.md` antes de começar.
 
-## 1. Entender (maximo 3 preguntas, todas juntas)
+## 1. Entender (no máximo 3 perguntas, todas juntas)
 
-Lee el brief y resuelve con sentido comun. Pregunta SOLO si falta algo critico y
-agrupa las preguntas en un unico mensaje. `specs/_brief.md` es el cuestionario completo:
-si el brief viene muy flaco, pasale ese archivo al miembro en vez de interrogarlo por
-chat. Lo tipico que hace falta:
+Leia o brief e resolva com bom senso. Pergunte SÓ se faltar algo crítico e
+agrupe as perguntas numa única mensagem. `specs/_brief.md` é o questionário completo:
+se o brief vier muito magro, passe esse arquivo ao membro em vez de interrogá-lo pelo
+chat. O típico que faz falta:
 
-1. **Nombre del cliente y nicho** (inmobiliaria, clinica, tienda...). Si existe
-   `config/plantillas/<nicho>.ts`, parte de ahi.
-2. **Dominio** para la instancia (`crm.cliente.com`, con DNS apuntando al VPS) y
-   acceso a **Coolify** (URL + token) y a **Supabase** (MCP en modo cuenta, o un
-   proyecto ya creado). Sin esto se puede hacer todo menos desplegar.
-3. **Clave de OpenRouter** (si no, el agente no responde y la demo queda sin IA).
+1. **Nome do cliente e nicho** (imobiliária, clínica, loja...). Se existe
+   `config/plantillas/<nicho>.ts`, parta dali.
+2. **Domínio** para a instância (`crm.cliente.com`, com DNS apontando para o VPS) e
+   acesso ao **Coolify** (URL + token) e ao **Supabase** (MCP em modo conta, ou um
+   projeto já criado). Sem isso dá para fazer tudo menos implantar.
+3. **Chave do OpenRouter** (se não, o agente não responde e a demo fica sem IA).
 
-No preguntes por canales (Zernio): se conectan despues con `conectar-zernio`.
+Não pergunte por canais (Zernio): conectam-se depois com `conectar-zernio`.
 
 ## 2. Especificar
 
-Copia `specs/_plantilla.md` a `specs/<cliente>/spec.md` y completala: problema,
-decisiones del dueno (las respuestas del paso 1), escenarios, requisitos, configuracion
-(marca, pipeline, campos, modulos), modelo de datos (solo tablas de modulos), agente
-(prompt, campos a calificar), criterios de aceptacion. Carril ligero salvo que haya
-modulos con tablas nuevas. Commit: `Spec de <cliente>`.
+Copie `specs/_modelo.md` para `specs/<cliente>/spec.md` e complete: problema,
+decisões do dono (as respostas do passo 1), cenários, requisitos, configuração
+(marca, pipeline, campos, módulos), modelo de dados (só tabelas de módulos), agente
+(prompt, campos a qualificar), critérios de aceitação. Trilho leve salvo que haja
+módulos com tabelas novas. Commit: `Spec de <cliente>`.
 
-## 3. Configurar (zona del cliente)
+## 3. Configurar (zona do cliente)
 
-1. `config/cliente.ts`: `definirConfig({ ...plantilla, marca: {...}, ... })` o desde
-   cero. Marca (nombre, nombreCorto, descripcion, colorPrimario, colorSidebar),
+1. `config/cliente.ts`: `definirConfig({ ...plantilla, marca: {...}, ... })` ou do
+   zero. Marca (nombre, nombreCorto, descripcion, colorPrimario, colorSidebar),
    `idioma`, `moneda`, `roles.etiquetaAsesor`, `pipeline.etapas` (clave snake_case,
-   nombre, color, ganada/perdida), `contacto.campos` (con `agente.descripcion` en los
-   que el agente deba averiguar), `agente` (nombre, prompt, mensajeDerivacion).
-2. `config/modulos.json`: `{ "activos": [...] }` con los modulos que la spec pide.
-3. `public/marca/logo.png` e `icono.png` (si el cliente los dio; si no, deja los
-   genericos y anotalo en el resumen). `npm run pwa:icons`.
-4. Verifica: `npm run typecheck && npm run lint && npm run build`. Commit:
+   nombre, color, ganada/perdida), `contacto.campos` (com `agente.descripcion` nos
+   que o agente deva descobrir), `agente` (nombre, prompt, mensajeDerivacion).
+2. `config/modulos.json`: `{ "activos": [...] }` com os módulos que a spec pede.
+3. `public/marca/logo.png` e `icono.png` (se o cliente os deu; se não, deixe os
+   genéricos e anote no resumo). `npm run pwa:icons`.
+4. Verifique: `npm run typecheck && npm run lint && npm run build`. Commit:
    `Configuracion de <cliente>`.
 
-## 4. Construir modulos
+## 4. Construir módulos
 
-Por cada modulo nuevo que pida la spec, invoca la skill `crear-modulo`. Los que ya
-existen (`modules/propiedades`, `modules/visitas`, `modules/ejemplo` como referencia)
-solo se activan. Commit por modulo.
+Por cada módulo novo que a spec peça, invoque a skill `crear-modulo`. Os que já
+existem (`modules/propiedades`, `modules/visitas`, `modules/ejemplo` como referência)
+só se ativam. Commit por módulo.
 
-## 5. Desplegar
+## 5. Implantar
 
-Invoca `deploy-coolify`. Resultado esperado: proyecto Supabase con migraciones
-aplicadas, cuenta admin de demo creada, app en Coolify respondiendo `/api/health`
-con `ok: true`, datos demo cargados (`npm run seed -- --url https://...`).
+Invoque `deploy-coolify`. Resultado esperado: projeto Supabase com migrações
+aplicadas, conta admin de demo criada, app no Coolify respondendo `/api/health`
+com `ok: true`, dados demo carregados (`npm run seed -- --url https://...`).
 
-## 6. Conectar canales (opcional ahora)
+## 6. Conectar canais (opcional agora)
 
-Si el cliente ya tiene credenciales de Zernio, invoca `conectar-zernio`. Si no, deja
-instrucciones en el resumen: la demo funciona con el simulador.
+Se o cliente já tem credenciais do Zernio, invoque `conectar-zernio`. Se não, deixe
+instruções no resumo: a demo funciona com o simulador.
 
-## 7. Probar
+## 7. Testar
 
-Invoca `probar-instancia` contra la URL desplegada. Si algo falla: diagnostica,
-corrige, redespliega y vuelve a probar. No entregues con checks en rojo; si uno no se
-puede cumplir (por ejemplo falta OpenRouter), dilo explicitamente.
+Invoque `probar-instancia` contra a URL implantada. Se algo falhar: diagnostique,
+corrija, reimplante e teste de novo. Não entregue com checks vermelhos; se um não se
+puder cumprir (por exemplo falta OpenRouter), diga explicitamente.
 
 ## 8. Entregar
 
-Un mensaje con:
-- **URL** de la instancia y `/api/health`.
-- **Acceso demo**: email y contrasena del admin creado (pedir cambiarla).
-- **Que se construyo**: marca, etapas, campos, modulos, prompt del agente (resumen).
-- **Como seguir**: conectar WhatsApp/IG/Messenger (`conectar-zernio`), cargar
-  catalogo real, ajustar el prompt desde Ajustes -> Agente.
-- **Pendientes y decisiones** que tomaste solo.
-- Tiempo total del flujo.
+Uma mensagem com:
+- **URL** da instância e `/api/health`.
+- **Acesso demo**: e-mail e senha do admin criado (pedir para trocá-la).
+- **O que se construiu**: marca, etapas, campos, módulos, prompt do agente (resumo).
+- **Como seguir**: conectar WhatsApp/IG/Messenger (`conectar-zernio`), carregar
+  catálogo real, ajustar o prompt em Ajustes -> Agente.
+- **Pendências e decisões** que você tomou sozinho.
+- Tempo total do fluxo.
 
-Guarda en `.claude/memory/` lo no obvio del cliente (skill `memory-manager`).
+Guarde em `.claude/memory/` o que não for óbvio do cliente (skill `memory-manager`).

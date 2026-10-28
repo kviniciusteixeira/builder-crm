@@ -1,23 +1,23 @@
-# modules/ — zona del cliente
+# modules/ — zona do cliente
 
-Cada agregado especifico de un cliente (pedidos, citas, propiedades, visitas...) es un
-**modulo**: una carpeta autocontenida que el nucleo descubre por configuracion. Agregar
-un modulo nunca toca `src/`.
+Cada acréscimo específico de um cliente (pedidos, consultas, imóveis, visitas...) é um
+**módulo**: uma pasta autocontida que o núcleo descobre pela configuração. Adicionar
+um módulo nunca toca em `src/`.
 
 ```
 modules/
-|-- README.md            <- esta guia
-|-- _plantilla/          <- copiar para empezar (no activable)
-|-- ejemplo/             <- modulo minimo funcionando (tareas); borrable
+|-- README.md            <- este guia
+|-- _plantilla/          <- copiar para começar (não ativável)
+|-- ejemplo/             <- módulo mínimo funcionando (tarefas); pode ser apagado
 `-- <nombre>/
-    |-- manifiesto.ts    <- nav, campos, titulo (seguro para el navegador)
-    |-- servidor.tsx      <- paginas, api, tools, seed
-    |-- componentes/     <- UI del modulo
-    |-- migrations/      <- SQL idempotente, con RLS
+    |-- manifiesto.ts    <- nav, campos, título (seguro para o navegador)
+    |-- servidor.tsx      <- páginas, api, tools, seed
+    |-- componentes/     <- UI do módulo
+    |-- migrations/      <- SQL idempotente, com RLS
     `-- README.md
 ```
 
-## Como se activa
+## Como se ativa
 
 `config/modulos.json`:
 
@@ -25,53 +25,53 @@ modules/
 { "activos": ["propiedades", "visitas"] }
 ```
 
-Esa lista la leen tres cosas: `config/cliente.ts` (validacion), el runner de
-migraciones (`npm run db:migrar` aplica `modules/<activo>/migrations/`) y el generador
-del registro (`scripts/generar-registro-modulos.mjs`), que escribe
-`src/lib/modules/*.generated.ts` con imports estaticos de los modulos activos. El
-generador corre solo al arrancar `next dev`, en `next build` y en `npm run typecheck`:
-solo los modulos activos entran al bundle.
+Essa lista é lida por três coisas: `config/cliente.ts` (validação), o runner de
+migrações (`npm run db:migrar` aplica `modules/<activo>/migrations/`) e o gerador
+do registro (`scripts/generar-registro-modulos.mjs`), que escreve
+`src/lib/modules/*.generated.ts` com imports estáticos dos módulos ativos. O
+gerador roda sozinho ao iniciar `next dev`, no `next build` e no `npm run typecheck`:
+só os módulos ativos entram no bundle.
 
-Apagar un modulo = quitarlo de la lista. Sus rutas pasan a 404, desaparece del menu y
-sus tablas quedan intactas.
+Desligar um módulo = tirá-lo da lista. As rotas passam a 404, ele some do menu e
+as tabelas ficam intactas.
 
-## Que puede aportar un modulo
+## O que um módulo pode contribuir
 
-| Pieza | Donde | Como llega al nucleo |
+| Peça | Onde | Como chega ao núcleo |
 |---|---|---|
-| Entradas del menu | `manifiesto.nav` | Sidebar y menu movil, en la seccion declarada |
-| Paginas | `servidor.paginas` | `/m/<nombre>/<patron>` via el catch-all `src/app/m/[modulo]/[[...ruta]]` |
-| API | `servidor.api` | `/api/m/<nombre>/<patron>`, ya con `requireMember` |
-| Campos del contacto | `manifiesto.campos` | Se suman a `config/cliente.ts`: formulario, ficha, tabla, chat y agente |
-| Tools del agente | `servidor.tools` | Se suman a las del nucleo mientras el modulo esta activo |
-| Tablas | `migrations/*.sql` | Las aplica el runner, en orden, una sola vez |
-| Datos demo | `servidor.seed` | `npm run seed` |
+| Entradas do menu | `manifiesto.nav` | Sidebar e menu móvel, na seção declarada |
+| Páginas | `servidor.paginas` | `/m/<nombre>/<patron>` via o catch-all `src/app/m/[modulo]/[[...ruta]]` |
+| API | `servidor.api` | `/api/m/<nombre>/<patron>`, já com `requireMember` |
+| Campos do contato | `manifiesto.campos` | Somam-se a `config/cliente.ts`: formulário, ficha, tabela, chat e agente |
+| Tools do agente | `servidor.tools` | Somam-se às do núcleo enquanto o módulo está ativo |
+| Tabelas | `migrations/*.sql` | O runner as aplica, em ordem, uma única vez |
+| Dados demo | `servidor.seed` | `npm run seed` |
 
-Patrones de ruta: `""` (principal), `"nueva"`, `"[id]"`, `"[id]/editar"`. Un segmento
-entre corchetes captura y llega en `params`. El patron con mas segmentos literales
-gana.
+Padrões de rota: `""` (principal), `"nueva"`, `"[id]"`, `"[id]/editar"`. Um segmento
+entre colchetes captura e chega em `params`. O padrão com mais segmentos literais
+vence.
 
-## Reglas
+## Regras
 
-1. **Nombre** en snake_case, igual a la carpeta. Tablas, claves de campos y tools con
-   el nombre del modulo como prefijo (`visitas_citas`, `visitas_zona`, `agendar_visita`).
-2. **Sin tocar `src/`.** Si algo no se puede hacer desde el modulo, es una mejora del
-   nucleo: se pide al repo original, no se parchea en la instancia.
-3. **Importar solo** `@/lib/*`, `@/components/{ui,layout,shared}/*`, `@/db`, `@/lib/modules/types` y
-   paquetes del `package.json`. Nunca otro modulo.
-4. **RLS en toda tabla** (`alter table ... enable row level security` + politica de
-   lectura). El runner lo fuerza igual, pero sin politica nadie lee por la API publica.
-5. **Credenciales por env**, documentadas en el README del modulo y en `.env.example`.
-6. **Spec antes** (`specs/<cliente>/spec.md`) y **autoverificacion despues**
-   (`probar-instancia` abre `/m/<nombre>` y prueba que guarda y muestra datos).
+1. **Nome** em snake_case, igual à pasta. Tabelas, chaves de campos e tools com
+   o nome do módulo como prefixo (`visitas_citas`, `visitas_zona`, `agendar_visita`).
+2. **Sem tocar em `src/`.** Se algo não puder ser feito a partir do módulo, é uma melhoria do
+   núcleo: pede-se ao repositório original, não se corrige na instância.
+3. **Importar só** `@/lib/*`, `@/components/{ui,layout,shared}/*`, `@/db`, `@/lib/modules/types` e
+   pacotes do `package.json`. Nunca outro módulo.
+4. **RLS em toda tabela** (`alter table ... enable row level security` + política de
+   leitura). O runner força isso de qualquer forma, mas sem política ninguém lê pela API pública.
+5. **Credenciais por env**, documentadas no README do módulo e em `.env.example`.
+6. **Spec antes** (`specs/<cliente>/spec.md`) e **autoverificação depois**
+   (`probar-instancia` abre `/m/<nombre>` e testa se grava e mostra dados).
 
-## Crear uno
+## Criar um
 
 ```bash
 cp -r modules/_plantilla modules/<nombre>
 # completar manifiesto.ts, servidor.tsx, migrations/0000_<nombre>.sql, README.md
-# agregar "<nombre>" a config/modulos.json
+# adicionar "<nombre>" a config/modulos.json
 npm run db:migrar && npm run typecheck && npm run dev
 ```
 
-O pedirselo a Claude Code con la skill `crear-modulo`.
+Ou pedir ao Claude Code com a skill `crear-modulo`.

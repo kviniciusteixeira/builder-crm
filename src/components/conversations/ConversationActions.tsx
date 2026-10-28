@@ -22,15 +22,15 @@ import { toast } from "sonner";
 
 interface Props {
   conversationId: string;
-  /** Con quien es el hilo, para que el aviso diga que se va a borrar. */
+  /** Com quem é o fio, para que o aviso diga que vai ser apagado. */
   name: string;
   messageCount: number;
 }
 
 /**
- * Menu del hilo abierto. Hoy solo eliminar, que es destructivo y por eso pide
- * confirmacion escrita en vez de un `confirm()` del navegador. Solo lo ve un admin;
- * el servidor igual lo vuelve a chequear.
+ * Menu do fio aberto. Hoje só apagar, que é destrutivo e por isso pede
+ * confirmação escrita em vez de um `confirm()` do navegador. Só um admin vê;
+ * o servidor mesmo assim volta a checar.
  */
 export function ConversationActions({ conversationId, name, messageCount }: Props) {
   const router = useRouter();

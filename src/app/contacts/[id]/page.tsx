@@ -19,7 +19,7 @@ export default async function ContactDetailPage({
 
   const contactRows = await db.select().from(contacts).where(eq(contacts.id, id)).limit(1);
   const contact = contactRows[0];
-  // Ajeno = inexistente, para no confirmar que existe.
+  // Alheio = inexistente, para não confirmar que existe.
   if (!contact || !canAccessContact(member, contact)) notFound();
 
   const contactActivities = await db

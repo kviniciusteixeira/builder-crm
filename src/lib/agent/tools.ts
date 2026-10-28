@@ -19,20 +19,20 @@ import { validarCamposPersonalizados } from "@/lib/config/campos";
 import { toolsDeModulos } from "@/lib/modules";
 
 /**
- * Tools del agente.
+ * Tools do agente.
  *
- * Las del NUCLEO son genericas: sirven para cualquier negocio y actuan sobre el CRM
- * (etapa, ficha, actividades, resumen, derivacion, asignacion). Lo especifico de un
- * nicho (propiedades, visitas...) lo aportan los modulos activos (`servidor.tools`).
+ * As do NÚCLEO são genéricas: servem para qualquer negócio e atuam sobre o CRM
+ * (etapa, ficha, atividades, resumo, derivação, atribuição). O específico de um
+ * nicho (propiedades, visitas...) o aportam os módulos ativos (`servidor.tools`).
  *
- * Ajustes -> Agente lista todo esto y permite apagar cada una por canal.
+ * Ajustes -> Agente lista tudo isto e permite desligar cada uma por canal.
  */
 
 export const ENABLED_TOOLS_SETTINGS_KEY = "agent.enabled_tools";
 
 export interface ToolContext {
   contactId: string;
-  /** Solo WhatsApp. En Instagram y Messenger no hay telefono: el identificador es IGSID/PSID. */
+  /** Só WhatsApp. No Instagram e no Messenger não há telefone: o identificador é IGSID/PSID. */
   contactPhone: string | null;
   conversationId?: string | null;
   channel?: string;
@@ -43,8 +43,8 @@ export interface ToolResult {
   data?: unknown;
   error?: string;
   /**
-   * true = despues de este resultado el agente no sigue el loop: manda el mensaje de
-   * derivacion y termina (derivar_asesor).
+   * true = depois deste resultado o agente não segue o loop: manda a mensagem de
+   * derivação e termina (derivar_asesor).
    */
   stop?: boolean;
 }
@@ -67,7 +67,7 @@ function normalizar(s: string): string {
 }
 
 // ============================================================
-// Tools genericas del nucleo
+// Tools genéricas do núcleo
 // ============================================================
 
 async function moverEtapa(args: { etapa?: string; motivo?: string }, ctx: ToolContext): Promise<ToolResult> {
@@ -93,7 +93,7 @@ async function moverEtapa(args: { etapa?: string; motivo?: string }, ctx: ToolCo
     };
   }
 
-  // Operacion abierta del contacto en este pipeline (la mas reciente).
+  // Operação aberta do contato neste pipeline (a mais recente).
   const [abierta] = await db
     .select({ id: deals.id, stageId: deals.stageId })
     .from(deals)
@@ -235,9 +235,9 @@ async function derivarAsesor(args: { motivo?: string }, ctx: ToolContext): Promi
   const motivo = String(args.motivo ?? "derivado por el agente").slice(0, 300);
   const now = new Date();
 
-  // Se apaga el agente en ESTA conversacion, no en el contacto entero: derivar una
-  // consulta que entro por Instagram no deberia callar al agente en WhatsApp. El
-  // kill-switch global del contacto sigue existiendo desde la ficha.
+  // Desliga-se o agente NESTA conversa, não no contato inteiro: transferir uma
+  // consulta que entrou pelo Instagram não deveria calar o agente no WhatsApp. O
+  // kill-switch global do contato continua existindo a partir da ficha.
   if (ctx.conversationId) {
     await db
       .update(conversations)
@@ -432,7 +432,7 @@ function toolsGenericas(): ToolAgente[] {
 // Registro
 // ============================================================
 
-/** Todas las tools disponibles en esta instancia: nucleo + nicho + modulos activos. */
+/** Todas as tools disponíveis nesta instância: núcleo + nicho + módulos ativos. */
 export function listarTools(): ToolAgente[] {
   return [...toolsGenericas(), ...toolsDeModulos()];
 }
@@ -461,8 +461,8 @@ export async function executeTool(name: string, args: unknown, ctx: ToolContext)
 }
 
 /**
- * Tools habilitadas globalmente (`crm_settings`). Sin fila = todas. Los nombres que ya
- * no existen (modulo apagado, tool renombrada) se descartan.
+ * Tools habilitadas globalmente (`crm_settings`). Sem linha = todas. Os nomes que já
+ * não existem (módulo desligado, tool renomeada) se descartam.
  */
 export async function getEnabledToolNames(): Promise<string[]> {
   const todas = nombresDeTools();
@@ -479,7 +479,7 @@ export async function getEnabledToolNames(): Promise<string[]> {
   }
 }
 
-/** Definiciones para el LLM, filtradas a las habilitadas. */
+/** Definições para o LLM, filtradas às habilitadas. */
 export async function getEnabledToolDefinitions(names?: string[]): Promise<OpenAI.Chat.Completions.ChatCompletionTool[]> {
   const enabled = new Set(names ?? (await getEnabledToolNames()));
   return listarTools()

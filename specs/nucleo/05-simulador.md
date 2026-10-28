@@ -1,87 +1,87 @@
-# Spec: Simulador de conversaciones (requisito 5.6 del brief)
+# Spec: Simulador de conversas (requisito 5.6 do brief)
 
-**Carril**: completo (nuevo conector + rutas publicas de la instancia)
-**Estado**: aprobada (plan de Fase 0, 2026-10-01)
-**Fecha**: 2026-10-01
-**Escrita antes del codigo**: si
+**Trilho**: completo (conector novo + rotas públicas da instância)
+**Estado**: aprovada (plano da Fase 0, 2026-10-01)
+**Data**: 2026-10-01
+**Escrita antes do código**: sim
 
 ## Problema
 
-Para probar el agente hoy hay que tener un numero de WhatsApp conectado y escribirle
-desde un telefono. Eso impide (1) la autoverificacion automatica de una instancia
-recien desplegada y (2) mostrar el CRM funcionando en una reunion de venta antes de
-que el cliente conecte su numero.
+Para testar o agente hoje é preciso ter um número de WhatsApp conectado e escrever para ele
+a partir de um telefone. Isso impede (1) a autoverificação automática de uma instância
+recém-implantada e (2) mostrar o CRM funcionando numa reunião de venda antes de
+o cliente conectar o número.
 
-## Decisiones del dueno
+## Decisões do dono
 
-- D1 (Fase 0) El simulador es un conector mas (`provider = "simulador"`): la
-  conversacion simulada entra a la bandeja como cualquier otra, el agente la atiende
-  por el mismo camino, y la salida nunca llega a la red.
+- D1 (Fase 0) O simulador é mais um conector (`provider = "simulador"`): a
+  conversa simulada entra na caixa de entrada como qualquer outra, o agente a atende
+  pelo mesmo caminho, e a saída nunca chega à rede.
 
-## Escenarios
+## Cenários
 
-1. **Demo** — El admin abre `/simulador`, elige el canal a simular (WhatsApp, Instagram
-   o Messenger), escribe como si fuera un cliente y ve la respuesta del agente en
-   segundos. Al lado ve lo que el agente fue cambiando en el CRM: etapa, campos,
-   resumen, actividades.
-2. **Bandeja** — La misma conversacion aparece en Conversaciones marcada como
-   "Simulador"; se puede abrir, ver los mensajes y el estado del agente.
-3. **Autoverificacion** — `probar-instancia` crea una conversacion por API, manda un
-   mensaje, espera la respuesta y comprueba que la etapa cambio.
-4. **Seguridad** — Un asesor no ve el menu ni puede usar las rutas (403); nada de lo
-   simulado sale por Zernio ni Meta.
+1. **Demo** — O admin abre `/simulador`, escolhe o canal a simular (WhatsApp, Instagram
+   ou Messenger), escreve como se fosse um cliente e vê a resposta do agente em
+   segundos. Ao lado vê o que o agente foi mudando no CRM: etapa, campos,
+   resumo, atividades.
+2. **Caixa de entrada** — A mesma conversa aparece em Conversas marcada como
+   "Simulador"; dá para abrir, ver as mensagens e o estado do agente.
+3. **Autoverificação** — `probar-instancia` cria uma conversa por API, manda uma
+   mensagem, espera a resposta e confere se a etapa mudou.
+4. **Segurança** — Um assessor não vê o menu nem pode usar as rotas (403); nada do
+   simulado sai pelo Zernio nem pela Meta.
 
 ## Requisitos
 
-- FR-001 `PROVIDERS` incluye `"simulador"`; `conectores/simulador.ts` implementa
-  `enviar` (devuelve exito con id `sim:<uuid>`, sin red) y `estado`; sin `webhook`.
-- FR-002 `POST /api/simulador/conversaciones { canal, nombre? }` (admin) crea un
-  contacto sintetico (fuente `simulador`, etiqueta `simulador`, propietario = quien lo
-  crea) con su identidad y una conversacion `provider="simulador"`. Devuelve ids.
-- FR-003 `POST /api/simulador/mensajes { conversationId, texto }` (admin) ingesta el
-  mensaje entrante con `ingestMessage` (sin encolar) y corre el agente de forma
-  sincrona; devuelve `{ agente: { ok, reason, reply, toolCalls }, messages }`.
-  Rechaza conversaciones que no sean del simulador. `maxDuration = 60`.
-- FR-004 `GET /api/simulador/conversaciones` (admin) lista las simuladas recientes.
-- FR-005 `/simulador`: pagina solo admin (404 para el resto) y apagable con
-  `modulos.nucleo.simulador`; item en el menu (seccion Inteligencia) visible solo para
+- FR-001 `PROVIDERS` inclui `"simulador"`; `conectores/simulador.ts` implementa
+  `enviar` (devolve sucesso com id `sim:<uuid>`, sem rede) e `estado`; sem `webhook`.
+- FR-002 `POST /api/simulador/conversaciones { canal, nombre? }` (admin) cria um
+  contato sintético (fonte `simulador`, etiqueta `simulador`, proprietário = quem o
+  cria) com a identidade e uma conversa `provider="simulador"`. Devolve ids.
+- FR-003 `POST /api/simulador/mensajes { conversationId, texto }` (admin) ingere a
+  mensagem recebida com `ingestMessage` (sem enfileirar) e roda o agente de forma
+  síncrona; devolve `{ agente: { ok, reason, reply, toolCalls }, messages }`.
+  Rejeita conversas que não sejam do simulador. `maxDuration = 60`.
+- FR-004 `GET /api/simulador/conversaciones` (admin) lista as simuladas recentes.
+- FR-005 `/simulador`: página só admin (404 para o resto) e desligável com
+  `modulos.nucleo.simulador`; item no menu (seção Inteligencia) visível só para
   admin.
-- FR-006 La bandeja marca las conversaciones con `provider === "simulador"`.
-- FR-007 Sin `OPENROUTER_API_KEY` la ruta responde 503 `agente_no_configurado` con un
-  mensaje claro (el simulador no finge respuestas).
+- FR-006 A caixa de entrada marca as conversas com `provider === "simulador"`.
+- FR-007 Sem `OPENROUTER_API_KEY` a rota responde 503 `agente_no_configurado` com uma
+  mensagem clara (o simulador não finge respostas).
 
-## Configuracion y modulos
+## Configuração e módulos
 
-`modulos.nucleo.simulador` (ya existe, default true).
+`modulos.nucleo.simulador` (já existe, default true).
 
-## Modelo de datos
+## Modelo de dados
 
-Ninguno: `provider` distingue lo simulado.
+Nenhum: `provider` distingue o simulado.
 
 ## Agente de IA
 
-El prompt recibe la guia de canal `simulador`; todo lo demas es identico a produccion.
+O prompt recebe o guia de canal `simulador`; o resto é idêntico à produção.
 
-## Criterios de aceptacion
+## Critérios de aceitação
 
-- CA-001 Crear conversacion + mandar "Hola, busco informacion" devuelve una respuesta
-  del agente y la conversacion aparece en `/conversations` marcada como Simulador.
-- CA-002 Con un prompt que indique mover a "contactado" al primer mensaje, la
-  operacion del contacto simulado queda en esa etapa (visible en el panel).
-- CA-003 Un asesor recibe 403 en las rutas y no ve el item del menu.
-- CA-004 `webhook_events` y los conectores reales no registran nada durante una
-  simulacion.
-- CA-005 `typecheck + lint + build` en verde.
+- CA-001 Criar conversa + mandar "Olá, busco informação" devolve uma resposta
+  do agente e a conversa aparece em `/conversations` marcada como Simulador.
+- CA-002 Com um prompt que indique mover para "contactado" na primeira mensagem, a
+  operação do contato simulado fica nessa etapa (visível no painel).
+- CA-003 Um assessor recebe 403 nas rotas e não vê o item do menu.
+- CA-004 `webhook_events` e os conectores reais não registram nada durante uma
+  simulação.
+- CA-005 `typecheck + lint + build` em verde.
 
 ## Constitution Check
 
-- I. Nucleo intocable: es nucleo; no toca config del cliente.
-- II. Spec antes que codigo: esta spec.
-- III. Autoverificacion: es la base de `probar-instancia`.
-- IV. Cero secretos: nada nuevo en env.
+- I. Núcleo intocável: é núcleo; não toca na config do cliente.
+- II. Spec antes do código: esta spec.
+- III. Autoverificação: é a base de `probar-instancia`.
+- IV. Zero segredos: nada novo no env.
 
-## Fuera de alcance
+## Fora de escopo
 
-- Clientes simulados automaticos con guion (tipo Laboratorio de vocero): el miembro
-  escribe a mano o `probar-instancia` manda un guion fijo.
-- Simular adjuntos, plantillas o estados de entrega.
+- Clientes simulados automáticos com roteiro (tipo Laboratório do vocero): o membro
+  escreve à mão ou `probar-instancia` manda um roteiro fixo.
+- Simular anexos, templates ou estados de entrega.

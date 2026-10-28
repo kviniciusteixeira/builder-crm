@@ -4,11 +4,11 @@ import { canAccessContact } from "@/lib/team";
 import { deleteConversation, getConversation } from "@/lib/conversations";
 
 /**
- * DELETE /api/conversations/:id — borra el hilo y sus mensajes.
+ * DELETE /api/conversations/:id — exclui o fio e suas mensagens.
  *
- * Solo admin: un asesor no deberia poder borrar historial de atencion, ni siquiera el
- * de sus propios contactos. Un hilo que el admin no puede ver responde 404, igual que
- * el resto de las rutas.
+ * Somente admin: um assessor não deveria poder excluir o histórico de atendimento, nem mesmo o
+ * dos próprios contatos. Um fio que o admin não pode ver responde 404, igual ao
+ * resto das rotas.
  */
 export async function DELETE(
   _request: NextRequest,

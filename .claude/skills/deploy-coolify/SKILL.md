@@ -1,155 +1,155 @@
 ---
 name: deploy-coolify
 description: |
-  Despliega una instancia nueva de Builder CRM de principio a fin: base y Auth (Supabase
-  cloud o autoalojados en el mismo Coolify), migraciones, primer admin, aplicacion en
-  Coolify (Dockerfile) con sus variables, deploy, health check y datos demo. Activar
-  cuando el usuario dice: despliega, deploy, subilo a Coolify, levanta la instancia,
-  ponlo en produccion, crea el proyecto de Supabase.
+  Implanta uma instância nova do Builder CRM do começo ao fim: base e Auth (Supabase
+  cloud ou auto-hospedados no mesmo Coolify), migrações, primeiro admin, aplicativo no
+  Coolify (Dockerfile) com as variáveis, deploy, health check e dados demo. Ativar
+  quando o usuário diz: implanta, deploy, sobe no Coolify, levanta a instância,
+  põe em produção, cria o projeto do Supabase.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# Desplegar en Coolify
+# Implantar no Coolify
 
-> Instancia a desplegar: $ARGUMENTS
+> Instância a implantar: $ARGUMENTS
 
-Resultado: `https://<dominio>/api/health` responde `{ "ok": true, ... }`, se puede
-iniciar sesion con la cuenta admin creada, y la demo esta cargada.
+Resultado: `https://<dominio>/api/health` responde `{ "ok": true, ... }`, dá para
+iniciar sessão com a conta admin criada, e a demo está carregada.
 
-## 0. Lo que hace falta (pedirlo junto, una sola vez)
+## 0. O que faz falta (pedir junto, uma única vez)
 
-| Credencial | Donde se obtiene | Para que |
+| Credencial | Onde se obtém | Para quê |
 |---|---|---|
-| **Dominio** con registro A al VPS | DNS del cliente | `APP_BASE_URL` y el dominio de la app |
-| **Coolify** URL + API token (scope de escritura) | Coolify -> Keys & Tokens -> API tokens | crear la app, variables y deploy |
-| **Base y Auth**: o un Personal Access Token de Supabase cloud, o nada (se autoalojan en el mismo Coolify) | supabase.com/dashboard/account/tokens, o el propio Coolify | ver el paso 1: hay que elegir antes de empezar |
-| **OpenRouter** API key (opcional) | openrouter.ai -> Keys | el agente |
-| **Zernio** (opcional, despues) | zernio.com -> Settings -> API Keys | canales |
+| **Domínio** com registro A no VPS | DNS do cliente | `APP_BASE_URL` e o domínio do app |
+| **Coolify** URL + API token (escopo de escrita) | Coolify -> Keys & Tokens -> API tokens | criar o app, variáveis e deploy |
+| **Base e Auth**: ou um Personal Access Token do Supabase cloud, ou nada (auto-hospedam-se no mesmo Coolify) | supabase.com/dashboard/account/tokens, ou o próprio Coolify | ver o passo 1: há que escolher antes de começar |
+| **OpenRouter** API key (opcional) | openrouter.ai -> Keys | o agente |
+| **Zernio** (opcional, depois) | zernio.com -> Settings -> API Keys | canais |
 
-Genera tu mismo los secretos que no vienen de un proveedor:
-`openssl rand -hex 32` para `AGENT_WORKER_SECRET` y `LEADS_WEBHOOK_SECRET`,
-`npx web-push generate-vapid-keys` para las VAPID. La contrasena del admin demo:
+Gere você mesmo os segredos que não vêm de um provedor:
+`openssl rand -hex 32` para `AGENT_WORKER_SECRET` e `LEADS_WEBHOOK_SECRET`,
+`npx web-push generate-vapid-keys` para as VAPID. A senha do admin demo:
 `openssl rand -base64 12`.
 
-Nunca pegues secretos en el chat de vuelta, en el repo ni en `.mcp.json`.
+Nunca cole segredos no chat de volta, no repositório nem em `.mcp.json`.
 
-## 1. Base y Auth: dos caminos, hay que elegir antes de empezar
+## 1. Base e Auth: dois caminhos, há que escolher antes de começar
 
-El CRM usa Supabase para **dos cosas separadas**: Postgres (los datos) y GoTrue (quien
-inicia sesion). No usa nada mas de Supabase. Por eso hay dos caminos validos, y el
-primer paso es preguntarle al miembro cual quiere.
+O CRM usa o Supabase para **duas coisas separadas**: Postgres (os dados) e GoTrue (quem
+inicia sessão). Não usa mais nada do Supabase. Por isso há dois caminhos válidos, e o
+primeiro passo é perguntar ao membro qual quer.
 
-### A) Supabase cloud (un proyecto por cliente)
+### A) Supabase cloud (um projeto por cliente)
 
-Mas rapido de levantar y con respaldos y panel incluidos. El plan gratuito alcanza, pero
-**pausa los proyectos inactivos**, y un CRM de un cliente que se pausa es una llamada a
-las 9 de la manana.
+Mais rápido de levantar e com backups e painel incluídos. O plano gratuito alcança, mas
+**pausa os projetos inativos**, e um CRM de um cliente que pausa é uma ligação às
+9 da manhã.
 
-Con el MCP de Supabase en **modo cuenta** (sin `project_ref`): `list_organizations`,
-`get_cost`/`confirm_cost`, `create_project` (region cercana al cliente, contrasena de
-base generada). Espera a que el proyecto este activo. Si el miembro ya tiene un
-proyecto, usa ese.
+Com o MCP do Supabase em **modo conta** (sem `project_ref`): `list_organizations`,
+`get_cost`/`confirm_cost`, `create_project` (região perto do cliente, senha de
+base gerada). Espere o projeto ficar ativo. Se o membro já tem um
+projeto, use esse.
 
-Obtener: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+Obter: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 (`get_publishable_keys` / `get_project_url`), `SUPABASE_SERVICE_ROLE_KEY` (dashboard
--> Settings -> API; no lo expone el MCP por diseno: pedirlo), `DATABASE_URL` (Connect
--> Transaction pooler, puerto 6543) y `DIRECT_URL` (Session/direct, 5432, para
-migraciones).
+-> Settings -> API; o MCP não a expõe por design: pedi-la), `DATABASE_URL` (Connect
+-> Transaction pooler, porta 6543) e `DIRECT_URL` (Session/direct, 5432, para
+migrações).
 
-### B) Autoalojado en el mismo Coolify (Postgres + GoTrue)
+### B) Auto-hospedado no mesmo Coolify (Postgres + GoTrue)
 
-Todo en el VPS del miembro: sin cuenta de Supabase, sin pausas y sin costo por cliente.
-**Es el camino de la instancia de demostracion de IA Builder Lab.** A cambio, los
-respaldos y las actualizaciones son suyos.
+Tudo no VPS do membro: sem conta do Supabase, sem pausas e sem custo por cliente.
+**É o caminho da instância de demonstração do IA Builder Lab.** Em troca, os
+backups e as atualizações são dele.
 
-Guia completa, con las variables de GoTrue y lo que se rompe si se saltea un paso:
-[`docs/SUPABASE-EN-VPS.md`](../../../docs/SUPABASE-EN-VPS.md). El orden importa y no es
-obvio:
+Guia completo, com as variáveis do GoTrue e o que quebra se se pular um passo:
+[`docs/SUPABASE-NO-VPS.md`](../../../docs/SUPABASE-NO-VPS.md). A ordem importa e não é
+óbvia:
 
-1. Base Postgres gestionada en Coolify (imagen `pgvector/pgvector:pg16` si se va a usar
-   el modulo propiedades).
-2. `npm run claves:supabase` genera el secreto JWT y las claves anonima y de servicio
-   coherentes entre si. **No van a ningun repo.**
-3. `npm run auth:preparar` crea en esa base lo que Supabase trae de fabrica y un
-   Postgres pelado no: los roles `anon` / `authenticated` / `service_role`, el esquema
-   `auth` con su dueno `supabase_auth_admin` y las funciones `auth.uid()` y companhia.
-   Va **antes** de arrancar GoTrue, que espera encontrar ese rol.
-4. GoTrue como aplicacion en Coolify, con su dominio. Al arrancar crea `auth.users` con
-   sus propias migraciones.
-5. Recien ahi `npm run db:migrar`, porque la ultima migracion pone un disparador sobre
+1. Base Postgres gerenciada no Coolify (imagem `pgvector/pgvector:pg16` se for usar
+   o módulo imóveis).
+2. `npm run claves:supabase` gera o segredo JWT e as chaves anônima e de serviço
+   coerentes entre si. **Não vão a nenhum repositório.**
+3. `npm run auth:preparar` cria nessa base o que o Supabase traz de fábrica e um
+   Postgres pelado não: os papéis `anon` / `authenticated` / `service_role`, o esquema
+   `auth` com o dono `supabase_auth_admin` e as funções `auth.uid()` e companhia.
+   Vai **antes** de iniciar o GoTrue, que espera encontrar esse papel.
+4. GoTrue como aplicativo no Coolify, com o domínio dele. Ao iniciar cria `auth.users` com
+   as próprias migrações.
+5. Só aí `npm run db:migrar`, porque a última migração põe um gatilho sobre
    `auth.users`.
 
-`NEXT_PUBLIC_SUPABASE_URL` es el dominio de GoTrue **incluyendo `/auth/v1`**, para que el
-proxy recorte el prefijo.
+`NEXT_PUBLIC_SUPABASE_URL` é o domínio do GoTrue **incluindo `/auth/v1`**, para que o
+proxy recorte o prefixo.
 
-## 2. Migraciones y primer admin (desde la maquina del miembro)
+## 2. Migrações e primeiro admin (da máquina do membro)
 
 ```bash
-DATABASE_URL='<pooler>' DIRECT_URL='<directo>' npm run db:migrar
+DATABASE_URL='<pooler>' DIRECT_URL='<direto>' npm run db:migrar
 NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... DATABASE_URL=... \
-  npm run admin:crear -- --email admin@<cliente>.com --password '<generada>' --nombre "Admin"
+  npm run admin:crear -- --email admin@<cliente>.com --password '<gerada>' --nombre "Admin"
 ```
 
-Alternativa: `apply_migration` del MCP con el contenido de cada archivo de
-`supabase/migrations/` y `modules/<activo>/migrations/`, en orden (y registrar en
-`_migraciones` para que el runner no los repita). Verifica con
-`get_advisors(security)`: no debe haber tablas sin RLS.
+Alternativa: `apply_migration` do MCP com o conteúdo de cada arquivo de
+`supabase/migrations/` e `modules/<activo>/migrations/`, em ordem (e registrar em
+`_migraciones` para o runner não os repetir). Verifique com
+`get_advisors(security)`: não deve haver tabelas sem RLS.
 
 ## 3. Coolify
 
-Dos caminos: el **MCP** de Coolify si esta configurado (ver `docs/MCP.md`; el oficial
-de Coolify v4 es de solo lectura) o la **REST API** con `curl`
-(`COOLIFY_URL`, `COOLIFY_TOKEN`; verificar rutas contra la version instalada en
+Dois caminhos: o **MCP** do Coolify se estiver configurado (ver `docs/MCP.md`; o oficial
+do Coolify v4 é só leitura) ou a **REST API** com `curl`
+(`COOLIFY_URL`, `COOLIFY_TOKEN`; verificar rotas contra a versão instalada em
 `<COOLIFY_URL>/docs/api`):
 
-1. **Proyecto y servidor**: `GET /api/v1/projects`, `GET /api/v1/servers` -> uuids.
-2. **Aplicacion desde repositorio** (el repo del cliente, publico o con deploy key):
-   `POST /api/v1/applications/public` con `project_uuid`, `server_uuid`,
+1. **Projeto e servidor**: `GET /api/v1/projects`, `GET /api/v1/servers` -> uuids.
+2. **Aplicativo a partir do repositório** (o repositório do cliente, público ou com deploy key):
+   `POST /api/v1/applications/public` com `project_uuid`, `server_uuid`,
    `environment_name` (production), `git_repository`, `git_branch` (main),
    `build_pack: "dockerfile"`, `ports_exposes: "3000"`, `domains: "https://<dominio>"`,
    `instant_deploy: false`.
-3. **Variables** (`POST /api/v1/applications/<uuid>/envs/bulk`): **todas en runtime, sin
-   excepcion**. Desde 1.2.2 el servidor le pasa al navegador la configuracion publica en
-   tiempo de ejecucion (`src/lib/config-publica.ts`), asi que ninguna `NEXT_PUBLIC_*`
-   necesita hornearse en el build. No intentes marcarlas como de build: la API de
-   Coolify 4.3 **rechaza el campo `is_build_time`** y solo se puede hacer desde la
-   interfaz.
+3. **Variáveis** (`POST /api/v1/applications/<uuid>/envs/bulk`): **todas em runtime, sem
+   exceção**. Desde 1.2.2 o servidor passa ao navegador a configuração pública em
+   tempo de execução (`src/lib/config-publica.ts`), então nenhuma `NEXT_PUBLIC_*`
+   precisa se gravar no build. Não tente marcá-las como de build: a API do
+   Coolify 4.3 **rejeita o campo `is_build_time`** e só se pode fazer pela
+   interface.
 
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`,
    `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `DATABASE_URL`, `DIRECT_URL`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `APP_BASE_URL`, `AGENT_WORKER_SECRET` (**obligatoria**: sin ella /api/health da 503 y el agente no corre),
+   `SUPABASE_SERVICE_ROLE_KEY`, `APP_BASE_URL`, `AGENT_WORKER_SECRET` (**obrigatória**: sem ela /api/health dá 503 e o agente não roda),
    `LEADS_WEBHOOK_SECRET`, `OPENROUTER_API_KEY`, `AGENT_MODEL` (opcional),
-   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, y las de Zernio/S3 si ya existen. Lista
-   completa y explicada en `.env.example`.
-4. **Deploy**: `POST /api/v1/deploy?uuid=<uuid>`; sigue `GET /api/v1/deployments/<id>`
-   hasta `finished`. Las migraciones corren solas al arrancar (entrypoint).
-5. **Health**: `curl https://<dominio>/api/health` -> `ok: true` con `version`. Si
-   responde 503 `env_invalida`, el cuerpo lista que variable falta.
+   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, e as do Zernio/S3 se já existirem. Lista
+   completa e explicada em `.env.example`.
+4. **Deploy**: `POST /api/v1/deploy?uuid=<uuid>`; siga `GET /api/v1/deployments/<id>`
+   até `finished`. As migrações rodam sozinhas ao iniciar (entrypoint).
+5. **Health**: `curl https://<dominio>/api/health` -> `ok: true` com `version`. Se
+   responder 503 `env_invalida`, o corpo lista qual variável falta.
 
-## 4. Datos demo y cierre
+## 4. Dados demo e fechamento
 
 ```bash
-AGENT_WORKER_SECRET='<el mismo de Coolify>' node scripts/seed-demo.mjs --url https://<dominio>
+AGENT_WORKER_SECRET='<o mesmo do Coolify>' node scripts/seed-demo.mjs --url https://<dominio>
 ```
 
-Luego invoca `probar-instancia`. Reporta: URL, credenciales demo (una sola vez),
-proyecto Supabase (ref), app de Coolify (uuid), y que quedo pendiente (Zernio, logo
-real, dominio de correo).
+Depois invoque `probar-instancia`. Reporte: URL, credenciais demo (uma única vez),
+projeto Supabase (ref), app do Coolify (uuid), e o que ficou pendente (Zernio, logo
+real, domínio de e-mail).
 
-## Diagnostico rapido
+## Diagnóstico rápido
 
-- **El dominio responde dos versiones distintas.** Coolify deja el contenedor viejo
-  sirviendo despues de marcar el despliegue como completado: `/api/health` alterna entre
-  la version nueva y la anterior. Reinicia la aplicacion y vuelve a comprobar antes de
-  buscar la causa en el codigo.
+- **O domínio responde duas versões distintas.** O Coolify deixa o contêiner velho
+  servindo depois de marcar o deploy como concluído: `/api/health` alterna entre
+  a versão nova e a anterior. Reinicie o aplicativo e confira de novo antes de
+  buscar a causa no código.
 
-- El build NO necesita variables: si falla pidiendo `DATABASE_URL` o una
-  `NEXT_PUBLIC_*`, el culpable es codigo nuevo que consulta la base o lee el entorno al
-  importarse (va dentro de la funcion). En Coolify todas las variables van en runtime.
-- Health 503 `db_unavailable`: `DATABASE_URL` incorrecta o el proyecto Supabase
-  pausado. 503 `config_invalida`: `config/cliente.ts` no pasa la validacion (el
-  detalle esta en el cuerpo).
-- Migraciones no corren: el contenedor arranca con `SKIP_MIGRATIONS=true`, o
-  `DIRECT_URL` apunta al pooler de transacciones (usar el directo).
-- `/login` redirige en bucle: `NEXT_PUBLIC_SUPABASE_URL` no apunta al proyecto de esta
-  instancia, o `APP_BASE_URL` no es el dominio publico.
+- O build NÃO precisa de variáveis: se falhar pedindo `DATABASE_URL` ou uma
+  `NEXT_PUBLIC_*`, o culpado é código novo que consulta a base ou lê o ambiente ao
+  se importar (vai dentro da função). No Coolify todas as variáveis vão em runtime.
+- Health 503 `db_unavailable`: `DATABASE_URL` incorreta ou o projeto Supabase
+  pausado. 503 `config_invalida`: `config/cliente.ts` não passa na validação (o
+  detalhe está no corpo).
+- Migrações não rodam: o contêiner inicia com `SKIP_MIGRATIONS=true`, ou
+  `DIRECT_URL` aponta para o pooler de transações (usar o direto).
+- `/login` redireciona em loop: `NEXT_PUBLIC_SUPABASE_URL` não aponta para o projeto desta
+  instância, ou `APP_BASE_URL` não é o domínio público.

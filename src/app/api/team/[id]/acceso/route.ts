@@ -8,12 +8,12 @@ import { correoDeAccesoActivo, enviarEnlaceDeAcceso } from "@/lib/auth-correo";
 export const dynamic = "force-dynamic";
 
 /**
- * Reenviar el acceso a un miembro que ya esta en el equipo (solo admin): le llega un
- * correo con un enlace para definir su contrasena.
+ * Reenviar o acesso a um membro que já está na equipe (somente admin): chega um
+ * e-mail com um link para definir a senha.
  *
- * Es para el caso de todos los dias: perdio la contrasena, nunca abrio la invitacion, o
- * se la pasaron por un chat que ya no encuentra. No cambia nada hasta que la persona usa
- * el enlace, asi que reenviarlo dos veces no rompe nada.
+ * É para o caso de todos os dias: perdeu a senha, nunca abriu o convite, ou
+ * lhe passaram por um chat que já não encontra. Não muda nada até que a pessoa use
+ * o link, então reenviá-lo duas vezes não quebra nada.
  */
 export async function POST(
   _request: Request,
@@ -25,7 +25,7 @@ export async function POST(
 
   if (!correoDeAccesoActivo()) {
     return NextResponse.json(
-      { error: "Esta instancia no manda correos de acceso. Ver docs/CORREO.md" },
+      { error: "Esta instancia no manda correos de acceso. Ver docs/CORREIO.md" },
       { status: 400 }
     );
   }
@@ -45,8 +45,8 @@ export async function POST(
     );
   }
 
-  // Un miembro sin usuario de Auth no puede recibir nada: pasa si alguien borro el
-  // usuario a mano. Mejor decirlo que mandar un correo al vacio.
+  // Um membro sem usuário de Auth não pode receber nada: acontece se alguém apagou o
+  // usuário à mão. Melhor dizer isso do que mandar um e-mail para o vazio.
   const [usuario] = await db.execute<{ id: string }>(
     sql`select id from auth.users where id = ${id} limit 1`
   );

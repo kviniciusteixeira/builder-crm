@@ -1,803 +1,803 @@
-# Cambios
+# Mudanças
 
-Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun lo que
-le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
-mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
+O que cada versão do Builder CRM traz e o que fazer para atualizar. SemVer segundo o que
+importa a quem opera uma instância (ver "Versões" no [README](README.md)):
+maior = passos manuais, menor = funções novas, patch = correções.
 
 ## 2.0.1 — 2026-10-26
 
-### Actualizar desde 2.0.0
+### Atualizar desde 2.0.0
 
-Trae esta version. Si ya tenias `APP_BASE_URL` definida (la skill de deploy la pide), no
-hay nada que hacer.
+Traga esta versão. Se você já tinha `APP_BASE_URL` definida (a skill de deploy a pede), não
+há nada a fazer.
 
-### Seguridad
+### Segurança
 
-- **El secreto del worker podia irse a un servidor ajeno.** Cuando faltaba `APP_BASE_URL`,
-  la URL a la que el CRM se llama a si mismo se armaba con el `Host` y el
-  `X-Forwarded-Proto` de la peticion entrante, y a esa URL se le manda `AGENT_WORKER_SECRET`
-  en una cabecera: quien pudiera poner el `Host` se llevaba el secreto a su propio
-  servidor. Estaba detras de la firma HMAC del webhook, pero eso es una defensa de otro,
-  no de esa funcion. Ahora, en produccion, sin `APP_BASE_URL` no se dispara nada: queda
-  dicho en el log y los trabajos los levanta el barrido. Pasaba en los dos caminos
-  (`src/lib/agent/trigger.ts` y el webhook de Meta).
-- **Dos rutas devolvian el mensaje interno del error al cliente** (`/api/push/test` y
-  `/api/seed/demo`): un error de Postgres trae nombres de tablas y restricciones, y uno
-  del proveedor de push puede traer endpoints. Ahora va un mensaje generico y el detalle
-  queda en el log del servidor.
+- **O segredo do worker podia ir para um servidor alheio.** Quando faltava `APP_BASE_URL`,
+  a URL para a qual o CRM se chama a si mesmo se montava com o `Host` e o
+  `X-Forwarded-Proto` da requisição recebida, e a essa URL se manda `AGENT_WORKER_SECRET`
+  num cabeçalho: quem pudesse pôr o `Host` levava o segredo para o próprio
+  servidor. Estava atrás da assinatura HMAC do webhook, mas isso é uma defesa de outra
+  coisa, não dessa função. Agora, em produção, sem `APP_BASE_URL` não se dispara nada: fica
+  dito no log e os trabalhos a varredura levanta. Acontecia nos dois caminhos
+  (`src/lib/agent/trigger.ts` e o webhook da Meta).
+- **Duas rotas devolviam a mensagem interna do erro ao cliente** (`/api/push/test` e
+  `/api/seed/demo`): um erro de Postgres traz nomes de tabelas e restrições, e um
+  do provedor de push pode trazer endpoints. Agora vai uma mensagem genérica e o detalhe
+  fica no log do servidor.
 
 ## 2.0.0 — 2026-10-26
 
-Version de seguridad. Sale de revisar contra Builder CRM un informe hecho sobre **otro
-producto** de la misma familia (CRM Prime): de nueve hallazgos, cuatro aplicaban tambien
-aca. Los otros cinco ya estaban cubiertos (la autorizacion por `team_members`, el
-middleware, el digest que no existe).
+Versão de segurança. Sai de revisar contra o Builder CRM um informe feito sobre **outro
+produto** da mesma família (CRM Prime): de nove achados, quatro se aplicavam também
+aqui. Os outros cinco já estavam cobertos (a autorização por `team_members`, o
+middleware, o digest que não existe).
 
-### Actualizar desde 1.6.x — HAY QUE HACER UNA COSA A MANO
+### Atualizar desde 1.6.x — HÁ QUE FAZER UMA COISA À MÃO
 
-**`AGENT_WORKER_SECRET` pasa a ser obligatoria.** Si tu instancia ya la tiene, no hay
-nada que hacer. Si no:
+**`AGENT_WORKER_SECRET` passa a ser obrigatória.** Se a sua instância já a tem, não há
+nada a fazer. Se não:
 
 ```bash
 openssl rand -hex 32
 ```
 
-y cargala en las variables de la aplicacion antes de redesplegar. Sin ella, `/api/health`
-responde 503 y el agente no procesa nada: es a proposito, porque la alternativa era
-seguir con las rutas internas abiertas.
+e carregue nas variáveis do aplicativo antes de reimplantar. Sem ela, `/api/health`
+responde 503 e o agente não processa nada: é de propósito, porque a alternativa era
+continuar com as rotas internas abertas.
 
-Si tu base no acepta TLS (un Postgres en la misma maquina, o en la red interna de
-Docker), agrega tambien `DATABASE_SSL=off`. Supabase, tanto cloud como autoalojado con
-dominio, acepta TLS y no necesita nada.
+Se a sua base não aceita TLS (um Postgres na mesma máquina, ou na rede interna do
+Docker), adicione também `DATABASE_SSL=off`. O Supabase, tanto cloud como auto-hospedado com
+domínio, aceita TLS e não precisa de nada.
 
-### Seguridad
+### Segurança
 
-- **Las rutas internas fallaban ABIERTAS sin `AGENT_WORKER_SECRET`.** `/api/agent/process`
-  (POST y GET), el barrido de automatizaciones y el barrido de webhooks colgados hacian
-  `if (secret) { ...comprobar... }`: sin la variable no comprobaban nada. Esas rutas son
-  publicas en el middleware a proposito, porque las llama un cron o el propio servidor sin
-  sesion, asi que en una instancia sin la variable cualquiera en internet podia ejecutar
-  trabajos del agente, relanzar eventos de webhook y sembrar datos. No habia ningun
-  sintoma: el CRM funcionaba igual. Ahora hay un unico guardian (`src/lib/secreto-worker.ts`)
-  que falla cerrado y compara en tiempo constante, con tests.
-- **La conexion a Postgres iba sin TLS.** `postgres-js` deja `ssl` en false si la URL no
-  trae `sslmode`, y ni la que copia y pega Supabase ni la plantilla de `.env.example` lo
-  traian: cada consulta (contactos, conversaciones enteras, telefonos) cruzaba la red en
-  claro. Ahora `ssl: "require"`, con `DATABASE_SSL=off` para una base sin certificado en
-  la misma maquina.
-- **Las cookies de sesion iban sin `Secure`.** `@supabase/ssr` no lo pone por defecto y el
-  CRM no pasaba `cookieOptions`, asi que el navegador adjuntaba el JWT de acceso y el token
-  de refresco a cualquier peticion `http://` al dominio. Ahora van `secure` (en produccion),
-  `httpOnly`, `sameSite: lax`, compartidas por el middleware y el cliente de servidor para
-  que no se desincronicen, y con test.
-- **Cabeceras de seguridad en produccion**: `Strict-Transport-Security`,
-  `X-Content-Type-Options`, `Referrer-Policy` y `X-Frame-Options`. HSTS cierra la ventana
-  de la primera visita en claro, que en Vercel cubre la plataforma y en un VPS con Coolify
-  no necesariamente.
-- **La vuelta del OAuth de canales se creia la URL.** Guardaba el `accountId` del query sin
-  comprobar que esa conexion la hubiera iniciado este CRM: un enlace preparado y abierto
-  por alguien del equipo conectaba una cuenta ajena. Ahora se le pregunta a Zernio por esa
-  cuenta con la clave de la instancia (que solo ve las propias) y lo que se guarda sale de
-  la respuesta, no del query.
+- **As rotas internas falhavam ABERTAS sem `AGENT_WORKER_SECRET`.** `/api/agent/process`
+  (POST e GET), a varredura de automações e a varredura de webhooks pendentes faziam
+  `if (secret) { ...conferir... }`: sem a variável não conferiam nada. Essas rotas são
+  públicas no middleware de propósito, porque as chama um cron ou o próprio servidor sem
+  sessão, então numa instância sem a variável qualquer um na internet podia executar
+  trabalhos do agente, relançar eventos de webhook e semear dados. Não havia nenhum
+  sintoma: o CRM funcionava igual. Agora há um único guardião (`src/lib/secreto-worker.ts`)
+  que falha fechado e compara em tempo constante, com testes.
+- **A conexão ao Postgres ia sem TLS.** `postgres-js` deixa `ssl` em false se a URL não
+  traz `sslmode`, e nem a que se copia e cola do Supabase nem o modelo de `.env.example` o
+  traziam: cada consulta (contatos, conversas inteiras, telefones) cruzava a rede em
+  claro. Agora `ssl: "require"`, com `DATABASE_SSL=off` para uma base sem certificado na
+  mesma máquina.
+- **Os cookies de sessão iam sem `Secure`.** `@supabase/ssr` não o põe por padrão e o
+  CRM não passava `cookieOptions`, então o navegador anexava o JWT de acesso e o token
+  de refresh a qualquer requisição `http://` ao domínio. Agora vão `secure` (em produção),
+  `httpOnly`, `sameSite: lax`, compartilhados pelo middleware e pelo cliente de servidor para
+  que não se desalinhem, e com teste.
+- **Cabeçalhos de segurança em produção**: `Strict-Transport-Security`,
+  `X-Content-Type-Options`, `Referrer-Policy` e `X-Frame-Options`. HSTS fecha a janela
+  da primeira visita em claro, que na Vercel a plataforma cobre e num VPS com Coolify
+  não necessariamente.
+- **A volta do OAuth de canais acreditava na URL.** Guardava o `accountId` da query sem
+  conferir que essa conexão a tivesse iniciado este CRM: um link preparado e aberto
+  por alguém da equipe conectava uma conta alheia. Agora se pergunta ao Zernio por essa
+  conta com a chave da instância (que só vê as próprias) e o que se guarda sai da
+  resposta, não da query.
 
-### Deuda que queda anotada
+### Dívida que fica anotada
 
-- Actualizar `eslint-config-next` activo `react-hooks/set-state-in-effect`, que en 16.2.2
-  no corria, y marca **9 sitios que ya existian**: componentes que cargan datos con
-  `useEffect(() => { load() }, [load])` donde `load` toca el estado antes del primer
-  `await`, lo que provoca renders en cascada al montar. No es un fallo de correccion ni de
-  seguridad. Queda como aviso (no error) y a la vista en cada `npm run lint`: arreglarlo
-  bien es reestructurar la carga de datos de nueve componentes y hay que recorrer cada
-  pantalla para comprobar los estados de carga, cosa que no entra en una version de
-  seguridad. Estan listados en `eslint.config.mjs`.
+- Atualizar `eslint-config-next` ativou `react-hooks/set-state-in-effect`, que em 16.2.2
+  não rodava, e marca **9 lugares que já existiam**: componentes que carregam dados com
+  `useEffect(() => { load() }, [load])` onde `load` toca o estado antes do primeiro
+  `await`, o que provoca renders em cascata ao montar. Não é uma falha de correção nem de
+  segurança. Fica como aviso (não erro) e à vista em cada `npm run lint`: arrumar
+  bem é reestruturar a carga de dados de nove componentes e há que percorrer cada
+  tela para conferir os estados de carga, coisa que não entra numa versão de
+  segurança. Estão listados em `eslint.config.mjs`.
 
-### Dependencias
+### Dependências
 
-- De **22 vulnerabilidades en produccion (2 criticas, 13 altas) a 0**. Next pasa a 16.4.3
-  (la serie 16.2.2 acumulaba ejecucion remota de codigo en la optimizacion de imagenes, en
-  `next/og` y en `use cache`, SSRF en Server Actions y un bypass del middleware por rutas
-  de prefetch), y `zod` a 4.6.7.
-- **`shadcn` sale de `dependencies`**: es la herramienta de linea de comandos para agregar
-  componentes, no se importa en ejecucion, y arrastraba 20 avisos al arbol de produccion.
-  Queda en `devDependencies`.
-- **`@anthropic-ai/sdk` se elimina**: no lo usaba ni una linea del codigo. Era un resto del
-  proyecto del que nacio este.
+- De **22 vulnerabilidades em produção (2 críticas, 13 altas) a 0**. O Next passa a 16.4.3
+  (a série 16.2.2 acumulava execução remota de código na otimização de imagens, em
+  `next/og` e em `use cache`, SSRF em Server Actions e um bypass do middleware por rotas
+  de prefetch), e `zod` a 4.6.7.
+- **`shadcn` sai de `dependencies`**: é a ferramenta de linha de comando para adicionar
+  componentes, não se importa em execução, e arrastava 20 avisos à árvore de produção.
+  Fica em `devDependencies`.
+- **`@anthropic-ai/sdk` se elimina**: nenhuma linha do código o usava. Era um resto do
+  projeto do qual este nasceu.
 
 ## 1.6.1 — 2026-10-21
 
-### Actualizar desde 1.6.0
+### Atualizar desde 1.6.0
 
-Trae esta version. No cambia una sola linea de codigo: cambia lo que podes hacer con el.
+Traga esta versão. Não muda uma única linha de código: muda o que você pode fazer com ele.
 
-### Cambiado
+### Alterado
 
-- **Builder CRM pasa a ser open source con licencia MIT.** Copyright de Diego Vásquez.
-  Cualquiera puede usarlo, copiarlo, modificarlo, desplegar instancias para sus clientes
-  y cobrar por eso, sin ser miembro de ninguna comunidad y sin pedir permiso. La unica
-  condicion es conservar el aviso de copyright. El repositorio queda publico.
-- Lo que esto reemplaza: la licencia propietaria de 1.3.6, que limitaba el despliegue
-  para clientes a los miembros de IA Builder Lab. Esa restriccion ya no existe. Las
-  instancias que ya estaban desplegadas no requieren ninguna accion.
-- `LICENSE` es ahora el texto canonico de la MIT, sin agregados, para que se reconozca
-  automaticamente. El aviso de copyright de auto-crm y la aclaracion sobre las
-  dependencias de npm se mudaron a `NOTICE`, que es donde van los avisos de terceros.
-- `package.json` declara `"license": "MIT"` en lugar de `UNLICENSED`.
-- El README se presenta para quien llega sin conocer la comunidad: la primera linea dice
-  que es el CRM, y el segundo parrafo que es MIT y que no hace falta ser miembro.
+- **O Builder CRM passa a ser código aberto com licença MIT.** Copyright de Diego Vásquez.
+  Qualquer um pode usá-lo, copiá-lo, modificá-lo, implantar instâncias para os seus clientes
+  e cobrar por isso, sem ser membro de nenhuma comunidade e sem pedir permissão. A única
+  condição é conservar o aviso de copyright. O repositório fica público.
+- O que isto substitui: a licença proprietária de 1.3.6, que limitava a implantação
+  para clientes aos membros do IA Builder Lab. Essa restrição já não existe. As
+  instâncias que já estavam implantadas não exigem nenhuma ação.
+- `LICENSE` agora é o texto canônico da MIT, sem acréscimos, para que se reconheça
+  automaticamente. O aviso de copyright do auto-crm e o esclarecimento sobre as
+  dependências de npm mudaram para `NOTICE`, que é onde vão os avisos de terceiros.
+- `package.json` declara `"license": "MIT"` em lugar de `UNLICENSED`.
+- O README se apresenta para quem chega sem conhecer a comunidade: a primeira linha diz
+  que é o CRM, e o segundo parágrafo que é MIT e que não faz falta ser membro.
 
 ## 1.6.0 — 2026-10-12
 
-### Actualizar desde 1.5.1
+### Atualizar desde 1.5.1
 
-Trae esta version y agrega `zonaHoraria` a `config/cliente.ts` con la zona del negocio
-(`America/Santiago`, `America/Mexico_City`, `Europe/Madrid`...). Si no la agregas, la
-instancia sigue en UTC y se comporta como antes, asi que actualizar no rompe nada; pero
-mientras este en UTC el agente va a nombrar mal el dia de noche.
+Traga esta versão e adicione `zonaHoraria` a `config/cliente.ts` com o fuso do negócio
+(`America/Santiago`, `America/Mexico_City`, `Europe/Madrid`...). Se você não adicionar, a
+instância continua em UTC e se comporta como antes, então atualizar não quebra nada; mas
+enquanto estiver em UTC o agente vai nomear mal o dia de noite.
 
-### Arreglado
+### Corrigido
 
-- **El agente nombraba el dia equivocado.** El prompt incluye la fecha de hoy, y se
-  calculaba con la zona del proceso. El contenedor corre en UTC a proposito (una imagen
-  compartida por muchas instancias no puede traer la zona horneada), asi que en Chile,
-  desde las 21:00 hasta la medianoche, el agente creia que ya era el dia siguiente: un
-  cliente que escribia a las 22:00 y preguntaba si atendian manana recibia la respuesta
-  corrida un dia. Sin excepcion y sin log, y en la maquina de un miembro chileno no se
-  reproduce. Ahora la fecha se resuelve en `config.zonaHoraria`.
-- **"Hoy" y "Ayer" eran una ventana de 24 horas**, no dias del calendario: a las 00:30,
-  algo de las 23:00 salia como "Hoy". Ahora se comparan dias en la zona configurada, asi
-  que la misma fila no dice una cosa en el servidor y otra en el navegador.
+- **O agente nomeava o dia errado.** O prompt inclui a data de hoje, e se
+  calculava com o fuso do processo. O contêiner roda em UTC de propósito (uma imagem
+  compartilhada por muitas instâncias não pode trazer o fuso gravado), então no Chile,
+  das 21:00 até a meia-noite, o agente achava que já era o dia seguinte: um
+  cliente que escrevia às 22:00 e perguntava se atendiam amanhã recebia a resposta
+  deslocada um dia. Sem exceção e sem log, e na máquina de um membro chileno não se
+  reproduz. Agora a data se resolve em `config.zonaHoraria`.
+- **"Hoje" e "Ontem" eram uma janela de 24 horas**, não dias do calendário: às 00:30,
+  algo das 23:00 saía como "Hoje". Agora se comparam dias no fuso configurado, então
+  a mesma linha não diz uma coisa no servidor e outra no navegador.
 
-### Agregado
+### Adicionado
 
-- `zonaHoraria` en `config/cliente.ts`: identificador IANA, validado contra el entorno
-  para que un error de tipeo se rechace al validar en vez de caer lejos. Por defecto
-  `UTC`. Ver `specs/nucleo/11-zona-horaria.md`.
-- `specs/_brief.md`: que preguntarle al cliente antes de empezar una adaptacion. Solo
-  tres respuestas son obligatorias; el resto lo decide Claude y lo informa al entregar.
-  Es la entrada del paso 1 de `adaptar-a-cliente`.
-- Cinco casos nuevos en `tests/`. La suite se corre tambien con el proceso en UTC
-  (`TZ=UTC npm test`), que es la unica forma de ver el bug de la fecha.
+- `zonaHoraria` em `config/cliente.ts`: identificador IANA, validado contra o ambiente
+  para que um erro de digitação se rejeite na validação em vez de cair longe. Por padrão
+  `UTC`. Ver `specs/nucleo/11-fuso-horario.md`.
+- `specs/_brief.md`: o que perguntar ao cliente antes de começar uma adaptação. Só
+  três respostas são obrigatórias; o resto o Claude decide e informa ao entregar.
+  É a entrada do passo 1 de `adaptar-a-cliente`.
+- Cinco casos novos em `tests/`. A suíte se roda também com o processo em UTC
+  (`TZ=UTC npm test`), que é a única forma de ver o bug da data.
 
 ## 1.5.1 — 2026-10-08
 
-### Actualizar desde 1.5.0
+### Atualizar desde 1.5.0
 
-Trae esta version. Solo cambian el arnes y la documentacion.
+Traga esta versão. Só mudam o arnês e a documentação.
 
-### Arreglado
+### Corrigido
 
-- **La skill `deploy-coolify` daba por hecho Supabase cloud.** Creaba un proyecto en
-  supabase.com por MCP y no mencionaba una sola vez `docs/SUPABASE-EN-VPS.md`, aunque el
-  CRM solo usa Supabase para Postgres y GoTrue y los dos se pueden autoalojar en el mismo
-  Coolify, que es como corre la instancia de demostracion. Ahora el paso 1 plantea los dos
-  caminos con sus costos (cloud pausa los proyectos inactivos; autoalojado deja los
-  respaldos de tu lado) y, para el autoalojado, da el orden de pasos que no es obvio:
-  base, `npm run claves:supabase`, `npm run auth:preparar`, GoTrue, y recien ahi
-  `npm run db:migrar`, porque la ultima migracion pone un disparador sobre `auth.users`.
-- **La misma skill mandaba marcar variables como `is_build_time: true`.** Quedo obsoleto
-  en 1.2.2, cuando la configuracion publica paso a servirse en ejecucion, y ademas la API
-  de Coolify 4.3 rechaza ese campo: seguir la instruccion al pie fallaba. Ahora dice que
-  van todas en runtime y por que.
-- El README resume los dos caminos en el paso 1 de "Desplegar en Coolify".
+- **A skill `deploy-coolify` dava o Supabase cloud por certo.** Criava um projeto em
+  supabase.com por MCP e não mencionava uma única vez `docs/SUPABASE-NO-VPS.md`, embora o
+  CRM só use o Supabase para Postgres e GoTrue e os dois se possam auto-hospedar no mesmo
+  Coolify, que é como roda a instância de demonstração. Agora o passo 1 apresenta os dois
+  caminhos com os custos (cloud pausa os projetos inativos; auto-hospedado deixa os
+  backups do seu lado) e, para o auto-hospedado, dá a ordem de passos que não é óbvia:
+  base, `npm run claves:supabase`, `npm run auth:preparar`, GoTrue, e só aí
+  `npm run db:migrar`, porque a última migração põe um gatilho sobre `auth.users`.
+- **A mesma skill mandava marcar variáveis como `is_build_time: true`.** Ficou obsoleto
+  em 1.2.2, quando a configuração pública passou a se servir em execução, e além disso a API
+  do Coolify 4.3 rejeita esse campo: seguir a instrução ao pé da letra falhava. Agora diz que
+  vão todas em runtime e por quê.
+- O README resume os dois caminhos no passo 1 de "Implantar no Coolify".
 
 ## 1.5.0 — 2026-10-08
 
-### Actualizar desde 1.4.3
+### Atualizar desde 1.4.3
 
-Trae esta version y corre `npm install` (entra una dependencia de desarrollo). No hay
-migraciones ni variables nuevas, y nada cambia en una instancia desplegada.
+Traga esta versão e rode `npm install` (entra uma dependência de desenvolvimento). Não há
+migrações nem variáveis novas, e nada muda numa instância implantada.
 
-### Agregado
+### Adicionado
 
-- **`npm run local`: el CRM corriendo en tu PC sin crear una cuenta en ningun lado.**
-  Clonar, `npm install`, `npm run local`, y el CRM abre con datos de demostracion. Sin
-  Supabase, sin Docker y sin ningun archivo `.env`. Levanta un Postgres embebido
-  (`@electric-sql/pglite`, un paquete de npm compilado a WebAssembly) en `.local/db`, le
-  agrega lo que Supabase trae de fabrica y un Postgres pelado no (los roles
-  `anon`/`authenticated`/`service_role`, el esquema `auth`, `auth.uid()` y `auth.users`),
-  aplica **las mismas migraciones** que una instancia desplegada con su RLS, da de alta
-  el administrador de la demo por el mismo disparador del primer admin que corre en
-  produccion, y carga la demo. Opciones: `--reset`, `--sin-datos`, `--puerto`.
-- **No hay login en modo local**, porque no hay servidor de autenticacion al que
-  preguntarle: quien abre la URL es administrador. El menu lateral lo dice, el boton de
-  cerrar sesion no aparece y `/api/health` informa `modoLocal`.
+- **`npm run local`: o CRM rodando no seu PC sem criar uma conta em lugar nenhum.**
+  Clonar, `npm install`, `npm run local`, e o CRM abre com dados de demonstração. Sem
+  Supabase, sem Docker e sem nenhum arquivo `.env`. Sobe um Postgres embutido
+  (`@electric-sql/pglite`, um pacote de npm compilado para WebAssembly) em `.local/db`, lhe
+  acrescenta o que o Supabase traz de fábrica e um Postgres pelado não (os papéis
+  `anon`/`authenticated`/`service_role`, o esquema `auth`, `auth.uid()` e `auth.users`),
+  aplica **as mesmas migrações** que uma instância implantada com o RLS, cadastra
+  o administrador da demo pelo mesmo gatilho do primeiro admin que roda em
+  produção, e carrega a demo. Opções: `--reset`, `--sin-datos`, `--puerto`.
+- **Não há login no modo local**, porque não há servidor de autenticação a quem
+  perguntar: quem abre a URL é administrador. O menu lateral diz isso, o botão de
+  encerrar sessão não aparece e `/api/health` informa `modoLocal`.
 
-### Arreglado
+### Corrigido
 
-- **El simulador se llevaba puesto el mensaje cuando el agente no podia contestar.** Sin
-  `OPENROUTER_API_KEY` cortaba antes de guardar nada, y con una clave vencida el
-  proveedor devolvia 401 y la ruta terminaba en 500. En los dos casos la persona veia
-  "Error" y su mensaje desaparecia de la pantalla, cuando el CRM habia hecho bien su
-  parte. Ahora el mensaje entra siempre —la conversacion aparece en la bandeja y el
-  contacto se crea— y la respuesta trae `agente.ok: false` con el motivo, que es lo que
-  la UI ya sabia mostrar. Esto tambien pasaba en una instancia desplegada.
+- **O simulador levava a mensagem embora quando o agente não podia responder.** Sem
+  `OPENROUTER_API_KEY` cortava antes de gravar nada, e com uma chave vencida o
+  provedor devolvia 401 e a rota terminava em 500. Nos dois casos a pessoa via
+  "Error" e a mensagem desaparecia da tela, quando o CRM tinha feito bem a
+  parte dele. Agora a mensagem entra sempre — a conversa aparece na caixa de entrada e o
+  contato se cria — e a resposta traz `agente.ok: false` com o motivo, que é o que
+  a UI já sabia mostrar. Isso também acontecia numa instância implantada.
 
-### Seguridad
+### Segurança
 
-- El modo local apaga la autenticacion entera, asi que tiene dos candados y el segundo
-  es el que cuenta: hace falta `MODO_LOCAL=true`, que solo pone `npm run local`, **y**
-  que `NODE_ENV` no sea `production`. Lo segundo no depende de ninguna configuracion, de
-  modo que es imposible encenderlo en una imagen desplegada aunque alguien copie un
-  `.env` ajeno al servidor. Hay un test que lo cubre: si se encendiera por error no
-  fallaria nada y el unico sintoma seria que cualquiera entra.
+- O modo local desliga a autenticação inteira, então tem dois cadeados e o segundo
+  é o que conta: faz falta `MODO_LOCAL=true`, que só `npm run local` põe, **e**
+  que `NODE_ENV` não seja `production`. O segundo não depende de nenhuma configuração, de
+  modo que é impossível ligá-lo numa imagem implantada mesmo que alguém copie um
+  `.env` alheio para o servidor. Há um teste que cobre: se se ligasse por erro não
+  falharia nada e o único sintoma seria que qualquer um entra.
 
-### Detalles que habrian fallado en silencio
+### Detalhes que teriam falhado em silêncio
 
-- `db.execute` devuelve el array de filas con el driver `postgres` y `{ rows }` con el
-  embebido, y media docena de lugares (reportes, equipo, automatizaciones, seed) hacen
-  `resultado[0]` sobre eso. Sin normalizarlo, en modo local los reportes salian en cero
-  sin un solo error. Se iguala en el proxy de `src/db/index.ts`.
-- `@electric-sql/pglite` resuelve sus extensiones desde la ruta de su propio archivo y el
-  compilador la reescribe a `file:///ROOT/...`: va en `serverExternalPackages`.
-- `DATABASE_URL` y las dos de Supabase dejan de contar como obligatorias en modo local.
-  Mientras contaban, `/api/health` respondia 503 y el CRM arrancaba pero no abria.
+- `db.execute` devolve o array de linhas com o driver `postgres` e `{ rows }` com o
+  embutido, e meia dúzia de lugares (relatórios, equipe, automações, seed) fazem
+  `resultado[0]` sobre isso. Sem normalizar, no modo local os relatórios saíam em zero
+  sem um único erro. Iguala-se no proxy de `src/db/index.ts`.
+- `@electric-sql/pglite` resolve as extensões a partir do caminho do próprio arquivo e o
+  compilador o reescreve para `file:///ROOT/...`: vai em `serverExternalPackages`.
+- `DATABASE_URL` e as duas do Supabase deixam de contar como obrigatórias no modo local.
+  Enquanto contavam, `/api/health` respondia 503 e o CRM iniciava mas não abria.
 
 ## 1.4.3 — 2026-10-07
 
-### Actualizar desde 1.4.2
+### Atualizar desde 1.4.2
 
-Trae esta version. Nada que hacer: solo cambia la licencia y el README.
+Traga esta versão. Nada a fazer: só muda a licença e o README.
 
-### Cambiado
+### Alterado
 
-- **Vuelve la licencia a miembros de IA Builder Lab.** 1.4.2 habia abierto el uso a
-  cualquiera porque el repositorio iba a ser publico. El repositorio vuelve a ser privado,
-  asi que la licencia vuelve a la version de 1.3.6: usarlo es de los miembros, mientras su
-  acceso a la comunidad este vigente. El aviso MIT de auto-crm sigue en su seccion aparte,
-  intacto, porque esa licencia obliga a conservarlo en los derivados.
-- `package.json` vuelve a `"license": "UNLICENSED"`, y el README vuelve a presentarlo como
-  lo que es: el CRM que los miembros entregan a sus clientes.
+- **Volta a licença a membros do IA Builder Lab.** 1.4.2 tinha aberto o uso a
+  qualquer um porque o repositório ia ser público. O repositório volta a ser privado,
+  então a licença volta à versão de 1.3.6: usá-lo é dos membros, enquanto o
+  acesso à comunidade estiver vigente. O aviso MIT do auto-crm continua na seção à parte,
+  intacto, porque essa licença obriga a conservá-lo nos derivados.
+- `package.json` volta a `"license": "UNLICENSED"`, e o README volta a apresentá-lo como
+  o que é: o CRM que os membros entregam aos seus clientes.
 
 ## 1.4.2 — 2026-10-06
 
-### Actualizar desde 1.4.1
+### Atualizar desde 1.4.1
 
-Trae esta version. Nada que hacer: solo cambia la licencia y el README.
+Traga esta versão. Nada a fazer: só muda a licença e o README.
 
-### Cambiado
+### Alterado
 
-- **El repositorio es publico y la licencia lo acompana.** Hasta 1.4.1 la licencia decia
-  que solo los miembros de IA Builder Lab podian usar el codigo y que no se podia publicar
-  en un repositorio abierto, lo que en un repo publico se contradice solo. Ahora tiene dos
-  niveles: **cualquiera** puede leerlo, clonarlo, correrlo y usarlo en su propio negocio;
-  **desplegar instancias para clientes y cobrar por ellas** es de los miembros. Lo que
-  sigue prohibido para todos es revenderlo o redistribuirlo como plantilla, curso o
-  producto, y presentarlo como propio. Sigue siendo propietario y sigue siendo MIT lo que
-  viene de auto-crm, en su seccion aparte.
-- **La licencia dice que pasa con los forks.** Al estar el repositorio publicado en
-  GitHub, sus terminos le permiten a cualquier usuario verlo y forkearlo dentro de la
-  plataforma, y ninguna licencia puede impedirlo. Queda escrito en el punto 4 para que
-  nadie lea "no redistribuir" y piense que la licencia es papel mojado al ver un fork: lo
-  que se regula es para que se usa el codigo, dentro o fuera del fork.
-- `package.json` declara `"license": "SEE LICENSE IN LICENSE"`, que es la forma que npm
-  documenta para una licencia propia. `UNLICENSED` significaba "no le doy permiso a
-  nadie", y ya no es cierto.
+- **O repositório é público e a licença o acompanha.** Até 1.4.1 a licença dizia
+  que só os membros do IA Builder Lab podiam usar o código e que não se podia publicar
+  num repositório aberto, o que num repositório público se contradiz sozinho. Agora tem dois
+  níveis: **qualquer um** pode lê-lo, cloná-lo, rodá-lo e usá-lo no próprio negócio;
+  **implantar instâncias para clientes e cobrar por elas** é dos membros. O que
+  continua proibido para todos é revendê-lo ou redistribuí-lo como modelo, curso ou
+  produto, e apresentá-lo como próprio. Continua sendo proprietário e continua sendo MIT o que
+  vem do auto-crm, na seção à parte.
+- **A licença diz o que acontece com os forks.** Estando o repositório publicado no
+  GitHub, os termos permitem a qualquer usuário vê-lo e forká-lo dentro da
+  plataforma, e nenhuma licença pode impedir isso. Fica escrito no ponto 4 para que
+  ninguém leia "não redistribuir" e pense que a licença é papel molhado ao ver um fork: o
+  que se regula é para que se usa o código, dentro ou fora do fork.
+- `package.json` declara `"license": "SEE LICENSE IN LICENSE"`, que é a forma que o npm
+  documenta para uma licença própria. `UNLICENSED` significava "não dou permissão a
+  ninguém", e já não é verdade.
 
 ## 1.4.1 — 2026-10-06
 
-### Actualizar desde 1.4.0
+### Atualizar desde 1.4.0
 
-Trae esta version. Nada mas.
+Traga esta versão. Nada mais.
 
-### Arreglado
+### Corrigido
 
-- **`npm test` fallaba en un clon limpio.** Desde 1.3.4 el registro de modulos no se
-  versiona (lo generan `build`, `dev` y `typecheck`), pero los tests corrian antes que
-  cualquiera de los tres: en una maquina recien clonada, el archivo no existia todavia y
-  el test que toca la configuracion moria con `Cannot find module`. Ahora `npm test`
-  genera el registro primero, igual que `typecheck`. Lo encontro el CI en el primer
-  commit con tests, que es exactamente para lo que estan.
+- **`npm test` falhava num clone limpo.** Desde 1.3.4 o registro de módulos não se
+  versiona (geram-no `build`, `dev` e `typecheck`), mas os testes rodavam antes que
+  qualquer um dos três: numa máquina recém-clonada, o arquivo ainda não existia e
+  o teste que toca a configuração morria com `Cannot find module`. Agora `npm test`
+  gera o registro primeiro, igual a `typecheck`. O CI encontrou no primeiro
+  commit com testes, que é exatamente para o que estão.
 
 ## 1.4.0 — 2026-10-06
 
-### Actualizar desde 1.3.6
+### Atualizar desde 1.3.6
 
-Trae esta version. No hay migraciones ni cambios de comportamiento: entran los tests y el
-CI pasa a correrlos. Si tenias un fork, `npm install` te trae vitest.
+Traga esta versão. Não há migrações nem mudanças de comportamento: entram os testes e o
+CI passa a rodá-los. Se você tinha um fork, `npm install` traz o vitest.
 
-### Agregado
+### Adicionado
 
-- **Primera suite de tests: 35 casos en 6 archivos, un segundo, sin base ni red.** No
-  cubren todo a proposito: cubren los invariantes que, cuando se rompen, **no avisan**.
-  - *Firma del webhook*: sin secreto rechaza (fail-closed), firma de otro secreto
-    rechaza, un caracter cambiado en el cuerpo rechaza, una firma corta no revienta el
-    handler, y tolera el prefijo `sha256=` de Meta.
-  - *Ventana de 24 h*: adentro deja texto libre, afuera no, en el limite exacto sigue
-    abierta, y sin mensaje entrante previo se considera cerrada.
-  - *Filtro por rol*: el administrador es el unico sin filtro; el asesor filtra por
-    `owner_id` contra su propio id (se traduce la condicion a SQL para verlo); un rol
-    desconocido se trata como asesor, no como admin.
-  - *Esquema de `config/cliente.ts`*: etapas repetidas, pipeline de una sola etapa, color
-    que no es `#rrggbb`, clave que no es snake_case, campo de seleccion sin opciones y
+- **Primeira suíte de testes: 35 casos em 6 arquivos, um segundo, sem base nem rede.** Não
+  cobrem tudo de propósito: cobrem os invariantes que, quando se quebram, **não avisam**.
+  - *Assinatura do webhook*: sem segredo rejeita (fail-closed), assinatura de outro segredo
+    rejeita, um caractere mudado no corpo rejeita, uma assinatura curta não estoura o
+    handler, e tolera o prefixo `sha256=` da Meta.
+  - *Janela de 24 h*: dentro deixa texto livre, fora não, no limite exato continua
+    aberta, e sem mensagem recebida prévia se considera fechada.
+  - *Filtro por papel*: o administrador é o único sem filtro; o assessor filtra por
+    `owner_id` contra o próprio id (traduz-se a condição para SQL para vê-lo); um papel
+    desconhecido se trata como assessor, não como admin.
+  - *Esquema de `config/cliente.ts`*: etapas repetidas, pipeline de uma única etapa, cor
+    que não é `#rrggbb`, chave que não é snake_case, campo de seleção sem opções e
     campos repetidos.
-  - *Configuracion publica*: escapa `<` para que no se pueda cerrar la etiqueta `script`
-    desde un valor del entorno.
-  - *Plantillas de correo*: conservan los marcadores que rellena el proveedor y escapan
-    el nombre de la marca.
-- `npm test` y `npm run test:watch`. El CI los corre **antes** de typecheck, lint y build,
-  en las dos puntas de la matriz de modulos.
+  - *Configuração pública*: escapa `<` para que não se possa fechar a tag `script`
+    a partir de um valor do ambiente.
+  - *Templates de e-mail*: conservam os marcadores que o provedor preenche e escapam
+    o nome da marca.
+- `npm test` e `npm run test:watch`. O CI os roda **antes** de typecheck, lint e build,
+  nas duas pontas da matriz de módulos.
 
-### Cambiado
+### Alterado
 
-- `@types/node` pasa de 20 a 22, que es la version de Node que el repo pide desde el
-  README. Estaban desalineados desde antes.
-- `SEGURIDAD.md` explica como escanear el historial con gitleaks antes de hacer publico un
-  fork, y cual es el unico hallazgo que da (un placeholder en un ejemplo de la
-  documentacion).
+- `@types/node` passa de 20 a 22, que é a versão de Node que o repositório pede desde o
+  README. Estavam desalinhados desde antes.
+- `SEGURANCA.md` explica como varrer o histórico com gitleaks antes de tornar público um
+  fork, e qual é o único achado que dá (um placeholder num exemplo da
+  documentação).
 
 ## 1.3.6 — 2026-10-06
 
-### Actualizar desde 1.3.5
+### Atualizar desde 1.3.5
 
-Trae esta version. No hay migraciones ni cambios de comportamiento: cambia la licencia.
+Traga esta versão. Não há migrações nem mudanças de comportamento: muda a licença.
 
-### Cambiado
+### Alterado
 
-- **Builder CRM pasa a ser software propietario.** Copyright de Diego Vásquez. Los
-  miembros de IA Builder Lab pueden adaptarlo, desplegar instancias para sus clientes y
-  cobrar por ellas; no pueden publicar el codigo ni redistribuirlo como plantilla o
-  producto. Los terminos estan en `LICENSE` y el resumen en el README.
-- **Se conserva el aviso MIT de auto-crm**, el proyecto del que esto nacio como fork, en
-  una seccion aparte de `LICENSE`. No es cortesia: la licencia MIT permite relicenciar un
-  derivado, incluso como propietario, **siempre que su aviso de copyright viaje en las
-  copias**. Quitarlo seria incumplirla.
-- `package.json` declara `UNLICENSED`, que es como npm nombra al software propietario.
+- **O Builder CRM passa a ser software proprietário.** Copyright de Diego Vásquez. Os
+  membros do IA Builder Lab podem adaptá-lo, implantar instâncias para os seus clientes e
+  cobrar por elas; não podem publicar o código nem redistribuí-lo como modelo ou
+  produto. Os termos estão em `LICENSE` e o resumo no README.
+- **Conserva-se o aviso MIT do auto-crm**, o projeto do qual isto nasceu como fork, numa
+  seção à parte de `LICENSE`. Não é cortesia: a licença MIT permite relicenciar um
+  derivado, inclusive como proprietário, **desde que o aviso de copyright viaje nas
+  cópias**. Tirá-lo seria descumpri-la.
+- `package.json` declara `UNLICENSED`, que é como o npm nomeia o software proprietário.
 
 ## 1.3.5 — 2026-10-05
 
-### Actualizar desde 1.3.4
+### Atualizar desde 1.3.4
 
-Trae esta version y vuelve a desplegar. No hay migraciones.
+Traga esta versão e implante de novo. Não há migrações.
 
-### Arreglado
+### Corrigido
 
-- **El lockfile seguia cambiando en el primer `npm install`.** 1.3.4 arreglo el numero de
-  version pero no el resto: el lockfile publicado declaraba `hasInstallScript`, que sobro
-  de los tiempos de SQLite, y npm lo reemplaza por `license` en cuanto alguien instala.
-  Comprobado en un clon limpio: ahora el primer `npm install` deja el arbol sin cambios, y
-  una adaptacion a un cliente solo muestra `config/cliente.ts` y `config/modulos.json`,
-  que es lo que la constitucion promete.
+- **O lockfile continuava mudando no primeiro `npm install`.** 1.3.4 arrumou o número de
+  versão mas não o resto: o lockfile publicado declarava `hasInstallScript`, que sobrou
+  dos tempos de SQLite, e o npm o substitui por `license` assim que alguém instala.
+  Conferido num clone limpo: agora o primeiro `npm install` deixa a árvore sem mudanças, e
+  uma adaptação a um cliente só mostra `config/cliente.ts` e `config/modulos.json`,
+  que é o que a constituição promete.
 
 ## 1.3.4 — 2026-10-05
 
-Salio de recorrer el camino de un miembro de verdad: clonar el repo publicado en una
-carpeta vacia, instalar, migrar una base nueva y adaptar la plantilla a un cliente
-inventado. Tres cosas no estaban como decian estar.
+Saiu de percorrer o caminho de um membro de verdade: clonar o repositório publicado numa
+pasta vazia, instalar, migrar uma base nova e adaptar o modelo a um cliente
+inventado. Três coisas não estavam como diziam estar.
 
-### Actualizar desde 1.3.3
+### Atualizar desde 1.3.3
 
-Trae esta version y vuelve a desplegar. No hay migraciones. Despues de actualizar,
-`src/lib/modules/*.generated.ts` deja de estar versionado: si tu instancia los tenia
-modificados, no pasa nada, se regeneran solos al construir.
+Traga esta versão e implante de novo. Não há migrações. Depois de atualizar,
+`src/lib/modules/*.generated.ts` deixa de estar versionado: se a sua instância os tinha
+modificados, não acontece nada, regeneram-se sozinhos ao construir.
 
-### Arreglado
+### Corrigido
 
-- **Activar un modulo ensuciaba dos archivos del nucleo.** El registro de modulos
-  (`src/lib/modules/*.generated.ts`) se genera desde `config/modulos.json`, pero estaba
-  versionado, asi que cualquier adaptacion dejaba cambios dentro de `src/`: rompia la
-  promesa de que `git status` solo muestra la zona del cliente y garantizaba un conflicto
-  en cada actualizacion desde el repo original. Ahora esta en `.gitignore` y lo generan
-  igual `next build`, `npm run dev` y `npm run typecheck`.
-- **El `package-lock.json` publicado decia `1.0.0`.** Las versiones se subian a mano en
-  `package.json` y el lockfile quedo atras, con un `hasInstallScript` que sobro de los
-  tiempos de SQLite. Resultado: el primer `npm install` de cualquier miembro le dejaba el
-  lockfile modificado sin que hubiera tocado nada. Corregido, y de ahora en mas la version
-  se sube con `npm version`, que actualiza los dos archivos.
-- **El runner de migraciones no explicaba los dos fallos mas probables.** Contra tu propio
-  Postgres, antes de arrancar GoTrue, decia `schema "auth" does not exist` y nada mas.
-  Ahora dice que corras `npm run auth:preparar`, y en el otro caso que levantes el
-  contenedor de autenticacion primero. Tambien imprime los avisos del servidor en una
-  linea en vez de volcar el objeto entero del driver, que parecia un error.
+- **Ativar um módulo sujava dois arquivos do núcleo.** O registro de módulos
+  (`src/lib/modules/*.generated.ts`) se gera a partir de `config/modulos.json`, mas estava
+  versionado, então qualquer adaptação deixava mudanças dentro de `src/`: quebrava a
+  promessa de que `git status` só mostra a zona do cliente e garantia um conflito
+  em cada atualização a partir do repositório original. Agora está no `.gitignore` e geram-no
+  igual `next build`, `npm run dev` e `npm run typecheck`.
+- **O `package-lock.json` publicado dizia `1.0.0`.** As versões se subiam à mão em
+  `package.json` e o lockfile ficou para trás, com um `hasInstallScript` que sobrou dos
+  tempos de SQLite. Resultado: o primeiro `npm install` de qualquer membro deixava o
+  lockfile modificado sem que tivesse tocado em nada. Corrigido, e daqui em diante a versão
+  se sobe com `npm version`, que atualiza os dois arquivos.
+- **O runner de migrações não explicava as duas falhas mais prováveis.** Contra o seu próprio
+  Postgres, antes de iniciar o GoTrue, dizia `schema "auth" does not exist` e nada mais.
+  Agora diz que rode `npm run auth:preparar`, e no outro caso que suba o
+  contêiner de autenticação primeiro. Também imprime os avisos do servidor numa
+  linha em vez de despejar o objeto inteiro do driver, que parecia um erro.
 
-### Verificado en el camino
+### Verificado no caminho
 
-Con una base Postgres vacia y el repo recien clonado: las 5 migraciones del nucleo entran
-limpias, quedan 23 tablas, **ninguna sin RLS**, 20 politicas y el rol `anon` sin un solo
-privilegio. Adaptado a un cliente inventado (marca, pipeline y el modulo `visitas`
-activo), la migracion del modulo entra sola y `npm run build` pasa.
+Com uma base Postgres vazia e o repositório recém-clonado: as 5 migrações do núcleo entram
+limpas, ficam 23 tabelas, **nenhuma sem RLS**, 20 políticas e o papel `anon` sem um único
+privilégio. Adaptado a um cliente inventado (marca, pipeline e o módulo `visitas`
+ativo), a migração do módulo entra sozinha e `npm run build` passa.
 
 ## 1.3.3 — 2026-10-05
 
-### Actualizar desde 1.3.2
+### Atualizar desde 1.3.2
 
-Trae esta version y vuelve a desplegar. No hay migraciones. El primer despliegue tarda
-como siempre (los caches nacen vacios); el siguiente tendria que ser bastante mas corto.
+Traga esta versão e implante de novo. Não há migrações. O primeiro deploy demora
+como sempre (os caches nascem vazios); o seguinte teria que ser bem mais curto.
 
-### Cambiado
+### Alterado
 
-- **El despliegue reinstalaba las 817 dependencias cada vez.** El Dockerfile copia
-  `package.json` antes de `npm ci`, y cada version nueva cambia ese archivo (el numero de
-  version), asi que la capa se invalidaba siempre: 4,5 minutos medidos en el VPS de la
-  demo bajando y descomprimiendo lo mismo que ya estaba. Ahora `npm ci` usa un cache de
-  BuildKit (`/root/.npm`), que sobrevive a la invalidacion de la capa. Se agrega tambien
-  un cache para `.next/cache`: con Turbopack ayuda poco, pero no cuesta nada.
-- El encabezado del `Dockerfile` ya no dice que haya que marcar variables como de build:
-  desde 1.2.2 el build no necesita ninguna variable.
+- **O deploy reinstalava as 817 dependências toda vez.** O Dockerfile copia
+  `package.json` antes de `npm ci`, e cada versão nova muda esse arquivo (o número de
+  versão), então a camada se invalidava sempre: 4,5 minutos medidos no VPS da
+  demo baixando e descomprimindo o mesmo que já estava. Agora `npm ci` usa um cache de
+  BuildKit (`/root/.npm`), que sobrevive à invalidação da camada. Adiciona-se também
+  um cache para `.next/cache`: com Turbopack ajuda pouco, mas não custa nada.
+- O cabeçalho do `Dockerfile` já não diz que haja que marcar variáveis como de build:
+  desde 1.2.2 o build não precisa de nenhuma variável.
 
-### Agregado
+### Adicionado
 
-- El arnes avisa de algo que pasa en Coolify y manda a buscar problemas que no existen:
-  **despues de un despliegue "completado" el contenedor viejo sigue sirviendo un rato**,
-  asi que el dominio alterna las dos versiones y la verificacion mira codigo viejo la
-  mitad de las veces. `probar-instancia` comprueba la version varias veces antes de
-  diagnosticar, y `deploy-coolify` lo lista primero en su diagnostico.
+- O arnês avisa de algo que acontece no Coolify e manda buscar problemas que não existem:
+  **depois de um deploy "concluído" o contêiner velho continua servindo um tempo**,
+  então o domínio alterna as duas versões e a verificação olha código velho a
+  metade das vezes. `probar-instancia` confere a versão várias vezes antes de
+  diagnosticar, e `deploy-coolify` lista isso primeiro no diagnóstico.
 
 ## 1.3.2 — 2026-10-05
 
-### Actualizar desde 1.3.1
+### Atualizar desde 1.3.1
 
-Trae esta version y vuelve a desplegar. No hay migraciones. Si tenias el cron de
-`sweepers` encendido para una instancia en Vercel, vuelve a descomentarlo (ver abajo).
+Traga esta versão e implante de novo. Não há migrações. Se você tinha o cron de
+`sweepers` ligado para uma instância na Vercel, volte a descomentá-lo (ver abaixo).
 
-### Arreglado
+### Corrigido
 
-- **El workflow de barridos fallaba cada media hora en cada clon del repo.** Estaba
-  programado cada 30 minutos y, sin los secretos configurados, el `curl` se quedaba sin
-  URL (`URL rejected: No host part`). Resultado para cualquier miembro que clonara: el
-  repo en rojo, un correo de fallo cada media hora y 1.440 minutos de Actions gastados al
-  mes para nada. Y es un workflow que **solo hace falta en Vercel**: en Coolify los
-  barridos corren dentro del proceso. Ahora viene con el cron apagado, se enciende
-  descomentando dos lineas, y si se corre a mano sin secretos explica que no hay nada que
-  barrer en vez de fallar.
+- **O workflow de varreduras falhava a cada meia hora em cada clone do repositório.** Estava
+  programado a cada 30 minutos e, sem os segredos configurados, o `curl` ficava sem
+  URL (`URL rejected: No host part`). Resultado para qualquer membro que clonasse: o
+  repositório vermelho, um e-mail de falha a cada meia hora e 1.440 minutos de Actions gastos no
+  mês para nada. E é um workflow que **só faz falta na Vercel**: no Coolify as
+  varreduras rodam dentro do processo. Agora vem com o cron desligado, liga-se
+  descomentando duas linhas, e se se roda à mão sem segredos explica que não há nada a
+  varrer em vez de falhar.
 
-### Cambiado
+### Alterado
 
-- **Ya no hay que marcar variables como "Build Variable" en Coolify.** Desde 1.2.2 la
-  configuracion publica se sirve en ejecucion, asi que el paso manual que la API de
-  Coolify no permite dejo de ser necesario. Lo decian el README, `.env.example`,
-  `CLAUDE.md`, la skill `deploy-coolify` y `docs/SUPABASE-EN-VPS.md`, cada uno a su
-  manera: los cinco quedaron corregidos. El `Dockerfile` sigue aceptando las
-  `NEXT_PUBLIC_*` como build args para plataformas que las hornean.
-- El diagnostico de `deploy-coolify` dice la causa real de un build que pide variables:
-  codigo que consulta la base o lee el entorno al importarse.
+- **Já não há que marcar variáveis como "Build Variable" no Coolify.** Desde 1.2.2 a
+  configuração pública se serve em execução, então o passo manual que a API do
+  Coolify não permite deixou de ser necessário. Diziam isso o README, `.env.example`,
+  `CLAUDE.md`, a skill `deploy-coolify` e `docs/SUPABASE-NO-VPS.md`, cada um à sua
+  maneira: os cinco ficaram corrigidos. O `Dockerfile` continua aceitando as
+  `NEXT_PUBLIC_*` como build args para plataformas que as gravam na imagem.
+- O diagnóstico de `deploy-coolify` diz a causa real de um build que pede variáveis:
+  código que consulta a base ou lê o ambiente ao se importar.
 
-### Agregado
+### Adicionado
 
-- **Las dos specs que faltaban**: `specs/nucleo/08-auth-externa.md` y
-  `09-correo-de-acceso.md`. Entrar con Google (1.2.0) y los correos de acceso (1.3.0) se
-  construyeron sin spec previa, contra el principio II de la constitucion. Ambas lo
-  declaran en el encabezado en vez de disimularlo, y con esto `specs/nucleo/` vuelve a
-  describir el sistema completo, que es lo que lee Claude al adaptar una instancia.
+- **As duas specs que faltavam**: `specs/nucleo/08-auth-externa.md` e
+  `09-correio-de-acesso.md`. Entrar com o Google (1.2.0) e os e-mails de acesso (1.3.0) se
+  construíram sem spec prévia, contra o princípio II da constituição. Ambas o
+  declaram no cabeçalho em vez de disfarçar, e com isto `specs/nucleo/` volta a
+  descrever o sistema completo, que é o que o Claude lê ao adaptar uma instância.
 
 ## 1.3.1 — 2026-10-05
 
-### Actualizar desde 1.3.0
+### Atualizar desde 1.3.0
 
-Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
+Traga esta versão e implante de novo. Não há migrações nem passos manuais.
 
-### Cambiado
+### Alterado
 
-- **El aviso de Ajustes -> Canales mandaba a un archivo que no existe.** Decia que
-  `ZERNIO_API_KEY` va en `.env.local`, que es cierto en desarrollo y falso en una
-  instancia desplegada: ahi son las variables de la aplicacion. Ahora nombra los dos
-  lugares, avisa que hay que volver a desplegar para que tome el valor, y en el del
-  secreto del webhook recuerda que tiene que ser identico al de la suscripcion de Zernio
-  y que `npm run zernio:webhook` los deja iguales.
-- **Las credenciales de Zernio se leen al usarlas, no al importar el modulo.**
-  `src/lib/zernio/client.ts` y `webhooks.ts` las guardaban en constantes del modulo, y
-  `zernioConfig` era un objeto calculado en el primer import (ahora es una funcion). No
-  habia ningun fallo en produccion, porque el contenedor arranca de nuevo en cada
-  despliegue y ahi lee el entorno; es la misma forma que obligo a volver perezoso el
-  cliente de base, y atarla al momento del import es una trampa esperando a que alguien
-  importe el modulo desde un script o un contexto que se evalua antes de cargar el
-  entorno. Quedan con el patron viejo, a proposito y documentado, `meta-whatsapp.ts` (la
-  valvula de escape de Meta, que no se extiende) y `push.ts`.
+- **O aviso de Ajustes -> Canales mandava a um arquivo que não existe.** Dizia que
+  `ZERNIO_API_KEY` vai em `.env.local`, que é verdade em desenvolvimento e falso numa
+  instância implantada: ali são as variáveis do aplicativo. Agora nomeia os dois
+  lugares, avisa que há que implantar de novo para que pegue o valor, e no do
+  segredo do webhook lembra que tem que ser idêntico ao da assinatura do Zernio
+  e que `npm run zernio:webhook` os deixa iguais.
+- **As credenciais do Zernio se leem ao usá-las, não ao importar o módulo.**
+  `src/lib/zernio/client.ts` e `webhooks.ts` as guardavam em constantes do módulo, e
+  `zernioConfig` era um objeto calculado no primeiro import (agora é uma função). Não
+  havia nenhuma falha em produção, porque o contêiner inicia de novo em cada
+  deploy e aí lê o ambiente; é a mesma forma que obrigou a tornar preguiçoso o
+  cliente de base, e atá-la ao momento do import é uma armadilha esperando que alguém
+  importe o módulo a partir de um script ou de um contexto que se avalia antes de carregar o
+  ambiente. Ficam com o padrão velho, de propósito e documentado, `meta-whatsapp.ts` (a
+  válvula de escape da Meta, que não se estende) e `push.ts`.
 
 ## 1.3.0 — 2026-10-04
 
-### Actualizar desde 1.2.2
+### Atualizar desde 1.2.2
 
-Trae esta version y vuelve a desplegar. No hay migraciones. Si no configuras SMTP, nada
-cambia: el alta sigue siendo con contrasena temporal, igual que hoy.
+Traga esta versão e implante de novo. Não há migrações. Se você não configurar SMTP, nada
+muda: o cadastro continua sendo com senha temporária, igual a hoje.
 
-Para encender las invitaciones por correo hay que hacer dos cosas, y las dos importan:
-poner el SMTP en el servidor de autenticacion y despues `AUTH_ENVIA_CORREOS=true` en el
-CRM. Paso a paso con Resend, Supabase cloud y las plantillas: `docs/CORREO.md`.
+Para ligar os convites por e-mail há que fazer duas coisas, e as duas importam:
+pôr o SMTP no servidor de autenticação e depois `AUTH_ENVIA_CORREOS=true` no
+CRM. Passo a passo com Resend, Supabase cloud e os templates: `docs/CORREIO.md`.
 
-### Agregado
+### Adicionado
 
-- **Invitaciones por correo.** En Ajustes -> Equipo, el alta ahora pregunta **como
-  entra**: una invitacion por correo, donde la persona elige su propia contrasena, o la
-  contrasena temporal de siempre. Solo aparece si la instancia declara que su servidor de
-  autenticacion manda correos.
-- **Reenviar el acceso.** Un boton por miembro, para quien perdio la contrasena o nunca
-  abrio la invitacion. No cambia nada hasta que la persona usa el enlace.
-- **"La olvidaste?" en el login**, con su pagina: pide el correo y manda un enlace. Antes
-  no habia forma de recuperar una contrasena sin que un admin la cambiara a mano.
-- **Pagina para elegir la contrasena** (`/auth/definir-clave`), donde aterrizan los tres
-  caminos. Guarda la sesion que viene en el fragmento de la URL y limpia la barra de
-  direcciones, para que el enlace no quede en el historial ni en una captura.
-- **Plantillas de correo con la marca de la instancia**, en espanol, servidas por el
-  propio CRM en `/correo/invitacion.html` y `/correo/recuperacion.html`. GoTrue las
-  descarga; en Supabase cloud se copian y se pegan en el panel. Si la URL no responde,
-  GoTrue usa su plantilla por defecto y el correo sale igual.
-- `/api/health` informa `correo: true|false`, y `npm run verificar` lo dice en la linea
+- **Convites por e-mail.** Em Ajustes -> Equipo, o cadastro agora pergunta **como
+  se entra**: um convite por e-mail, onde a pessoa escolhe a própria senha, ou a
+  senha temporária de sempre. Só aparece se a instância declara que o servidor de
+  autenticação manda e-mails.
+- **Reenviar o acesso.** Um botão por membro, para quem perdeu a senha ou nunca
+  abriu o convite. Não muda nada até que a pessoa use o link.
+- **"Esqueceu?" no login**, com a página: pede o e-mail e manda um link. Antes
+  não havia forma de recuperar uma senha sem que um admin a trocasse à mão.
+- **Página para escolher a senha** (`/auth/definir-clave`), onde aterrissam os três
+  caminhos. Guarda a sessão que vem no fragmento da URL e limpa a barra de
+  endereços, para que o link não fique no histórico nem numa captura.
+- **Templates de e-mail com a marca da instância**, em espanhol, servidos pelo
+  próprio CRM em `/correo/invitacion.html` e `/correo/recuperacion.html`. O GoTrue os
+  baixa; no Supabase cloud se copiam e se colam no painel. Se a URL não responder,
+  o GoTrue usa o template padrão e o e-mail sai igual.
+- `/api/health` informa `correo: true|false`, e `npm run verificar` diz isso na linha
   **Formas de entrar**.
 
-### Cambiado
+### Alterado
 
-- El dialogo de alta ya no afirma que nunca se envia un correo: lo dice segun lo que esta
-  configurado (era cierto en 1.2.2, dejo de serlo).
-- `AUTH_ENVIA_CORREOS` es un interruptor manual a proposito. GoTrue sin SMTP **no falla**:
-  usa un cliente de correo que se traga el mensaje y responde 200, asi que detectarlo
-  automaticamente era imposible y sin el interruptor la UI diria "invitacion enviada"
-  sobre un correo que nunca salio.
-- `docs/SUPABASE-EN-VPS.md` corrige un consejo: `GOTRUE_MAILER_AUTOCONFIRM` se queda en
-  `true` tambien con SMTP configurado, porque solo afecta al registro publico, que esta
-  cerrado.
+- O diálogo de cadastro já não afirma que nunca se envia um e-mail: diz conforme o que está
+  configurado (era verdade em 1.2.2, deixou de ser).
+- `AUTH_ENVIA_CORREOS` é um interruptor manual de propósito. O GoTrue sem SMTP **não falha**:
+  usa um cliente de e-mail que engole a mensagem e responde 200, então detectá-lo
+  automaticamente era impossível e sem o interruptor a UI diria "convite enviado"
+  sobre um e-mail que nunca saiu.
+- `docs/SUPABASE-NO-VPS.md` corrige um conselho: `GOTRUE_MAILER_AUTOCONFIRM` fica em
+  `true` também com SMTP configurado, porque só afeta o cadastro público, que está
+  fechado.
 
 ## 1.2.2 — 2026-10-04
 
-### Actualizar desde 1.2.1
+### Atualizar desde 1.2.1
 
-Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
+Traga esta versão e implante de novo. Não há migrações nem passos manuais.
 
-### Arreglado
+### Corrigido
 
-- **El pie del menu lateral se quedaba en gris para siempre.** Next hornea las
-  variables NEXT_PUBLIC durante el build, y en una instancia por cliente la URL de
-  Supabase no se conoce al compilar la imagen. Encima, la API de Coolify 4.3 no permite
-  marcar una variable como de build, asi que llegaban vacias al bundle: el cliente de
-  Supabase del navegador nacia roto y el menu de usuario nunca cargaba, sin ningun error
-  visible. Ahora el layout escribe esos dos valores publicos en un bloque JSON en tiempo
-  de ejecucion y el navegador los lee de ahi, asi que la misma imagen sirve para
-  cualquier instancia. Esto tambien era necesario para que funcionara el boton de entrar
-  con un proveedor externo.
-- El menu de usuario lee el nombre y el correo del propio CRM en vez del cliente de
-  Supabase, y si la consulta falla muestra un aviso en vez de quedarse cargando.
+- **O rodapé do menu lateral ficava cinza para sempre.** O Next grava as
+  variáveis NEXT_PUBLIC durante o build, e numa instância por cliente a URL do
+  Supabase não se conhece ao compilar a imagem. Por cima, a API do Coolify 4.3 não permite
+  marcar uma variável como de build, então chegavam vazias ao bundle: o cliente de
+  Supabase do navegador nascia quebrado e o menu de usuário nunca carregava, sem nenhum erro
+  visível. Agora o layout escreve esses dois valores públicos num bloco JSON em tempo
+  de execução e o navegador os lê dali, então a mesma imagem serve para
+  qualquer instância. Isso também era necessário para que funcionasse o botão de entrar
+  com um provedor externo.
+- O menu de usuário lê o nome e o e-mail do próprio CRM em vez do cliente do
+  Supabase, e se a consulta falhar mostra um aviso em vez de ficar carregando.
 
-### Cambiado
+### Alterado
 
-- **Ajustes -> Equipo explica que ve cada rol** al elegirlo: el asesor ve solo los
-  contactos asignados a el con todo lo que cuelga de ellos, el administrador ve todo.
-  El comportamiento ya era ese; lo que faltaba era decirlo donde se decide.
-- El dialogo de alta aclara que **no se envia ningun correo**: la cuenta queda lista al
-  instante y la contrasena temporal se la pasa el administrador, o se deja vacia si esa
-  persona va a entrar con un proveedor externo.
+- **Ajustes -> Equipo explica o que cada papel vê** ao escolhê-lo: o assessor vê só os
+  contatos atribuídos a ele com tudo o que pende deles, o administrador vê tudo.
+  O comportamento já era esse; o que faltava era dizê-lo onde se decide.
+- O diálogo de cadastro esclarece que **não se envia nenhum e-mail**: a conta fica pronta na
+  hora e a senha temporária o administrador passa, ou se deixa vazia se essa
+  pessoa vai entrar com um provedor externo.
 
 ## 1.2.1 — 2026-10-03
 
-### Actualizar desde 1.2.0
+### Atualizar desde 1.2.0
 
-Trae esta version y vuelve a desplegar. Si todavia no configuraste ningun proveedor
-externo, no te afecta.
+Traga esta versão e implante de novo. Se você ainda não configurou nenhum provedor
+externo, não te afeta.
 
-### Arreglado
+### Corrigido
 
-- **La vuelta del login con un proveedor externo redirigia a la direccion interna del
-  contenedor.** Detras de un proxy, el origen de la peticion es algo como
-  https://0.0.0.0:3000, asi que despues de entrar con Google el navegador terminaba en
-  una URL inalcanzable. Ahora la direccion publica sale de APP_BASE_URL, que es la
-  fuente que no se puede falsear desde fuera, y solo si falta se miran las cabeceras
-  del proxy. Encontrado probando la ruta en la instancia desplegada.
+- **A volta do login com um provedor externo redirecionava para o endereço interno do
+  contêiner.** Atrás de um proxy, a origem da requisição é algo como
+  https://0.0.0.0:3000, então depois de entrar com o Google o navegador terminava numa
+  URL inalcançável. Agora o endereço público sai de APP_BASE_URL, que é a
+  fonte que não se pode falsificar de fora, e só se faltar se olham os cabeçalhos
+  do proxy. Encontrado testando a rota na instância implantada.
 
 ## 1.2.0 — 2026-10-03
 
-### Actualizar desde 1.1.2
+### Atualizar desde 1.1.2
 
-Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales, y si no
-configuras ningun proveedor externo nada cambia: el login se ve igual que hoy.
+Traga esta versão e implante de novo. Não há migrações nem passos manuais, e se você não
+configurar nenhum provedor externo nada muda: o login se vê igual a hoje.
 
-### Agregado
+### Adicionado
 
-- **Entrar con Google, opcional y apagado de fabrica.** Si el servidor de autenticacion
-  tiene el proveedor encendido, aparece el boton en el login y en el registro; si no, no
-  aparece. El CRM **no tiene variables propias** para esto: le pregunta al proveedor por
-  su endpoint publico `/auth/v1/settings` que tiene encendido, asi que se configura en
-  un solo lugar y no hay nada que mantener sincronizado. Sirve igual para GitHub,
-  Microsoft, Facebook y Apple.
+- **Entrar com o Google, opcional e desligado de fábrica.** Se o servidor de autenticação
+  tem o provedor ligado, aparece o botão no login e no cadastro; se não, não
+  aparece. O CRM **não tem variáveis próprias** para isso: pergunta ao provedor pelo
+  endpoint público `/auth/v1/settings` o que tem ligado, então se configura num
+  só lugar e não há nada a manter sincronizado. Serve igual para GitHub,
+  Microsoft, Facebook e Apple.
 
-  Entrar con un proveedor **no da acceso por si solo**: quien no este en
-  `team_members` cae en `/sin-acceso`, igual que con email y contrasena. El proveedor
-  dice quien sos; el equipo dice si entras. Paso a paso, con la configuracion de Google
-  Cloud y los fallos tipicos: [docs/GOOGLE-AUTH.md](docs/GOOGLE-AUTH.md).
+  Entrar com um provedor **não dá acesso por si só**: quem não estiver em
+  `team_members` cai em `/sin-acceso`, igual a e-mail e senha. O provedor
+  diz quem você é; a equipe diz se você entra. Passo a passo, com a configuração do Google
+  Cloud e as falhas típicas: [docs/GOOGLE-AUTH.md](docs/GOOGLE-AUTH.md).
 
-- La **contrasena temporal es opcional** al dar de alta a alguien en Ajustes -> Equipo.
-  Si esa persona va a entrar con un proveedor externo, inventar una contrasena que nadie
-  usara solo agrega ruido.
+- A **senha temporária é opcional** ao cadastrar alguém em Ajustes -> Equipo.
+  Se essa pessoa vai entrar com um provedor externo, inventar uma senha que ninguém
+  usará só adiciona ruído.
 
-- `npm run verificar` informa las **formas de entrar** que admite la instancia.
+- `npm run verificar` informa as **formas de entrar** que a instância admite.
 
 ## 1.1.2 — 2026-10-03
 
-### Actualizar desde 1.1.1
+### Atualizar desde 1.1.1
 
-Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
+Traga esta versão e implante de novo. Não há migrações nem passos manuais.
 
-### Arreglado
+### Corrigido
 
-- **Cinco paginas no mandaban a `/sin-acceso`.** Contactos, ajustes, actividades,
-  automatizaciones y plantillas son componentes de cliente, asi que resolvian la sesion
-  en el navegador y se renderizaban igual para alguien con sesion de Auth pero sin fila
-  en `team_members`. No se escapaba ningun dato, porque toda ruta de datos exige
-  membresia y devolvia 403, pero se veia el armazon de la aplicacion en lugar del aviso.
-  Ahora la puerta es la misma en todas: `layoutSoloMiembros()` para las dos primeras y
-  la comprobacion dentro de `gateLayout` para las otras tres.
+- **Cinco páginas não mandavam a `/sin-acceso`.** Contatos, ajustes, atividades,
+  automações e templates são componentes de cliente, então resolviam a sessão
+  no navegador e se renderizavam igual para alguém com sessão de Auth mas sem linha
+  em `team_members`. Não escapava nenhum dado, porque toda rota de dados exige
+  membresia e devolvia 403, mas se via o esqueleto do aplicativo em lugar do aviso.
+  Agora a porta é a mesma em todas: `layoutSoloMiembros()` para as duas primeiras e
+  a checagem dentro de `gateLayout` para as outras três.
 
 ## 1.1.1 — 2026-10-03
 
-### Actualizar desde 1.1.0
+### Atualizar desde 1.1.0
 
-Trae esta version y vuelve a desplegar: la migracion corre sola al arrancar. **Si tu
-instancia ya estaba publicada en internet, despues entra a Ajustes -> Equipo y desactiva
-cualquier cuenta que no reconozcas**, porque el arreglo cierra la puerta hacia adelante
-pero no borra a quien haya entrado antes.
+Traga esta versão e implante de novo: a migração roda sozinha ao iniciar. **Se a sua
+instância já estava publicada na internet, depois entre em Ajustes -> Equipo e desative
+qualquer conta que você não reconheça**, porque a correção fecha a porta para a frente
+mas não apaga quem tenha entrado antes.
 
-### Arreglado (seguridad)
+### Corrigido (segurança)
 
-- **Cualquiera podia darse de alta y entrar como asesor.** El disparador de la base
-  creaba la fila de `team_members`, activa, para todo usuario nuevo de Auth. Y el
-  registro de Supabase Auth es publico por naturaleza, porque la clave anonima viaja en
-  el navegador: bastaba con llamar a `/auth/v1/signup` a mano para saltarse la pagina
-  de registro cerrada del CRM y entrar a la bandeja y a los contactos. Comprobado contra
-  una instancia real antes y despues del arreglo.
+- **Qualquer um podia se cadastrar e entrar como assessor.** O gatilho da base
+  criava a linha de `team_members`, ativa, para todo usuário novo de Auth. E o
+  cadastro do Supabase Auth é público por natureza, porque a chave anônima viaja no
+  navegador: bastava chamar `/auth/v1/signup` à mão para pular a página
+  de cadastro fechada do CRM e entrar na caixa de entrada e nos contatos. Conferido contra
+  uma instância real antes e depois da correção.
 
-  Ahora el disparador **solo resuelve el arranque**: la primera cuenta de la instancia
-  queda como administradora y nadie mas entra solo. Un usuario de Auth sin invitacion no
-  tiene fila en `team_members` y cae en `/sin-acceso`, que es lo que la documentacion
-  decia desde el principio. El alta desde Ajustes -> Equipo no cambia: esa ruta siempre
-  inserto la fila ella misma.
+  Agora o gatilho **só resolve a partida**: a primeira conta da instância
+  fica como administradora e ninguém mais entra sozinho. Um usuário de Auth sem convite não
+  tem linha em `team_members` e cai em `/sin-acceso`, que é o que a documentação
+  dizia desde o princípio. O cadastro a partir de Ajustes -> Equipo não muda: essa rota sempre
+  inseriu a linha ela mesma.
 
-  Como defensa en profundidad, una vez creada la cuenta administradora conviene cerrar
-  tambien el registro en el proveedor: `GOTRUE_DISABLE_SIGNUP=true` si lo autoalojas, o
-  el interruptor de registros en el panel de Supabase cloud. `npm run admin:crear` sigue
-  funcionando igual, porque usa la clave de servicio.
+  Como defesa em profundidade, uma vez criada a conta administradora convém fechar
+  também o cadastro no provedor: `GOTRUE_DISABLE_SIGNUP=true` se você auto-hospeda, ou
+  o interruptor de cadastros no painel do Supabase cloud. `npm run admin:crear` continua
+  funcionando igual, porque usa a chave de serviço.
 
 ## 1.1.0 — 2026-10-03
 
-### Actualizar desde 1.0.3
+### Atualizar desde 1.0.3
 
-Trae esta version y vuelve a desplegar. Si ya pusiste la marca de tu cliente en
-`config/cliente.ts` y en `public/marca/`, el merge te va a marcar conflicto en esos
-archivos: **gana tu version**, como dice [ACTUALIZAR.md](ACTUALIZAR.md). No hay
-migraciones.
+Traga esta versão e implante de novo. Se você já pôs a marca do seu cliente em
+`config/cliente.ts` e em `public/marca/`, o merge vai marcar conflito nesses
+arquivos: **ganha a sua versão**, como diz [ATUALIZAR.md](ATUALIZAR.md). Não há
+migrações.
 
-### Cambiado
+### Alterado
 
-- **La plantilla viene con la marca de IA Builder Lab**: el logo de la comunidad y sus
-  colores, medidos del propio logo, con el cian `#3CF5F5` en las acciones primarias y
-  el carbon `#171E21` en el panel lateral y la barra del movil. Antes el valor por
-  defecto era un verde generico. Para un cliente se cambia donde siempre, en la zona del
-  cliente, y nada del nucleo se toca.
+- **O modelo vem com a marca do IA Builder Lab**: o logo da comunidade e as
+  cores, medidas do próprio logo, com o ciano `#3CF5F5` nas ações primárias e
+  o carbono `#171E21` no painel lateral e na barra do celular. Antes o valor por
+  padrão era um verde genérico. Para um cliente se muda onde sempre, na zona do
+  cliente, e nada do núcleo se toca.
 
-### Agregado
+### Adicionado
 
-- La autoverificacion avisa cuando una instancia **sigue con la marca de la plantilla**.
-  No es un fallo, porque para una demo esta bien, pero entregarle a un cliente un CRM
-  con el logo de la comunidad no da ningun error por si solo y conviene verlo antes.
+- A autoverificação avisa quando uma instância **continua com a marca do modelo**.
+  Não é uma falha, porque para uma demo está bem, mas entregar a um cliente um CRM
+  com o logo da comunidade não dá nenhum erro por si só e convém ver antes.
 
 ## 1.0.3 — 2026-10-03
 
-### Actualizar desde 1.0.2
+### Atualizar desde 1.0.2
 
-Trae esta version y vuelve a desplegar. Hay una migracion nueva y corre sola al
-arrancar el contenedor.
+Traga esta versão e implante de novo. Há uma migração nova e roda sozinha ao
+iniciar o contêiner.
 
-### Arreglado
+### Corrigido
 
-- **Borrar un contacto fallaba con un 500.** Las claves ajenas de `activities`,
-  `deals` y `messages` hacia `contacts` estaban en NO ACTION, y todo contacto termina
-  teniendo actividades, porque las escriben la ingesta, el agente y las
-  automatizaciones. Es decir: el borrado chocaba siempre. La migracion
-  `20261003000000_cascada_contactos.sql` pasa esas tres a ON DELETE CASCADE buscando la
-  restriccion por su definicion, no por su nombre. Lo que debe sobrevivir al borrado no
-  se toca: `automation_runs` y `notifications` siguen en SET NULL porque son registro.
-- **La autoverificacion cargaba `.env.local` incluso para verificar una instancia
-  remota**, asi que el login se intentaba contra otro Supabase y fallaba con
-  "Invalid login credentials", que parece un problema de la instancia. Ahora ese archivo
-  se lee solo cuando no se pasa `--url`; para una instancia remota van
-  `--supabase-url` y `--anon-key`.
+- **Apagar um contato falhava com um 500.** As chaves estrangeiras de `activities`,
+  `deals` e `messages` para `contacts` estavam em NO ACTION, e todo contato acaba
+  tendo atividades, porque as escrevem a ingestão, o agente e as
+  automações. Ou seja: o apagamento chocava sempre. A migração
+  `20261003000000_cascada_contactos.sql` passa essas três a ON DELETE CASCADE buscando a
+  restrição pela definição, não pelo nome. O que deve sobreviver ao apagamento não
+  se toca: `automation_runs` e `notifications` continuam em SET NULL porque são registro.
+- **A autoverificação carregava `.env.local` mesmo para verificar uma instância
+  remota**, então o login se tentava contra outro Supabase e falhava com
+  "Invalid login credentials", que parece um problema da instância. Agora esse arquivo
+  se lê só quando não se passa `--url`; para uma instância remota vão
+  `--supabase-url` e `--anon-key`.
 
-### Cambiado
+### Alterado
 
-- La autoverificacion comprueba que **el agente actue sobre el CRM** (etapa, campos,
-  resumen o nombre del contacto) en lugar de exigir que mueva la etapa. Cuando mover la
-  etapa lo decide el prompt de cada cliente, no el codigo, y si no dejo ningun rastro
-  sigue siendo un fallo. Si no movio la etapa, se informa sin pintar rojo.
+- A autoverificação confere que **o agente aja sobre o CRM** (etapa, campos,
+  resumo ou nome do contato) em vez de exigir que mova a etapa. Quando mover a
+  etapa o decide o prompt de cada cliente, não o código, e se não deixou nenhum rastro
+  continua sendo uma falha. Se não moveu a etapa, informa-se sem pintar de vermelho.
 
 ## 1.0.2 — 2026-10-03
 
-### Actualizar desde 1.0.1
+### Atualizar desde 1.0.1
 
-Trae esta version y vuelve a desplegar. No hay pasos manuales ni migraciones.
+Traga esta versão e implante de novo. Não há passos manuais nem migrações.
 
-### Arreglado
+### Corrigido
 
-- **La pagina de reportes no cargaba y el seed de demostracion se cortaba a mitad.**
-  Las dos cosas pasaban objetos `Date` como parametro dentro de SQL crudo. Por la via
-  de `db.execute(sql\`...\`)` el driver no serializa fechas: la consulta muere con
-  `ERR_INVALID_ARG_TYPE` sin llegar a Postgres. Ahora los reportes mandan las fechas
-  como texto ISO con cast a `timestamptz`, y el seed usa el constructor de Drizzle, que
-  si conoce el tipo de cada columna. Encontrado desplegando la instancia de
-  demostracion; ningun gate lo veia porque no tocan la base.
+- **A página de relatórios não carregava e o seed de demonstração se cortava no meio.**
+  As duas coisas passavam objetos `Date` como parâmetro dentro de SQL cru. Pelo caminho
+  de `db.execute(sql\`...\`)` o driver não serializa datas: a consulta morre com
+  `ERR_INVALID_ARG_TYPE` sem chegar ao Postgres. Agora os relatórios mandam as datas
+  como texto ISO com cast a `timestamptz`, e o seed usa o construtor do Drizzle, que
+  sim conhece o tipo de cada coluna. Encontrado implantando a instância de
+  demonstração; nenhum gate via porque não tocam a base.
 
 ## 1.0.1 — 2026-10-03
 
-### Actualizar desde 1.0.0
+### Atualizar desde 1.0.0
 
-Trae esta version y vuelve a desplegar. No hay pasos manuales. Si tu instancia ya
-estaba funcionando es porque tenias activos los modulos de propiedades y visitas; en ese
-caso no cambia nada para ti.
+Traga esta versão e implante de novo. Não há passos manuais. Se a sua instância já
+estava funcionando é porque você tinha ativos os módulos de imóveis e visitas; nesse
+caso não muda nada para você.
 
-### Arreglado
+### Corrigido
 
-- **Una instancia con los modulos apagados no podia migrar.** La migracion de RLS del
-  nucleo declaraba politicas sobre `visits` y `properties`, dos tablas que desde 1.0.0
-  pertenecen a los modulos de visitas y propiedades. Con `config/modulos.json` en su
-  valor por defecto, que es sin modulos, esas tablas no existen: `db:migrar` fallaba y
-  el contenedor no llegaba a arrancar. Cada modulo ya declara su propio RLS en su
-  migracion, asi que el nucleo no las nombra mas.
+- **Uma instância com os módulos desligados não podia migrar.** A migração de RLS do
+  núcleo declarava políticas sobre `visits` e `properties`, duas tabelas que desde 1.0.0
+  pertencem aos módulos de visitas e imóveis. Com `config/modulos.json` no
+  valor padrão, que é sem módulos, essas tabelas não existem: `db:migrar` falhava e
+  o contêiner não chegava a iniciar. Cada módulo já declara o próprio RLS na
+  migração, então o núcleo não as nomeia mais.
 
-### Agregado
+### Adicionado
 
-- **Modo de base de datos autoalojada**, para desplegar sin cuenta de Supabase:
-  `npm run claves:supabase` genera el secreto JWT y las claves anonima y de servicio;
-  `npm run auth:preparar` crea en tu Postgres los roles, el esquema `auth` y las
-  funciones `auth.uid()` y companeras que Supabase cloud trae de fabrica, con el dueno
-  que GoTrue necesita. La guia completa, con el orden de los pasos y los fallos tipicos,
-  esta en `docs/SUPABASE-EN-VPS.md`. Hacen falta dos contenedores en lugar de los 13 del
-  stack completo de Supabase, porque el CRM usa Supabase solo para autenticacion.
+- **Modo de banco de dados auto-hospedado**, para implantar sem conta do Supabase:
+  `npm run claves:supabase` gera o segredo JWT e as chaves anônima e de serviço;
+  `npm run auth:preparar` cria no seu Postgres os papéis, o esquema `auth` e as
+  funções `auth.uid()` e companheiras que o Supabase cloud traz de fábrica, com o dono
+  que o GoTrue precisa. O guia completo, com a ordem dos passos e as falhas típicas,
+  está em `docs/SUPABASE-NO-VPS.md`. Fazem falta dois contêineres em lugar dos 13 do
+  stack completo do Supabase, porque o CRM usa o Supabase só para autenticação.
 
 ## 1.0.0 — 2026-10-02
 
-Primera version para la comunidad IA Builder Lab. Nace de un CRM construido para un
-cliente inmobiliario (Next.js 16 + Supabase + Zernio) y lo convierte en una plantilla
-con nucleo minimo, zona del cliente y arnes de Claude Code.
+Primeira versão para a comunidade IA Builder Lab. Nasce de um CRM construído para um
+cliente imobiliário (Next.js 16 + Supabase + Zernio) e o converte num modelo
+com núcleo mínimo, zona do cliente e arnês de Claude Code.
 
-### Actualizar desde…
+### Atualizar desde…
 
-No hay version anterior compatible: esta es la base. Las instancias del CRM de origen no
-se actualizan por merge; se migran creando una instancia nueva y cargando los datos.
+Não há versão anterior compatível: esta é a base. As instâncias do CRM de origem não
+se atualizam por merge; migram-se criando uma instância nova e carregando os dados.
 
-### Nucleo
+### Núcleo
 
-- **Base desplegable**: migraciones canonicas en `supabase/migrations/` (base, RLS,
-  primer admin) aplicadas por `scripts/migrar.mjs` (tabla `_migraciones`, transaccion
-  por archivo, reintentos, RLS forzado); `src/lib/env.ts`; `/api/health` con version y
-  commit; Dockerfile multi-stage con migraciones al arrancar; `docker-compose.yml`
-  solo app; barridos dentro del proceso fuera de Vercel.
-- **Seguridad**: RLS en todas las tablas, `anon` sin privilegios, politicas de lectura
-  por rol; `requireMember` en toda ruta de datos y chequeo de propietario por
-  contacto; registro publico abierto solo para la primera cuenta (admin);
+- **Base implantável**: migrações canônicas em `supabase/migrations/` (base, RLS,
+  primeiro admin) aplicadas por `scripts/migrar.mjs` (tabela `_migraciones`, transação
+  por arquivo, novas tentativas, RLS forçado); `src/lib/env.ts`; `/api/health` com versão e
+  commit; Dockerfile multi-stage com migrações ao iniciar; `docker-compose.yml`
+  só app; varreduras dentro do processo fora da Vercel.
+- **Segurança**: RLS em todas as tabelas, `anon` sem privilégios, políticas de leitura
+  por papel; `requireMember` em toda rota de dados e checagem de proprietário por
+  contato; cadastro público aberto só para a primeira conta (admin);
   `scripts/crear-admin.mjs`.
-- **Configuracion por cliente**: `config/cliente.ts` (marca, idioma, moneda, roles,
-  pipeline, campos del contacto, agente, modulos) validada con zod; marca aplicada en
-  SSR (CSS variables, manifest de la PWA, titulo); pipeline sincronizado por clave al
-  arrancar; `contacts.custom_fields` en formulario, ficha, tabla y chat.
-- **Modulos**: `modules/<nombre>/` con manifiesto, servidor (paginas, API, tools,
-  seed) y migraciones; `config/modulos.json`; registro generado con imports
-  estaticos; catch-all `/m/<modulo>` y `/api/m/<modulo>`; menu construido desde la
-  config. Incluye `_plantilla` y `ejemplo`.
-- **Conectores**: interfaz `Conector` (enviar, webhook, estado); Zernio completo,
-  Meta Cloud API parcial y documentado, simulador; mecanica generica de webhooks;
-  webhook de leads en `/api/webhooks/leads`.
-- **Agente**: tools genericas (`mover_etapa`, `actualizar_contacto`,
-  `registrar_actividad`, `resumen_lead`, `derivar_asesor`, `asignar_asesor`) mas las
-  de los modulos; prompt generico con CONTEXTO y EQUIPO; cascada canal -> global ->
-  config -> default; pausa por conversacion; responde solo por `deliverMessage`;
+- **Configuração por cliente**: `config/cliente.ts` (marca, idioma, moeda, papéis,
+  pipeline, campos do contato, agente, módulos) validada com zod; marca aplicada em
+  SSR (CSS variables, manifesto da PWA, título); pipeline sincronizado por chave ao
+  iniciar; `contacts.custom_fields` no formulário, na ficha, na tabela e no chat.
+- **Módulos**: `modules/<nombre>/` com manifesto, servidor (páginas, API, tools,
+  seed) e migrações; `config/modulos.json`; registro gerado com imports
+  estáticos; catch-all `/m/<modulo>` e `/api/m/<modulo>`; menu construído a partir da
+  config. Inclui `_plantilla` e `ejemplo`.
+- **Conectores**: interface `Conector` (enviar, webhook, estado); Zernio completo,
+  Meta Cloud API parcial e documentada, simulador; mecânica genérica de webhooks;
+  webhook de leads em `/api/webhooks/leads`.
+- **Agente**: tools genéricas (`mover_etapa`, `actualizar_contacto`,
+  `registrar_actividad`, `resumen_lead`, `derivar_asesor`, `asignar_asesor`) mais as
+  dos módulos; prompt genérico com CONTEXTO e EQUIPE; cascata canal -> global ->
+  config -> default; pausa por conversa; responde só por `deliverMessage`;
   `contacts.ai_summary`.
-- **Simulador** (`/simulador`, solo admin): chatear con el agente sin canal conectado
-  y ver lo que cambia en el CRM; base de la autoverificacion.
-- **Reportes reales** por 7/30/90 dias y dashboard sin numeros inventados;
+- **Simulador** (`/simulador`, só admin): conversar com o agente sem canal conectado
+  e ver o que muda no CRM; base da autoverificação.
+- **Relatórios reais** por 7/30/90 dias e dashboard sem números inventados;
   `messages.origin`.
-- **Datos demo** por `POST /api/seed/demo`, `npm run seed` y boton del inicio.
+- **Dados demo** por `POST /api/seed/demo`, `npm run seed` e botão do início.
 
-### Plantillas y modulos
+### Modelos e módulos
 
-- `config/plantillas/inmobiliaria.ts` (7 etapas, 5 campos, prompt calificador).
-- `modules/propiedades` (catalogo, busqueda semantica o por filtros, Tokko opcional).
-- `modules/visitas` (visitas, calendario, tool `agendar_visita`).
+- `config/plantillas/inmobiliaria.ts` (7 etapas, 5 campos, prompt qualificador).
+- `modules/propiedades` (catálogo, busca semântica ou por filtros, Tokko opcional).
+- `modules/visitas` (visitas, calendário, tool `agendar_visita`).
 
-### Arnes
+### Arnês
 
-- `CLAUDE.md`, `specs/CONSTITUCION.md`, `specs/_plantilla.md`, `specs/nucleo/*`,
-  `specs/inmobiliaria/spec.md`.
+- `CLAUDE.md`, `specs/CONSTITUICAO.md`, `specs/_modelo.md`, `specs/nucleo/*`,
+  `specs/imobiliaria/spec.md`.
 - Skills: `adaptar-a-cliente`, `crear-modulo`, `nueva-plantilla-nicho`,
   `deploy-coolify`, `conectar-zernio`, `probar-instancia`, `actualizar-desde-original`.
 - `.mcp.json.example` + `docs/MCP.md`; `scripts/verificar-instancia.mjs`; CI.
 
-### Quitado respecto del CRM de origen
+### Removido em relação ao CRM de origem
 
-Clasificacion con Anthropic, digest por Resend, servidor MCP sobre SQLite, slash
-commands de auto-crm, experimento GoHighLevel, scripts de operacion de un cliente,
-datos del cliente en el prompt, maqueta de reportes.
+Classificação com Anthropic, digest por Resend, servidor MCP sobre SQLite, slash
+commands do auto-crm, experimento GoHighLevel, scripts de operação de um cliente,
+dados do cliente no prompt, maquete de relatórios.

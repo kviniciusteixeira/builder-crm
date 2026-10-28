@@ -1,5 +1,5 @@
-// Iconos de marca para los proveedores de login. Van inline porque lucide-react ya no
-// trae iconos de marca, igual que los de canal en channels.tsx.
+// Ícones de marca para os provedores de login. Vão inline porque o lucide-react já não
+// traz ícones de marca, igual aos de canal em channels.tsx.
 
 export function IconoGoogle({ className }: { className?: string }) {
   return (

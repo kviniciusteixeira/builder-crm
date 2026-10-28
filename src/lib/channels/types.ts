@@ -1,12 +1,12 @@
 /**
- * Canal y proveedor son dos ejes distintos, y confundirlos es lo que haria imposible el
- * cutover de WhatsApp con rollback:
+ * Canal e provedor são dois eixos distintos, e confundi-los é o que tornaria impossível o
+ * cutover de WhatsApp com rollback:
  *
- *   channel  -> QUE red es (lo ve el usuario: badge, filtro, prompt del agente, plantillas)
- *   provider -> POR DONDE viaja (lo ve el sistema: que adapter envia, que webhook alimenta)
+ *   channel  -> QUE rede é (vê o usuário: badge, filtro, prompt do agente, templates)
+ *   provider -> POR ONDE viaja (vê o sistema: que adapter envia, que webhook alimenta)
  *
- * Durante la migracion va a existir `channel='whatsapp'` con `provider='meta'` y con
- * `provider='zernio'` al mismo tiempo, conviviendo en la misma bandeja.
+ * Durante a migração vai existir `channel='whatsapp'` com `provider='meta'` e com
+ * `provider='zernio'` ao mesmo tempo, convivendo na mesma caixa de entrada.
  */
 
 export const CHANNELS = ["whatsapp", "instagram", "facebook"] as const;
@@ -34,15 +34,15 @@ export function isProvider(value: unknown): value is Provider {
   );
 }
 
-/** Lo que cada canal permite hacer. Lo consume la UI y el adapter de salida. */
+/** O que cada canal permite fazer. Consomem a UI e o adapter de saída. */
 export interface ChannelCapabilities {
-  /** Plantillas aprobadas por Meta. Solo WhatsApp las tiene. */
+  /** Templates aprovados pela Meta. Só o WhatsApp os tem. */
   templates: boolean;
-  /** Horas de ventana de texto libre desde el ultimo mensaje entrante. */
+  /** Horas de janela de texto livre desde a última mensagem entrante. */
   freeFormWindowHours: number;
   /**
-   * Fuera de la ventana, IG y Messenger permiten seguir respondiendo con la etiqueta
-   * HUMAN_AGENT (valida 7 dias). WhatsApp no: ahi el unico camino es una plantilla.
+   * Fora da janela, IG e Messenger permitem continuar respondendo com a etiqueta
+   * HUMAN_AGENT (válida 7 dias). O WhatsApp não: aí o único caminho é um template.
    */
   humanAgentTag: boolean;
   attachments: boolean;
@@ -73,7 +73,7 @@ export function capabilitiesFor(channel: Channel): ChannelCapabilities {
   return CAPABILITIES[channel];
 }
 
-/** true si ya pasaron mas horas que la ventana de texto libre del canal. */
+/** true se já passaram mais horas que a janela de texto livre do canal. */
 export function isOutsideFreeFormWindow(
   channel: Channel,
   lastInboundAt: Date | string | null | undefined,

@@ -43,8 +43,8 @@ export function ChannelsSettings() {
   const [syncing, setSyncing] = useState(false);
   const [connecting, setConnecting] = useState<Channel | null>(null);
   const [importing, setImporting] = useState(false);
-  // Como conectar WhatsApp. Coexistencia por defecto: es lo que quiere un negocio que
-  // ya atiende desde el celular. Ver la nota en la UI mas abajo.
+  // Como conectar o WhatsApp. Coexistência por padrão: é o que quer um negócio que
+  // já atende a partir do celular. Ver a nota na UI mais abaixo.
   const [waMode, setWaMode] = useState<"business_app" | "api">("business_app");
   const popupRef = useRef<Window | null>(null);
 
@@ -61,7 +61,7 @@ export function ChannelsSettings() {
     load();
   }, [load]);
 
-  // El popup avisa por postMessage cuando termina el OAuth y se cierra solo.
+  // O popup avisa por postMessage quando o OAuth termina e se fecha sozinho.
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
@@ -88,8 +88,8 @@ export function ChannelsSettings() {
     return () => window.removeEventListener("message", onMessage);
   }, [load]);
 
-  // Si el usuario cierra el popup a mano no llega ningun mensaje: sin esto el boton
-  // quedaria girando para siempre.
+  // Se o usuário fecha o popup à mão não chega nenhuma mensagem: sem isso o botão
+  // ficaria girando para sempre.
   useEffect(() => {
     if (!connecting) return;
     const timer = setInterval(() => {
@@ -166,9 +166,9 @@ export function ChannelsSettings() {
   };
 
   const connect = async (platform: Channel) => {
-    // La ventana se abre ANTES del await, de forma sincronica con el click: si se
-    // abriera al resolver la promesa, el navegador la trata como popup no solicitado
-    // y la bloquea.
+    // A janela abre ANTES do await, de forma síncrona com o clique: se
+    // abrisse ao resolver a promessa, o navegador a trata como popup não solicitado
+    // e a bloqueia.
     const popup = window.open(
       "about:blank",
       "zernio-connect",

@@ -1,200 +1,200 @@
-# Brief del cliente — Builder CRM
+# Brief do cliente — Builder CRM
 
-Lo que Claude Code necesita saber para adaptar una instancia. Se llena antes de escribir
-una sola linea: es la entrada del flujo one-shot (`adaptar-a-cliente`), y de el sale
-`specs/<cliente>/spec.md`, `config/cliente.ts` y los modulos.
+O que o Claude Code precisa saber para adaptar uma instância. Preenche-se antes de escrever
+uma única linha: é a entrada do fluxo one-shot (`adaptar-a-cliente`), e dele saem
+`specs/<cliente>/spec.md`, `config/cliente.ts` e os módulos.
 
-**Como se usa.** Copia este archivo a `specs/<cliente>/brief.md`, llenalo y abri Claude
-Code en el repo:
+**Como se usa.** Copie este arquivo para `specs/<cliente>/brief.md`, preencha e abra o Claude
+Code no repositório:
 
-> Adapta Builder CRM para <cliente> con el brief de specs/<cliente>/brief.md y
-> desplegalo en mi Coolify.
+> Adapta o Builder CRM para <cliente> com o brief de specs/<cliente>/brief.md e
+> implanta no meu Coolify.
 
-Tambien sirve pegado en el chat sin crear el archivo.
+Também serve colado no chat sem criar o arquivo.
 
-**No hace falta llenarlo todo.** Solo las tres cosas de *Lo minimo* son obligatorias. Lo
-que dejes en blanco lo decide Claude con criterio de negocio y te lo dice en el resumen
-final, para que lo corrijas desde Ajustes o pidiendo el cambio. Un brief a medias y
-desplegado sirve mas que un brief perfecto sin desplegar.
+**Não precisa preencher tudo.** Só as três coisas de *O mínimo* são obrigatórias. O
+que você deixar em branco o Claude decide com critério de negócio e te diz no resumo
+final, para você corrigir em Ajustes ou pedindo a mudança. Um brief pela metade e
+implantado vale mais que um brief perfeito sem implantar.
 
-**Las credenciales no van aqui.** Este archivo puede terminar en un commit. Las claves
-van en `.env.local` (local) o en las variables de Coolify, y nunca al repo. Si se las
-pasas a Claude, pegalas en el chat, no en el archivo.
-
----
-
-## Lo minimo
-
-**1. Cliente y nicho**
-Nombre tal cual se escribe, y a que se dedica en una linea.
-
-> Ejemplo: Casa Sur, inmobiliaria que vende y arrienda departamentos en Santiago.
-
-El nicho decide el punto de partida: si existe `config/plantillas/<nicho>.ts` se arranca
-de ahi y se ajusta. Hoy existe `inmobiliaria`. Si no existe, se arma desde cero (y
-despues conviene convertirlo en plantilla con `nueva-plantilla-nicho`).
-
-**2. Dominio de la instancia**
-Donde va a vivir el CRM, con el DNS ya apuntando al VPS.
-
-> Ejemplo: crm.casasur.cl
-
-**3. Que tiene que lograr el agente**
-Dos o tres frases sobre que pasa hoy cuando entra un mensaje, y que querria el cliente
-que pasara. Esto es lo que mas influye en el resultado: de aqui sale el prompt.
-
-> Ejemplo: hoy los mensajes de WhatsApp los contesta la recepcionista cuando puede, y de
-> noche no contesta nadie. Queremos que el agente responda al toque, averigue si busca
-> comprar o arrendar, en que zona y con que presupuesto, agende la visita si esta listo,
-> y avise a un asesor cuando el lead esta calificado.
+**As credenciais não vão aqui.** Este arquivo pode acabar num commit. As chaves
+vão em `.env.local` (local) ou nas variáveis do Coolify, e nunca no repositório. Se você as
+passar ao Claude, cole no chat, não no arquivo.
 
 ---
 
-## Accesos que hacen falta (se pasan por chat, no por archivo)
+## O mínimo
 
-| Para que | Que se necesita | Sin esto |
+**1. Cliente e nicho**
+Nome exatamente como se escreve, e a que se dedica numa linha.
+
+> Exemplo: Casa Sur, imobiliária que vende e aluga apartamentos em Santiago.
+
+O nicho decide o ponto de partida: se existe `config/plantillas/<nicho>.ts` começa-se
+dali e se ajusta. Hoje existe `inmobiliaria`. Se não existir, monta-se do zero (e
+depois convém convertê-lo em modelo com `nueva-plantilla-nicho`).
+
+**2. Domínio da instância**
+Onde o CRM vai viver, com o DNS já apontando para o VPS.
+
+> Exemplo: crm.casasur.cl
+
+**3. O que o agente tem que conseguir**
+Duas ou três frases sobre o que acontece hoje quando entra uma mensagem, e o que o cliente
+quereria que acontecesse. Isso é o que mais influencia o resultado: daqui sai o prompt.
+
+> Exemplo: hoje as mensagens de WhatsApp a recepcionista responde quando pode, e de
+> noite ninguém responde. Queremos que o agente responda na hora, descubra se busca
+> comprar ou alugar, em que zona e com que orçamento, agende a visita se estiver pronto,
+> e avise um assessor quando o lead estiver qualificado.
+
+---
+
+## Acessos que fazem falta (passam pelo chat, não pelo arquivo)
+
+| Para quê | O que se precisa | Sem isso |
 |---|---|---|
-| Base de datos | Proyecto de Supabase, o el MCP de Supabase en modo cuenta para crearlo | No hay instancia |
-| Hosting | URL y token de Coolify | Se arma todo pero no se despliega |
-| El agente | Clave de OpenRouter | La demo levanta sin IA: el agente no responde |
-| Canales | Credenciales de Zernio | La demo funciona con el simulador; WhatsApp, Instagram y Messenger se conectan despues con `conectar-zernio` |
+| Banco de dados | Projeto do Supabase, ou o MCP do Supabase em modo conta para criá-lo | Não há instância |
+| Hospedagem | URL e token do Coolify | Monta-se tudo mas não se implanta |
+| O agente | Chave do OpenRouter | A demo sobe sem IA: o agente não responde |
+| Canais | Credenciais do Zernio | A demo funciona com o simulador; WhatsApp, Instagram e Messenger se conectam depois com `conectar-zernio` |
 
-Los tres primeros conviene tenerlos antes de empezar. Los canales pueden esperar: una
-instancia se entrega y se demuestra con el simulador.
+Os três primeiros convém ter antes de começar. Os canais podem esperar: uma
+instância se entrega e se demonstra com o simulador.
 
 ---
 
 ## Marca
 
-| Dato | Que es | Limite |
+| Dado | O que é | Limite |
 |---|---|---|
-| Nombre | Pestana del navegador, login, sidebar | 60 caracteres |
-| Nombre corto | Icono de la app en el celular y notificaciones | **12 caracteres** |
-| Descripcion | Una frase, aparece en el login | 200 caracteres |
-| Color primario | Botones y acciones | formato `#rrggbb` |
-| Color del sidebar | Fondo de la barra lateral, y del navegador en el celular | formato `#rrggbb` |
-| Logo e icono | PNG. El icono tiene que leerse en 64 px | — |
+| Nome | Aba do navegador, login, sidebar | 60 caracteres |
+| Nome curto | Ícone do app no celular e notificações | **12 caracteres** |
+| Descrição | Uma frase, aparece no login | 200 caracteres |
+| Cor primária | Botões e ações | formato `#rrggbb` |
+| Cor da sidebar | Fundo da barra lateral, e do navegador no celular | formato `#rrggbb` |
+| Logo e ícone | PNG. O ícone tem que se ler em 64 px | — |
 
-Si el cliente no dio logo ni colores, se usan los genericos y queda anotado como
-pendiente. Los archivos van en `public/marca/` como `logo.png` e `icono.png`.
+Se o cliente não deu logo nem cores, usam-se os genéricos e fica anotado como
+pendente. Os arquivos vão em `public/marca/` como `logo.png` e `icono.png`.
 
-**Idioma** (`es` o `en`), **moneda** (codigo de tres letras: `USD`, `CLP`, `MXN`, `EUR`)
-y **como se llama al rol** en pantalla: Asesor, Vendedor, Agente, Ejecutivo, Consultor.
+**Idioma** (`es` ou `en`), **moeda** (código de três letras: `USD`, `CLP`, `MXN`, `EUR`)
+e **como se chama o papel** na tela: Assessor, Vendedor, Agente, Executivo, Consultor.
 
-**Zona horaria del negocio**, en formato IANA: `America/Santiago`,
-`America/Mexico_City`, `America/Bogota`, `Europe/Madrid`. No es un detalle cosmetico: es
-la zona con la que el agente decide que dia es hoy, y el servidor corre en UTC. Si queda
-mal, el cliente que escribe a las 22:00 recibe la respuesta corrida un dia.
+**Fuso horário do negócio**, em formato IANA: `America/Santiago`,
+`America/Mexico_City`, `America/Bogota`, `Europe/Madrid`, `America/Sao_Paulo`. Não é um detalhe cosmético: é
+o fuso com o qual o agente decide que dia é hoje, e o servidor roda em UTC. Se ficar
+errado, o cliente que escreve às 22:00 recebe a resposta deslocada um dia.
 
 ---
 
 ## Pipeline
 
-Las etapas por las que pasa una operacion, **en orden**, con cual cierra ganando y cual
-cierra perdiendo. Minimo dos. El agente mueve el contacto entre estas etapas, asi que
-tienen que ser las reales del negocio, no las de un manual.
+As etapas por que passa uma operação, **em ordem**, com qual fecha ganhando e qual
+fecha perdendo. Mínimo duas. O agente move o contato entre essas etapas, então
+têm que ser as reais do negócio, não as de um manual.
 
-> Ejemplo: Nuevo lead → Calificado → Visita agendada → Visita realizada → Negociacion →
-> Cerrado ganado (ganada) → Cerrado perdido (perdida)
+> Exemplo: Novo lead → Qualificado → Visita agendada → Visita realizada → Negociação →
+> Fechado ganho (ganha) → Fechado perdido (perdida)
 
-Si no sabes, se usa el pipeline de la plantilla del nicho y se ajusta despues arrastrando
-en pantalla.
-
----
-
-## Datos a averiguar de cada lead
-
-Los campos propios del negocio: lo que un vendedor necesita saber antes de llamar. Por
-cada uno:
-
-- **Etiqueta**: como se ve en la ficha ("Presupuesto maximo").
-- **Tipo**: `texto`, `numero`, `seleccion`, `booleano` o `fecha`.
-- **Opciones**: obligatorias si es `seleccion` ("Compra" / "Arriendo").
-- **Lo pregunta el agente?** Si si, en que palabras lo tiene que averiguar. Eso es lo que
-  lee el modelo, asi que mejor "presupuesto maximo en pesos" que "presupuesto".
-- **Va como columna en la tabla de contactos?** Dos o tres campos, no diez.
-
-> Ejemplo: Tipo de operacion (seleccion: Compra / Arriendo, lo pregunta el agente, en
-> tabla) · Zona (texto, lo pregunta el agente: barrio o comuna donde busca, en tabla) ·
-> Presupuesto (numero, lo pregunta el agente: presupuesto maximo en UF) · Dormitorios
-> (numero, lo pregunta el agente) · Credito preaprobado (booleano, no lo pregunta el
-> agente: lo carga el asesor)
-
-Regla practica: entre tres y seis campos que el agente averigua. Mas que eso y la
-conversacion se vuelve un interrogatorio.
+Se você não souber, usa-se o pipeline do modelo do nicho e se ajusta depois arrastando
+na tela.
 
 ---
 
-## El agente
+## Dados a descobrir de cada lead
 
-- **Como se presenta**: nombre, y si dice que es un asistente virtual o no.
-- **Tono**: formal o cercano, usted o tu, largo o telegrafico. Una frase de ejemplo
-  escrita como hablaria el cliente ayuda mas que tres adjetivos.
-- **Que SI puede hacer**: dar precios, agendar, mandar fichas, cotizar.
-- **Que NO puede hacer nunca**: prometer descuentos, dar plazos de entrega, opinar de la
-  competencia, hablar de la obra en construccion.
-- **Cuando pasa a una persona**, y que le dice al cliente mientras espera.
-- **Horario**: contesta siempre, o fuera de horario avisa que responde al dia siguiente.
+Os campos próprios do negócio: o que um vendedor precisa saber antes de ligar. Por
+cada um:
 
-Lo que el agente **no** debe inventar conviene escribirlo explicito. Es la parte del
-prompt que mas problemas evita.
+- **Rótulo**: como se vê na ficha ("Orçamento máximo").
+- **Tipo**: `texto`, `numero`, `seleccion`, `booleano` ou `fecha`.
+- **Opções**: obrigatórias se for `seleccion` ("Compra" / "Aluguel").
+- **O agente pergunta?** Se sim, com que palavras tem que descobrir. Isso é o que
+  o modelo lê, então melhor "orçamento máximo em reais" que "orçamento".
+- **Vai como coluna na tabela de contatos?** Dois ou três campos, não dez.
 
----
+> Exemplo: Tipo de operação (seleção: Compra / Aluguel, o agente pergunta, na
+> tabela) · Zona (texto, o agente pergunta: bairro ou cidade onde busca, na tabela) ·
+> Orçamento (número, o agente pergunta: orçamento máximo) · Dormitórios
+> (número, o agente pergunta) · Crédito pré-aprovado (booleano, o agente não pergunta:
+> o assessor preenche)
 
-## Modulos
-
-Contactos, conversaciones, pipeline, actividades, plantillas, reportes y simulador ya
-vienen. Un modulo se agrega cuando el negocio maneja **cosas** que el CRM tiene que
-listar y que el agente tiene que poder consultar.
-
-Ya construidos: `propiedades`, `visitas`.
-
-Por cada modulo nuevo: que cosa lista (propiedades, pedidos, citas, cursos), que datos
-tiene cada una, y que tendria que poder hacer el agente con eso ("buscar propiedades por
-zona y presupuesto y mandar hasta tres").
-
-Si no estas seguro de que haga falta un modulo, no lo pidas: un campo personalizado
-alcanza casi siempre, y un modulo de mas es codigo que hay que mantener en cada
-actualizacion del nucleo.
-
-**Si hace falta agendar citas o visitas**, tres preguntas mas, porque cambian como se
-construye:
-
-1. El agente **cierra** el horario ("te espero el jueves a las 16:00") o **propone** y
-   una persona confirma? Lo segundo es mucho mas barato y se siente casi igual de rapido.
-2. Que dias y en que horario se atiende, y cuanto dura una cita.
-3. El asesor mantiene su propia agenda (Google Calendar, Outlook) con otras cosas? Si la
-   respuesta es si y el agente cierra horarios, va a pisar compromisos que el CRM no ve,
-   y hay que decidir si se lee su calendario o si se reserva una franja fija para citas.
+Regra prática: entre três e seis campos que o agente descobre. Mais que isso e a
+conversa vira um interrogatório.
 
 ---
 
-## Datos del cliente para la demo
+## O agente
 
-Que cargar para que la demo se vea real: catalogo de propiedades, lista de servicios con
-precios, nombres del equipo. Si no hay nada, se usan los datos de demostracion
-(`npm run seed`), que son inventados y estan marcados como tales.
+- **Como se apresenta**: nome, e se diz que é um assistente virtual ou não.
+- **Tom**: formal ou próximo, você ou tu, longo ou telegráfico. Uma frase de exemplo
+  escrita como o cliente falaria ajuda mais que três adjetivos.
+- **O que SIM pode fazer**: dar preços, agendar, mandar fichas, cotar.
+- **O que NÃO pode fazer nunca**: prometer descontos, dar prazos de entrega, opinar da
+  concorrência, falar da obra em construção.
+- **Quando passa para uma pessoa**, e o que diz ao cliente enquanto espera.
+- **Horário**: responde sempre, ou fora do horário avisa que responde no dia seguinte.
 
-**Nunca datos reales de personas** en seeds, specs ni commits.
+O que o agente **não** deve inventar convém escrever explícito. É a parte do
+prompt que mais problemas evita.
 
 ---
 
-## Fuera de alcance
+## Módulos
 
-Lo que el cliente pidio y se decidio **no** hacer en esta instancia, y por que. Esta
-seccion evita la discusion de la entrega: queda escrito que se dejo afuera a proposito.
+Contatos, conversas, pipeline, atividades, templates, relatórios e simulador já
+vêm. Um módulo se adiciona quando o negócio lida com **coisas** que o CRM tem que
+listar e que o agente tem que poder consultar.
+
+Já construídos: `propiedades`, `visitas`.
+
+Por cada módulo novo: que coisa lista (imóveis, pedidos, consultas, cursos), que dados
+cada uma tem, e o que o agente teria que poder fazer com isso ("buscar imóveis por
+zona e orçamento e mandar até três").
+
+Se você não tiver certeza de que faz falta um módulo, não peça: um campo personalizado
+quase sempre basta, e um módulo a mais é código que há que manter em cada
+atualização do núcleo.
+
+**Se fizer falta agendar consultas ou visitas**, mais três perguntas, porque mudam como se
+constrói:
+
+1. O agente **fecha** o horário ("te espero quinta às 16:00") ou **propõe** e
+   uma pessoa confirma? O segundo é muito mais barato e se sente quase tão rápido.
+2. Que dias e em que horário se atende, e quanto dura uma consulta.
+3. O assessor mantém a própria agenda (Google Calendar, Outlook) com outras coisas? Se a
+   resposta for sim e o agente fechar horários, vai pisar compromissos que o CRM não vê,
+   e há que decidir se se lê o calendário dele ou se se reserva uma faixa fixa para consultas.
 
 ---
 
-## Lo que pasa despues de pegar el brief
+## Dados do cliente para a demo
 
-1. Claude pregunta **como maximo tres cosas**, todas juntas, y solo si falta algo
-   critico.
-2. Escribe `specs/<cliente>/spec.md` y te la deja para revisar.
-3. Configura, construye los modulos, despliega en Coolify y **prueba la instancia
-   desplegada** con `probar-instancia`. No se entrega con checks en rojo.
-4. Te entrega la URL, el acceso de demo, que se construyo, que quedo pendiente y las
-   decisiones que tomo solo.
+O que carregar para a demo parecer real: catálogo de imóveis, lista de serviços com
+preços, nomes da equipe. Se não houver nada, usam-se os dados de demonstração
+(`npm run seed`), que são inventados e estão marcados como tais.
 
-Lo que no te guste se corrige despues: marca, etapas y campos se cambian en
-`config/cliente.ts`, y el prompt del agente desde Ajustes → Agente sin tocar codigo.
+**Nunca dados reais de pessoas** em seeds, specs nem commits.
+
+---
+
+## Fora de escopo
+
+O que o cliente pediu e se decidiu **não** fazer nesta instância, e por quê. Esta
+seção evita a discussão da entrega: fica escrito que se deixou de fora de propósito.
+
+---
+
+## O que acontece depois de colar o brief
+
+1. O Claude pergunta **no máximo três coisas**, todas juntas, e só se faltar algo
+   crítico.
+2. Escreve `specs/<cliente>/spec.md` e te deixa para revisar.
+3. Configura, constrói os módulos, implanta no Coolify e **testa a instância
+   implantada** com `probar-instancia`. Não se entrega com checks vermelhos.
+4. Te entrega a URL, o acesso de demo, o que se construiu, o que ficou pendente e as
+   decisões que tomou sozinho.
+
+O que você não gostar se corrige depois: marca, etapas e campos se mudam em
+`config/cliente.ts`, e o prompt do agente em Ajustes → Agente sem tocar em código.

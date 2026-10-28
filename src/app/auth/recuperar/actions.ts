@@ -3,11 +3,11 @@
 import { correoDeAccesoActivo, enviarEnlaceDeAcceso } from "@/lib/auth-correo";
 
 /**
- * Pide el correo con el enlace para volver a entrar.
+ * Pede o e-mail com o link para voltar a entrar.
  *
- * Responde lo mismo exista o no la cuenta: si dijera "ese correo no esta registrado",
- * cualquiera podria averiguar quien trabaja en la empresa probando direcciones. El limite
- * de frecuencia lo pone el servidor de autenticacion, que es el que manda el correo.
+ * Responde o mesmo exista ou não a conta: se dissesse "esse e-mail não está registrado",
+ * qualquer um poderia descobrir quem trabalha na empresa testando endereços. O limite
+ * de frequência quem põe é o servidor de autenticação, que é quem envia o e-mail.
  */
 export async function pedirEnlaceDeAcceso(
   formData: FormData
@@ -23,8 +23,8 @@ export async function pedirEnlaceDeAcceso(
 
   const { error } = await enviarEnlaceDeAcceso(email);
   if (error) {
-    // Los limites de frecuencia si se cuentan: sin esto, la persona vuelve a apretar el
-    // boton pensando que no paso nada.
+    // Os limites de frequência sim se contam: sem isto, a pessoa volta a apertar o
+    // botão pensando que não aconteceu nada.
     const m = error.toLowerCase();
     if (m.includes("rate") || m.includes("security purposes") || m.includes("seconds")) {
       return { error: "Ya se mando uno hace poco. Espera un minuto y volve a intentar." };

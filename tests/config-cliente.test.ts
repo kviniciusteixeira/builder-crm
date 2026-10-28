@@ -2,10 +2,10 @@ import { describe, it, expect } from "vitest";
 import { esquemaConfig } from "@/lib/config/schema";
 
 /**
- * `config/cliente.ts` es lo unico que toca un miembro para adaptar el CRM. Este esquema
- * es el contrato de esa adaptacion: si deja pasar algo invalido, el error aparece mucho
- * mas tarde y en otro lado (un pipeline con dos etapas iguales, un color que rompe el
- * contraste, un campo de seleccion sin opciones), y lo descubre el cliente.
+ * `config/cliente.ts` é o único que um membro toca para adaptar o CRM. Este esquema
+ * é o contrato dessa adaptação: se deixar passar algo inválido, o erro aparece muito
+ * mais tarde e em outro lugar (um pipeline com duas etapas iguais, uma cor que quebra o
+ * contraste, um campo de seleção sem opções), e quem descobre é o cliente.
  */
 
 const BASE = {
@@ -59,8 +59,8 @@ describe("esquema de config/cliente.ts", () => {
   });
 
   it("rechaza una clave de etapa que no sea snake_case", () => {
-    // Las claves viajan a la base y al prompt del agente: un espacio o un acento ahi
-    // rompe consultas y confunde al modelo.
+    // As chaves viajam para a base e para o prompt do agente: um espaço ou um acento aí
+    // quebra consultas e confunde o modelo.
     const r = esquemaConfig.safeParse({
       ...BASE,
       pipeline: {
@@ -97,16 +97,16 @@ describe("esquema de config/cliente.ts", () => {
   });
 
   it("acepta una zona horaria IANA y usa UTC si no se declara", () => {
-    // UTC por default a proposito: una instancia ya desplegada que actualiza el nucleo
-    // sin tocar su configuracion sigue viendo las mismas fechas que antes.
+    // UTC por default de propósito: uma instância já implantada que atualiza o núcleo
+    // sem tocar sua configuração continua vendo as mesmas datas de antes.
     expect(esquemaConfig.safeParse(BASE).data?.zonaHoraria).toBe("UTC");
     const r = esquemaConfig.safeParse({ ...BASE, zonaHoraria: "America/Mexico_City" });
     expect(r.success).toBe(true);
   });
 
   it("rechaza una zona horaria mal escrita", () => {
-    // Es la clase de error que no avisa: Intl la rechaza al formatear, lejos de aqui, y
-    // el sintoma es un agente que nombra el dia equivocado.
+    // É a classe de erro que não avisa: o Intl a rejeita ao formatar, longe daqui, e
+    // o sintoma é um agente que nomeia o dia errado.
     const r = esquemaConfig.safeParse({ ...BASE, zonaHoraria: "America/Santigo" });
     expect(r.success).toBe(false);
     if (!r.success) {

@@ -8,14 +8,14 @@ import type {
   ZernioResult,
 } from "./types";
 
-/** Bandeja unificada de Zernio: conversaciones y mensajes de todas las plataformas. */
+/** Caixa de entrada unificada do Zernio: conversas e mensagens de todas as plataformas. */
 
 export interface ListConversationsParams {
   platform?: ZernioPlatform;
   accountId?: string;
   status?: "active" | "archived";
   sortOrder?: "asc" | "desc";
-  /** 1-100, default 50 del lado de Zernio. */
+  /** 1-100, default 50 do lado do Zernio. */
   limit?: number;
   cursor?: string;
   profileId?: string;
@@ -41,8 +41,8 @@ export async function listConversations(
 }
 
 /**
- * Pagina todas las conversaciones siguiendo `nextCursor`. `maxPages` es un tope duro:
- * sin el, un cursor que no avanza (bug del proveedor) haria un loop infinito.
+ * Pagina todas as conversas seguindo `nextCursor`. `maxPages` é um teto duro:
+ * sem ele, um cursor que não avança (bug do provedor) faria um loop infinito.
  */
 export async function* iterateConversations(
   params: ListConversationsParams = {},
@@ -54,8 +54,8 @@ export async function* iterateConversations(
   for (let page = 0; page < maxPages; page++) {
     const result = await listConversations({ ...params, cursor });
     if (!result.success) {
-      // Sin este callback el llamador no distingue "no hay conversaciones" de
-      // "la API fallo", y una importacion rota se lee como exitosa.
+      // Sem este callback quem chama não distingue "não há conversas" de
+      // "a API falhou", e uma importação quebrada se lê como bem-sucedida.
       console.error("[zernio] listConversations fallo:", result.error.message);
       onError?.(result.error.message);
       return;
@@ -63,8 +63,8 @@ export async function* iterateConversations(
 
     const { data, pagination, meta } = result.data;
     if (meta?.failedAccounts?.length) {
-      // No es un error de la request: Zernio degrada por cuenta. Si no se loguea, una
-      // sincronizacion parcial se lee como completa.
+      // Não é um erro da request: o Zernio degrada por conta. Se não se loga, uma
+      // sincronização parcial se lê como completa.
       console.warn(
         "[zernio] cuentas que fallaron en la consulta:",
         meta.failedAccounts.map((a) => `${a.accountUsername ?? a.accountId}: ${a.error}`)
@@ -92,7 +92,7 @@ export interface ListMessagesParams {
   sortOrder?: "asc" | "desc";
 }
 
-/** La respuesta trae los mensajes en `messages`, no en `data`. */
+/** A resposta traz as mensagens em `messages`, não em `data`. */
 export interface ListMessagesResponse {
   messages?: ZernioInboxMessage[];
   data?: ZernioInboxMessage[];
@@ -117,7 +117,7 @@ export async function listMessages(
   );
 }
 
-/** Referencia a una plantilla aprobada, tal como la espera el endpoint de envio. */
+/** Referência a um template aprovado, tal como o espera o endpoint de envio. */
 export interface ZernioTemplateRef {
   name: string;
   language: string;
@@ -128,34 +128,34 @@ export interface SendMessageInput {
   accountId: string;
   message?: string;
   /**
-   * Fuera de la ventana de 24h, Instagram y Messenger solo aceptan HUMAN_AGENT
-   * (valida 7 dias) y hay que acompanarlo de messagingType MESSAGE_TAG.
+   * Fora da janela de 24h, Instagram e Messenger só aceitam HUMAN_AGENT
+   * (válida 7 dias) e há que acompanhá-lo de messagingType MESSAGE_TAG.
    */
   messageTag?: "HUMAN_AGENT";
   messagingType?: "RESPONSE" | "MESSAGE_TAG";
   attachments?: ZernioAttachment[];
-  /** WhatsApp: plantilla aprobada dentro de un hilo que ya existe. */
+  /** WhatsApp: template aprovado dentro de um fio que já existe. */
   template?: ZernioTemplateRef;
   /**
-   * WhatsApp Direct Send: mensaje de utilidad iniciado por el negocio SIN plantilla
-   * aprobada. Requiere que la WABA sea elegible; si no lo es, Meta rechaza el envio.
+   * WhatsApp Direct Send: mensagem de utilidade iniciada pelo negócio SEM template
+   * aprovado. Requer que a WABA seja elegível; se não é, a Meta rejeita o envio.
    */
   category?: "utility";
-  /** Zernio replica la respuesta original en lugar de reenviar. Valido 24h. */
+  /** O Zernio replica a resposta original em vez de reenviar. Válido 24h. */
   idempotencyKey?: string;
 }
 
 export interface SendMessageResponse {
   /**
-   * Zernio envuelve la respuesta: `{ success, data: { messageId, conversationId } }`.
-   * El cliente devuelve el cuerpo crudo, asi que el id util vive UN NIVEL ADENTRO.
+   * O Zernio envolve a resposta: `{ success, data: { messageId, conversationId } }`.
+   * O cliente devolve o corpo cru, então o id útil vive UM NÍVEL ADENTRO.
    */
   data?: {
     messageId?: string;
     conversationId?: string;
     /**
-     * Facebook e Instagram cuando se manda adjunto + texto: Meta lo parte en dos
-     * mensajes. El primero es el adjunto y coincide con `messageId`.
+     * Facebook e Instagram quando se manda anexo + texto: a Meta o parte em duas
+     * mensagens. A primeira é o anexo e coincide com `messageId`.
      */
     messageIds?: string[];
     [key: string]: unknown;
@@ -184,7 +184,7 @@ export async function sendMessage(
         ...(input.messagingType ? { messagingType: input.messagingType } : {}),
         ...(input.attachments?.length ? { attachments: input.attachments } : {}),
         ...(input.category ? { category: input.category } : {}),
-        // El endpoint espera la plantilla envuelta en `elements`, con un solo elemento.
+        // O endpoint espera o template envolvido em `elements`, com um só elemento.
         ...(input.template
           ? { template: { elements: [input.template] } }
           : {}),
@@ -195,16 +195,16 @@ export async function sendMessage(
 
 export interface CreateConversationInput {
   accountId: string;
-  /** WhatsApp: telefono en formato internacional, SIN el `+`. */
+  /** WhatsApp: telefone em formato internacional, SEM o `+`. */
   participantId?: string;
   participantUsername?: string;
   message?: string;
   templateName?: string;
   templateLanguage?: string;
   /**
-   * Valores de las variables en UN solo array plano y en el orden en que aparecen en
-   * la plantilla: primero las del header de texto, despues las del body, y al final
-   * una por cada boton de URL dinamica.
+   * Valores das variáveis num ÚNICO array plano e na ordem em que aparecem no
+   * template: primeiro as do header de texto, depois as do body, e no final
+   * uma por cada botão de URL dinâmica.
    */
   templateParams?: string[];
   category?: "utility";
@@ -219,12 +219,12 @@ export interface CreateConversationResponse {
 }
 
 /**
- * Inicia una conversacion de WhatsApp con un numero con el que no hay hilo abierto.
+ * Inicia uma conversa de WhatsApp com um número com o qual não há fio aberto.
  *
- * Es TAMBIEN la unica forma de reenganchar a alguien pasadas las 24 horas: WhatsApp no
- * permite texto libre para abrir conversacion, asi que sin `templateName` la API
- * devuelve TEMPLATE_REQUIRED (salvo Direct Send con `category: 'utility'`).
- * Si ya existe un hilo con ese numero, la plantilla entra en ese mismo hilo.
+ * É TAMBÉM a única forma de reengajar alguém passadas as 24 horas: o WhatsApp não
+ * permite texto livre para abrir conversa, então sem `templateName` a API
+ * devolve TEMPLATE_REQUIRED (salvo Direct Send com `category: 'utility'`).
+ * Se já existe um fio com esse número, o template entra nesse mesmo fio.
  */
 export async function createConversation(
   input: CreateConversationInput
@@ -253,18 +253,18 @@ export async function createConversation(
   });
 }
 
-/** Zernio devuelve el id del mensaje con distinto nombre segun endpoint. */
+/** O Zernio devolve o id da mensagem com nome diferente conforme o endpoint. */
 /**
- * Id del mensaje recien enviado.
+ * Id da mensagem recém-enviada.
  *
- * IMPORTA MAS DE LO QUE PARECE: es la clave con la que se deduplica el eco. Zernio
- * manda un webhook `message.sent` por cada mensaje que sale, incluidos los que mando
- * el propio CRM. Si la fila saliente se guarda sin este id, el indice unico (que es
- * parcial, `where external_id is not null`) no puede frenar nada y el mensaje aparece
- * DOS VECES en la bandeja, aunque al cliente le llegue una sola.
+ * IMPORTA MAIS DO QUE PARECE: é a chave com a qual se deduplica o eco. O Zernio
+ * manda um webhook `message.sent` por cada mensagem que sai, incluídas as que mandou
+ * o próprio CRM. Se a linha de saída se guarda sem este id, o índice único (que é
+ * parcial, `where external_id is not null`) não pode frear nada e a mensagem aparece
+ * DUAS VEZES na caixa de entrada, mesmo que ao cliente chegue uma só.
  *
- * Se leen las dos formas —con y sin envoltorio— para no depender de que la API no
- * cambie de opinion.
+ * Leem-se as duas formas —com e sem envelope— para não depender de a API não
+ * mudar de opinião.
  */
 export function extractMessageId(res: SendMessageResponse): string | null {
   return (

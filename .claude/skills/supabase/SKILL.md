@@ -1,51 +1,51 @@
 ---
 name: supabase
 description: |
-  Todo lo relacionado con Supabase: crear tablas, migraciones, RLS, queries, metricas, CRUD,
-  auth, storage, logs, y operaciones de datos.
-  Activar cuando el usuario dice: necesito una tabla, crear tabla, base de datos, guardar datos,
-  proteger datos, RLS, migracion, query, cuantos usuarios, metricas, revenue, dame los datos,
-  consulta supabase, cuantos registros, analiza los datos, estadisticas, reportes, churn,
-  funnel, storage, auth, configurar permisos, o cualquier operacion de BD.
+  Tudo relacionado ao Supabase: criar tabelas, migrações, RLS, queries, métricas, CRUD,
+  auth, storage, logs e operações de dados.
+  Ativar quando o usuário diz: preciso de uma tabela, criar tabela, banco de dados, guardar dados,
+  proteger dados, RLS, migração, query, quantos usuários, métricas, receita, me dá os dados,
+  consulta supabase, quantos registros, analisa os dados, estatísticas, relatórios, churn,
+  funil, storage, auth, configurar permissões, ou qualquer operação de banco.
 allowed-tools: Bash(curl *) Bash(export *) Bash(grep *) Bash(python3 *) Read, Write, Edit, Grep
 metadata:
   author: saas-factory
   version: "2.0"
 ---
 
-# Supabase — Tu Base de Datos Completa
+# Supabase — o seu banco de dados completo
 
-Estructura, datos, seguridad, y metricas. Todo en un solo lugar.
+Estrutura, dados, segurança e métricas. Tudo num só lugar.
 
 ---
 
-## Setup Inicial (Una Sola Vez)
+## Setup inicial (uma única vez)
 
-### Paso 1: Credenciales
+### Passo 1: Credenciais
 
-| Key | Donde encontrarla | Para que |
+| Key | Onde encontrá-la | Para quê |
 |-----|-------------------|----------|
-| **Service Role Key** | Dashboard → Settings → API → `service_role` | Queries directos (bypassa RLS) |
-| **Personal Access Token** | supabase.com/dashboard/account/tokens | Management API (SQL raw, logs) |
+| **Service Role Key** | Dashboard → Settings → API → `service_role` | Queries diretas (ignora RLS) |
+| **Personal Access Token** | supabase.com/dashboard/account/tokens | Management API (SQL cru, logs) |
 
-### Paso 2: Guardar en `.env`
+### Passo 2: Guardar em `.env`
 
 ```bash
-SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
-SUPABASE_SERVICE_KEY=eyJhbGci...tu_service_role_key
-SUPABASE_PAT=sbp_...tu_personal_access_token
-SUPABASE_PROJECT_REF=tu_project_ref
+SUPABASE_URL=https://SEU_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGci...sua_service_role_key
+SUPABASE_PAT=sbp_...seu_personal_access_token
+SUPABASE_PROJECT_REF=seu_project_ref
 ```
 
-### Paso 3: Documentar tu schema
+### Passo 3: Documentar o seu schema
 
-Ejecuta el MEGAPROMPT al final de este archivo para generar `references/schema.md` automaticamente.
+Execute o MEGAPROMPT no final deste arquivo para gerar `references/schema.md` automaticamente.
 
 ---
 
-## Cargar Credenciales
+## Carregar credenciais
 
-SIEMPRE ejecutar antes de cualquier query:
+SEMPRE executar antes de qualquer query:
 
 ```bash
 export SUPABASE_URL=$(grep '^SUPABASE_URL=' .env | cut -d= -f2)
@@ -56,64 +56,64 @@ export SUPABASE_PROJECT_REF=$(grep '^SUPABASE_PROJECT_REF=' .env | cut -d= -f2)
 
 ---
 
-## MCP: Estructura y Exploracion
+## MCP: estrutura e exploração
 
-Si tienes `@supabase/mcp-server-supabase` en `.mcp.json`:
+Se você tem `@supabase/mcp-server-supabase` em `.mcp.json`:
 
 ### Explorar
 ```
-list_tables                    -- Ver estructura de BD
-execute_sql("SELECT ...")      -- Consultar datos
+list_tables                    -- Ver estrutura do banco
+execute_sql("SELECT ...")      -- Consultar dados
 get_logs(service: "auth")      -- Depurar auth
-get_logs(service: "postgres")  -- Depurar BD
+get_logs(service: "postgres")  -- Depurar o banco
 ```
 
-### Crear/Modificar Estructura (DDL)
+### Criar/modificar estrutura (DDL)
 ```
 apply_migration(
-  name: "nombre_descriptivo",
+  name: "nome_descritivo",
   query: "CREATE TABLE | ALTER TABLE | CREATE INDEX"
 )
 ```
 
-### Verificar Seguridad
+### Verificar segurança
 ```
-get_advisors(type: "security") -- Detecta tablas sin RLS
-search_docs("consulta aqui")   -- Buscar en docs oficiales
+get_advisors(type: "security") -- Detecta tabelas sem RLS
+search_docs("consulta aqui")   -- Buscar na documentação oficial
 ```
 
 ---
 
-## HTTP: Datos y Operaciones
+## HTTP: dados e operações
 
-### PostgREST (CRUD rapido)
+### PostgREST (CRUD rápido)
 
 ```bash
-curl -s "$SUPABASE_URL/rest/v1/TABLA?FILTROS" \
+curl -s "$SUPABASE_URL/rest/v1/TABELA?FILTROS" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_KEY"
 ```
 
-### Management API (SQL raw)
+### Management API (SQL cru)
 
 ```bash
 curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
   -H "Authorization: Bearer $SUPABASE_PAT" \
   -H "Content-Type: application/json" \
-  -d '{"query": "TU SQL AQUI"}'
+  -d '{"query": "SEU SQL AQUI"}'
 ```
 
-**Cuando usar cada uno:**
-- **MCP** → explorar, migraciones, verificar seguridad
-- **PostgREST** → CRUD, filtros, paginacion, scripts
-- **Management API** → JOINs, aggregations, SQL complejo, logs
+**Quando usar cada um:**
+- **MCP** → explorar, migrações, verificar segurança
+- **PostgREST** → CRUD, filtros, paginação, scripts
+- **Management API** → JOINs, agregações, SQL complexo, logs
 
 ---
 
-## Patron: Crear Tabla con RLS
+## Padrão: criar tabela com RLS
 
 ```sql
--- 1. Crear la tabla
+-- 1. Criar a tabela
 apply_migration(
   name: "create_profiles",
   query: "
@@ -133,7 +133,7 @@ apply_migration(
   query: "ALTER TABLE profiles ENABLE ROW LEVEL SECURITY"
 )
 
--- 3. Politicas
+-- 3. Políticas
 apply_migration(
   name: "profiles_select_own",
   query: "
@@ -154,7 +154,7 @@ apply_migration(
 get_advisors(type: "security")
 ```
 
-### Claves Foraneas
+### Chaves estrangeiras
 ```sql
 apply_migration(
   name: "create_posts",
@@ -171,12 +171,12 @@ apply_migration(
 )
 ```
 
-### Indices
+### Índices
 ```sql
--- Simple
+-- Simples
 apply_migration(name: "idx_posts_user_id", query: "CREATE INDEX idx_posts_user_id ON posts(user_id)")
 
--- Compuesto
+-- Composto
 apply_migration(name: "idx_posts_user_published", query: "CREATE INDEX idx_posts_user_published ON posts(user_id, published)")
 
 -- Parcial
@@ -185,33 +185,33 @@ apply_migration(name: "idx_posts_published", query: "CREATE INDEX idx_posts_publ
 
 ---
 
-## PostgREST — Referencia Rapida
+## PostgREST — referência rápida
 
 ### Filtros
 
-| Operador | Significado | Ejemplo |
+| Operador | Significado | Exemplo |
 |----------|-------------|---------|
 | `eq` | Igual | `status=eq.active` |
-| `neq` | No igual | `status=neq.deleted` |
-| `gt` / `gte` | Mayor / mayor-igual | `price_cents=gt.1000` |
-| `lt` / `lte` | Menor / menor-igual | `created_at=lte.2026-01-01` |
-| `like` / `ilike` | Patron | `email=ilike.*@gmail.com` |
-| `in` | En lista | `status=in.(active,trialing)` |
-| `is` | Null check | `deleted_at=is.null` |
-| `not` | Negacion | `status=not.eq.canceled` |
-| `cs` | Contains (arrays) | `tags=cs.{premium}` |
+| `neq` | Diferente | `status=neq.deleted` |
+| `gt` / `gte` | Maior / maior ou igual | `price_cents=gt.1000` |
+| `lt` / `lte` | Menor / menor ou igual | `created_at=lte.2026-01-01` |
+| `like` / `ilike` | Padrão | `email=ilike.*@gmail.com` |
+| `in` | Na lista | `status=in.(active,trialing)` |
+| `is` | Checagem de null | `deleted_at=is.null` |
+| `not` | Negação | `status=not.eq.canceled` |
+| `cs` | Contém (arrays) | `tags=cs.{premium}` |
 
-### Ordenar y Paginar
+### Ordenar e paginar
 
-| Parametro | Ejemplo |
+| Parâmetro | Exemplo |
 |-----------|---------|
 | Ordenar | `order=created_at.desc` |
 | Limitar | `limit=10` |
 | Offset | `offset=20` |
-| Seleccionar columnas | `select=id,name,email` |
-| Contar total | Header: `Prefer: count=exact` + `-I` |
+| Selecionar colunas | `select=id,name,email` |
+| Contar o total | Header: `Prefer: count=exact` + `-I` |
 
-### CRUD Completo
+### CRUD completo
 
 **Listar:**
 ```bash
@@ -228,7 +228,7 @@ curl -s "$SUPABASE_URL/rest/v1/users?select=id&status=eq.active" \
   -H "Prefer: count=exact,head=true" -I 2>/dev/null | grep -i content-range
 ```
 
-**Insertar:**
+**Inserir:**
 ```bash
 curl -s -X POST "$SUPABASE_URL/rest/v1/users" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
@@ -238,7 +238,7 @@ curl -s -X POST "$SUPABASE_URL/rest/v1/users" \
   -d '{"email": "test@example.com", "name": "Test User"}'
 ```
 
-**Actualizar:**
+**Atualizar:**
 ```bash
 curl -s -X PATCH "$SUPABASE_URL/rest/v1/users?id=eq.UUID_AQUI" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
@@ -258,7 +258,7 @@ curl -s -X POST "$SUPABASE_URL/rest/v1/metrics" \
   -d '{"date": "2026-03-16", "value": 100}'
 ```
 
-**Filtrar por fecha (ultimos 7 dias):**
+**Filtrar por data (últimos 7 dias):**
 ```bash
 curl -s "$SUPABASE_URL/rest/v1/events?created_at=gte.$(date -u -v-7d +%Y-%m-%dT00:00:00Z)&order=created_at.desc" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
@@ -267,9 +267,9 @@ curl -s "$SUPABASE_URL/rest/v1/events?created_at=gte.$(date -u -v-7d +%Y-%m-%dT0
 
 ---
 
-## Management API — SQL Raw
+## Management API — SQL cru
 
-**Usuarios por dia:**
+**Usuários por dia:**
 ```bash
 curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
   -H "Authorization: Bearer $SUPABASE_PAT" \
@@ -277,7 +277,7 @@ curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/data
   -d '{"query": "SELECT date_trunc('\''day'\'', created_at)::date as day, count(*) FROM users WHERE created_at >= now() - interval '\''30 days'\'' GROUP BY 1 ORDER BY 1"}'
 ```
 
-**Revenue total:**
+**Receita total:**
 ```bash
 curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
   -H "Authorization: Bearer $SUPABASE_PAT" \
@@ -285,7 +285,7 @@ curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/data
   -d '{"query": "SELECT sum(price_cents)/100.0 as revenue_usd, count(*) as total FROM purchases WHERE status = '\''completed'\''"}'
 ```
 
-**Top N con JOIN:**
+**Top N com JOIN:**
 ```bash
 curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
   -H "Authorization: Bearer $SUPABASE_PAT" \
@@ -301,9 +301,9 @@ curl -s "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/analytics/en
 
 ---
 
-## Patron: Metricas de Negocio
+## Padrão: métricas de negócio
 
-Adapta nombres de tabla y columnas a tu schema:
+Adapte nomes de tabela e colunas ao seu schema:
 
 ### MRR (Monthly Recurring Revenue)
 ```bash
@@ -312,20 +312,20 @@ curl -s "$SUPABASE_URL/rest/v1/purchases?select=price_cents,billing_interval&sta
   -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" | python3 -c "
 import sys,json; data=json.load(sys.stdin)
 mrr=sum(r['price_cents']/(12 if r.get('billing_interval')=='year' else 1) for r in data)
-print(f'MRR: \${mrr/100:,.2f} USD ({len(data)} suscripciones activas)')
+print(f'MRR: \${mrr/100:,.2f} USD ({len(data)} assinaturas ativas)')
 "
 ```
 
-### Churn Signal
+### Sinal de churn
 ```bash
 curl -s "$SUPABASE_URL/rest/v1/purchases?select=id&status=eq.completed&cancel_at_period_end=eq.true" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" | python3 -c "
-import sys,json; print(f'Van a cancelar: {len(json.load(sys.stdin))}')
+import sys,json; print(f'Vão cancelar: {len(json.load(sys.stdin))}')
 "
 ```
 
-### Funnel de Conversion
+### Funil de conversão
 ```bash
 curl -s "$SUPABASE_URL/rest/v1/funnel_events?select=event_name&created_at=gte.$(date -u -v-7d +%Y-%m-%dT00:00:00Z)" \
   -H "apikey: $SUPABASE_SERVICE_KEY" \
@@ -338,9 +338,9 @@ for k,v in counts.most_common(): print(f'{k}: {v}')
 
 ---
 
-## Patron: BI Snapshot (Metricas Diarias)
+## Padrão: snapshot de BI (métricas diárias)
 
-Tabla que se llena cada noche con un snapshot de tus KPIs:
+Tabela que se preenche toda noite com um snapshot dos seus KPIs:
 
 ```sql
 CREATE TABLE daily_metrics (
@@ -369,55 +369,55 @@ curl -s -X POST "$SUPABASE_URL/rest/v1/daily_metrics" \
 
 ---
 
-## MEGAPROMPT: Documentar tu Schema
+## MEGAPROMPT: documentar o seu schema
 
-Copia y pega en Claude Code:
+Copie e cole no Claude Code:
 
 ```
-Documenta el schema completo de mi base de datos Supabase.
+Documenta o schema completo do meu banco de dados Supabase.
 
-1. Ejecuta: list_tables
-2. Para cada tabla: execute_sql("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'NOMBRE_TABLA' ORDER BY ordinal_position")
-3. Genera references/schema.md con formato:
+1. Execute: list_tables
+2. Para cada tabela: execute_sql("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'NOME_TABELA' ORDER BY ordinal_position")
+3. Gere references/schema.md com o formato:
 
-# [Mi Proyecto] -- Database Schema
+# [Meu projeto] -- Database Schema
 ## Project: [project_ref]
 ## Tables ([N] total)
 
-### nombre_tabla (CRITICAL - [dominio])
-- columna1: tipo, columna2: tipo, ...
+### nome_tabela (CRITICAL - [domínio])
+- coluna1: tipo, coluna2: tipo, ...
 
-Marca CRITICAL las tablas mas importantes (usuarios, compras, contenido).
-Agrupa por dominio (Core, Content, Analytics, etc.).
+Marque CRITICAL as tabelas mais importantes (usuários, compras, conteúdo).
+Agrupe por domínio (Core, Content, Analytics, etc.).
 ```
 
 ---
 
-## Principios
+## Princípios
 
-1. **RLS Siempre**: Toda tabla con datos de usuario debe tener RLS habilitado
-2. **Migraciones Nombradas**: Nombres descriptivos para tracking
+1. **RLS sempre**: toda tabela com dados de usuário deve ter RLS habilitado
+2. **Migrações nomeadas**: nomes descritivos para rastreio
 3. **apply_migration para DDL**: CREATE, ALTER, DROP
 4. **execute_sql para DML**: SELECT, INSERT, UPDATE, DELETE
-5. **get_advisors despues de crear tablas**: Verificar seguridad
-6. **NUNCA fabricar datos**: Si un query falla, decirlo
-7. **NUNCA mezclar ventanas de tiempo**: Advertir si se comparan periodos incompatibles
-8. **Verificar con queries reales**: No confiar en docs desactualizados
-9. **Service Role Key bypassa RLS**: Solo en desarrollo/admin
-10. **Documentar tu schema**: Claude es 10x mas util cuando conoce tus tablas
+5. **get_advisors depois de criar tabelas**: verificar segurança
+6. **NUNCA fabricar dados**: se uma query falhar, dizer
+7. **NUNCA misturar janelas de tempo**: avisar se se comparam períodos incompatíveis
+8. **Verificar com queries reais**: não confiar em docs desatualizados
+9. **Service Role Key ignora RLS**: só em desenvolvimento/admin
+10. **Documentar o seu schema**: o Claude é 10x mais útil quando conhece as suas tabelas
 
 ---
 
-## Flujo de Trabajo
+## Fluxo de trabalho
 
 ```
-Estructura:
-  list_tables → disenar → apply_migration → RLS → policies → get_advisors → test data
+Estrutura:
+  list_tables → desenhar → apply_migration → RLS → policies → get_advisors → test data
 
-Datos:
-  Cargar credenciales → PostgREST (CRUD) o Management API (SQL) → verificar resultado
+Dados:
+  Carregar credenciais → PostgREST (CRUD) ou Management API (SQL) → verificar o resultado
 ```
 
-## Referencia: Tu Schema
+## Referência: o seu schema
 
-Si documentaste tu schema, esta en `references/schema.md`. Leelo antes de cualquier query.
+Se você documentou o schema, está em `references/schema.md`. Leia antes de qualquer query.

@@ -11,10 +11,10 @@ interface Body {
 }
 
 /**
- * Toggle del agente IA por contacto.
- * - { enabled: true, clearNeedsHuman: true }  -> reactivar bot (lo mas comun, ej. cliente cerro caso humano)
- * - { enabled: false }                         -> apagar bot manualmente
- * - { clearNeedsHuman: true }                  -> solo limpiar bandera de "necesita humano"
+ * Toggle do agente de IA por contato.
+ * - { enabled: true, clearNeedsHuman: true }  -> reativar bot (o mais comum, ex. cliente fechou caso humano)
+ * - { enabled: false }                         -> desligar bot manualmente
+ * - { clearNeedsHuman: true }                  -> só limpar a bandeira de "precisa de humano"
  */
 export async function PATCH(
   request: NextRequest,

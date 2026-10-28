@@ -3,13 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { modoLocal } from "@/lib/modo-local";
 import { opcionesDeCookie } from "@/lib/supabase/cookies";
 
-// `/correo` sirve las plantillas de los correos de acceso: las descarga el servidor de
-// autenticacion, que no tiene sesion en el CRM. Son plantillas vacias, sin datos.
+// `/correo` serve os templates dos e-mails de acesso: baixa-os o servidor de
+// autenticação, que não tem sessão no CRM. São templates vazios, sem dados.
 const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/sin-acceso", "/correo"];
-// `/api/automations/process` es el sweeper (lo llama el cron con secreto); el resto
-// de /api/automations exige sesion.
-// Rutas con autenticacion propia (secreto del worker o admin con sesion, resuelto en
-// la ruta): el middleware no las manda a /login.
+// `/api/automations/process` é o sweeper (chama-o o cron com segredo); o resto
+// de /api/automations exige sessão.
+// Rotas com autenticação própria (segredo do worker ou admin com sessão, resolvido na
+// rota): o middleware não as manda para /login.
 const PUBLIC_API_PREFIXES = [
   "/api/health",
   "/api/webhooks",
@@ -20,9 +20,9 @@ const PUBLIC_API_PREFIXES = [
 ];
 
 export async function updateSession(request: NextRequest) {
-  // Modo local: no hay servidor de autenticacion al que preguntarle. Sin esta salida,
-  // `createServerClient` recibe undefined y TODA peticion muere antes de renderizar;
-  // eso es lo que hacia que el CRM no abriera sin un proyecto de Supabase.
+  // Modo local: não há servidor de autenticação a quem perguntar. Sem esta saída,
+  // `createServerClient` recebe undefined e TODA requisição morre antes de renderizar;
+  // isso é o que fazia o CRM não abrir sem um projeto de Supabase.
   if (modoLocal()) return NextResponse.next({ request });
 
   let supabaseResponse = NextResponse.next({ request });

@@ -5,13 +5,13 @@ import { and, asc, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { isChannel, type Channel } from "@/lib/channels/types";
 
 /**
- * Capa de lectura del inbox.
+ * Camada de leitura da caixa de entrada.
  *
- * Antes una "conversacion" era una proyeccion de `contacts ⟕ ultimo mensaje`, agrupada
- * por contacto. Con tres canales eso colapsaba los hilos: la misma persona escribiendo
- * por WhatsApp y por Instagram quedaba en un solo chat mezclado. Ahora se lee de la
- * tabla `conversations`, que ademas trae `unread_count` y `last_*` materializados: la
- * lista pasa de N+1 queries a una sola.
+ * Antes uma "conversa" era uma projeção de `contacts ⟕ última mensagem`, agrupada
+ * por contato. Com três canais isso colapsava os fios: a mesma pessoa escrevendo
+ * por WhatsApp e por Instagram ficava num só chat misturado. Agora se lê da
+ * tabela `conversations`, que além disso traz `unread_count` e `last_*` materializados: a
+ * lista passa de N+1 queries a uma só.
  */
 
 export interface ConversationListItem {
@@ -20,7 +20,7 @@ export interface ConversationListItem {
   name: string;
   channel: Channel;
   provider: string;
-  /** Telefono en WhatsApp, @usuario en Instagram, nombre en Messenger. */
+  /** Telefone no WhatsApp, @usuário no Instagram, nome no Messenger. */
   handle: string | null;
   phone: string | null;
   participantPicture: string | null;
@@ -28,7 +28,7 @@ export interface ConversationListItem {
   lastDirection: "in" | "out" | null;
   lastAt: Date | null;
   unreadCount: number;
-  /** Efectivo: el contacto es el kill-switch global, la conversacion apaga un canal. */
+  /** Efetivo: o contato é o kill-switch global, a conversa desliga um canal. */
   aiEnabled: boolean;
   needsHuman: boolean;
   needsHumanReason: string | null;
@@ -57,7 +57,7 @@ export interface ConversationDetail {
   handle: string | null;
   participantName: string | null;
   participantPicture: string | null;
-  /** Ultimo entrante: define la ventana de 24h del lado del servidor. */
+  /** Último entrante: define a janela de 24h do lado do servidor. */
   lastInboundAt: Date | null;
   aiEnabled: boolean;
   needsHuman: boolean;
@@ -82,7 +82,7 @@ function handleOf(row: {
 
 export async function listConversations(filter?: {
   channel?: Channel;
-  /** Solo hilos de contactos con este propietario (visibilidad de asesor). */
+  /** Só fios de contatos com este proprietário (visibilidade de assessor). */
   ownerId?: string;
 }): Promise<ConversationListItem[]> {
   const base = db
@@ -112,16 +112,16 @@ export async function listConversations(filter?: {
     .leftJoin(contacts, eq(contacts.id, conversations.contactId))
     .leftJoin(channelAccounts, eq(channelAccounts.id, conversations.accountId));
 
-  // Los hilos de una cuenta desconectada no se muestran.
+  // Os fios de uma conta desconectada não se mostram.
   //
-  // Al desconectar una cuenta y conectar otra, sus conversaciones seguian apareciendo
-  // en la bandeja: parecian activas, pero responderlas fallaba porque la cuenta ya no
-  // existe del lado del proveedor. No se borran — si se vuelve a conectar la misma
-  // cuenta, el historial reaparece solo. Para eliminarlas de verdad esta
+  // Ao desconectar uma conta e conectar outra, as suas conversas continuavam aparecendo
+  // na caixa de entrada: pareciam ativas, mas respondê-las falhava porque a conta já não
+  // existe do lado do provedor. Não se apagam — se se volta a conectar a mesma
+  // conta, o histórico reaparece sozinho. Para eliminá-las de verdade está
   // `npm run channels:purge`.
   //
-  // Las conversaciones sin cuenta asociada (historicas, o de otro proveedor) se
-  // muestran igual: no hay ninguna cuenta que las invalide.
+  // As conversas sem conta associada (históricas, ou de outro provedor) se
+  // mostram igual: não há nenhuma conta que as invalide.
   const soloConectadas = or(
     isNull(conversations.accountId),
     isNull(channelAccounts.id),
@@ -133,8 +133,8 @@ export async function listConversations(filter?: {
       and(
         soloConectadas,
         filter?.channel ? eq(conversations.channel, filter.channel) : undefined,
-        // Un asesor ve solo los hilos de sus contactos. Los hilos sin contacto
-        // (raros: llegaron antes de crear el contacto) los ve solo el admin.
+        // Um assessor vê só os fios dos seus contatos. Os fios sem contato
+        // (raros: chegaram antes de criar o contato) só o admin os vê.
         filter?.ownerId ? eq(contacts.ownerId, filter.ownerId) : undefined
       )
     )
@@ -247,7 +247,7 @@ export async function markConversationAsRead(
     .where(eq(conversations.id, conversationId));
 }
 
-/** Todos los hilos de un contacto, para el panel de detalle. */
+/** Todos os fios de um contato, para o painel de detalhe. */
 export async function listConversationsForContact(
   contactId: string
 ): Promise<Array<{ conversationId: string; channel: Channel; lastAt: Date | null }>> {
@@ -265,8 +265,8 @@ export async function listConversationsForContact(
 }
 
 /**
- * Retrocompatibilidad de links viejos: `/conversations/<contactId>` sigue funcionando.
- * Devuelve el id de conversacion si el parametro era un contacto.
+ * Retrocompatibilidade de links velhos: `/conversations/<contactId>` continua funcionando.
+ * Devolve o id de conversa se o parâmetro era um contato.
  */
 export async function resolveConversationId(
   id: string
@@ -301,15 +301,15 @@ export async function countUnreadByChannel(): Promise<Record<string, number>> {
 }
 
 /**
- * Borra un hilo y todo lo que cuelga de el.
+ * Apaga um fio e tudo o que pende dele.
  *
- * `messages` y `agent_jobs` se van por cascade (FK con ON DELETE CASCADE). NO se toca
- * el contacto ni `contact_identities`: la persona sigue en el CRM y, si vuelve a
- * escribir, la ingesta crea un hilo nuevo y lo engancha al mismo contacto. Tampoco se
- * tocan `webhook_events`: son el registro de lo que entrego el proveedor y sirven de
- * idempotencia; borrarlos haria que un reintento reinsertara los mensajes.
+ * `messages` e `agent_jobs` vão por cascade (FK com ON DELETE CASCADE). NÃO se toca
+ * o contato nem `contact_identities`: a pessoa continua no CRM e, se volta a
+ * escrever, a ingestão cria um fio novo e o engancha ao mesmo contato. Também não se
+ * tocam `webhook_events`: são o registro do que o provedor entregou e servem de
+ * idempotência; apagá-los faria com que uma nova tentativa reinsira as mensagens.
  *
- * No se puede deshacer: el historial de esa conversacion se pierde para siempre.
+ * Não se pode desfazer: o histórico dessa conversa se perde para sempre.
  */
 export async function deleteConversation(conversationId: string): Promise<{
   deleted: boolean;

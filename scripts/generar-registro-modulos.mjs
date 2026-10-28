@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Genera el registro de modulos activos con imports ESTATICOS, para que el bundler
-// (Turbopack o webpack) los compile. Lee config/modulos.json y escribe:
+// Gera o registro de módulos ativos com imports ESTÁTICOS, para que o bundler
+// (Turbopack ou webpack) os compile. Lê config/modulos.json e escreve:
 //
-//   src/lib/modules/registro.generated.ts          (servidor: paginas, api, tools, seed)
+//   src/lib/modules/registro.generated.ts          (servidor: páginas, api, tools, seed)
 //   src/lib/modules/registro-cliente.generated.ts  (navegador: nav, campos)
 //
-// Lo invoca next.config.ts al cargar (dev, build y Docker) y `npm run typecheck`.
-// Es idempotente: no reescribe si el contenido no cambio (evita reinicios en dev).
+// O next.config.ts o invoca ao carregar (dev, build e Docker) e `npm run typecheck`.
+// É idempotente: não reescreve se o conteúdo não mudou (evita reinícios em dev).
 //
 //   node scripts/generar-registro-modulos.mjs
 

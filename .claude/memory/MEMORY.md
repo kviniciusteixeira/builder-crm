@@ -1,16 +1,16 @@
-# Memoria del proyecto — Indice
+# Memória do projeto — Índice
 
-> Un archivo por hecho, organizado por carpeta (tipo). Maximo 200 lineas en este indice.
-> Gestionado por la skill `memory-manager`. Se versiona con git para que viaje con el repo.
+> Um arquivo por fato, organizado por pasta (tipo). Máximo de 200 linhas neste índice.
+> Gerenciado pela skill `memory-manager`. Versionado com git para viajar com o repositório.
 
-## user/ — Sobre el usuario o equipo
-(vacio)
+## user/ — Sobre o usuário ou a equipe
+(vazio)
 
-## project/ — Decisiones activas y estado del trabajo
-(vacio)
+## project/ — Decisões ativas e estado do trabalho
+(vazio)
 
-## feedback/ — Correcciones y preferencias
-(vacio)
+## feedback/ — Correções e preferências
+(vazio)
 
-## reference/ — Donde encontrar cosas
-(vacio)
+## reference/ — Onde encontrar as coisas
+(vazio)

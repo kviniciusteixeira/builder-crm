@@ -1,4 +1,4 @@
 import { layoutSoloMiembros } from "@/lib/acceso";
 
-// La pagina es de cliente, asi que la puerta va aca: sin membresia, /sin-acceso.
+// A página é de cliente, então a porta fica aqui: sem ser membro, /sin-acceso.
 export default layoutSoloMiembros();

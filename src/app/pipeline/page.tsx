@@ -39,7 +39,7 @@ export default async function PipelinePage() {
     })
     .from(deals)
     .leftJoin(contacts, eq(deals.contactId, contacts.id))
-    // Un asesor ve solo las operaciones de sus contactos.
+    // Um assessor vê só as operações dos seus contatos.
     .where(ownerFilter(member));
 
   const docCounts = await countDocumentsByContact([...new Set(dealRows.map((d) => d.contactId))]);

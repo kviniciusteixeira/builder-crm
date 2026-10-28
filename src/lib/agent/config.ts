@@ -9,13 +9,13 @@ import { getDefaultSystemPromptTemplate, getGlobalSystemPromptTemplate } from ".
 import { getAgentModel } from "./openrouter";
 
 /**
- * Configuracion del agente POR CANAL.
+ * Configuração do agente POR CANAL.
  *
- * El pedido concreto fue "los agentes no deben ser iguales": el que contesta un DM de
- * Instagram no puede tener el mismo prompt que el de WhatsApp. La resolucion es en
- * cascada, asi nada de lo que ya estaba configurado se rompe:
+ * O pedido concreto foi "os agentes não devem ser iguais": o que responde um DM de
+ * Instagram não pode ter o mesmo prompt que o de WhatsApp. A resolução é em
+ * cascata, assim nada do que já estava configurado se quebra:
  *
- *   agent_configs[canal]  ->  crm_settings['agent.*'] (global)  ->  default del codigo
+ *   agent_configs[canal]  ->  crm_settings['agent.*'] (global)  ->  default do código
  */
 
 export interface ResolvedAgentConfig {
@@ -24,7 +24,7 @@ export interface ResolvedAgentConfig {
   systemPrompt: string;
   enabledTools: string[];
   model: string;
-  /** true si el valor viene del global y no de una config propia del canal. */
+  /** true se o valor vem do global e não de uma config própria do canal. */
   promptInherited: boolean;
   toolsInherited: boolean;
   modelInherited: boolean;
@@ -43,8 +43,8 @@ export async function getAgentConfig(
 
   return {
     channel,
-    // Sin fila, WhatsApp queda encendido (comportamiento actual) y los canales nuevos
-    // tambien: la fila de la migracion los crea explicitamente en false.
+    // Sem linha, o WhatsApp fica ligado (comportamento atual) e os canais novos
+    // também: a linha da migração os cria explicitamente em false.
     enabled: row?.enabled ?? true,
     systemPrompt: ownPrompt || (await getGlobalSystemPromptTemplate()),
     enabledTools: ownTools?.length
@@ -75,7 +75,7 @@ function filterValidTools(names: string[]): string[] {
 
 export interface AgentConfigPatch {
   enabled?: boolean;
-  /** null vuelve a heredar del global. */
+  /** null volta a herdar do global. */
   systemPrompt?: string | null;
   enabledTools?: string[] | null;
   model?: string | null;
@@ -121,7 +121,7 @@ export async function saveAgentConfig(
   return getAgentConfig(channel);
 }
 
-/** Vuelve a heredar todo del global sin borrar el on/off del canal. */
+/** Volta a herdar tudo do global sem apagar o on/off do canal. */
 export async function resetAgentConfig(
   channel: Channel
 ): Promise<ResolvedAgentConfig | null> {

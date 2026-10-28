@@ -1,6 +1,6 @@
--- Modulo ejemplo: tareas personales por miembro. Idempotente.
--- Las tablas de un modulo llevan el nombre del modulo como prefijo para no chocar
--- con el nucleo ni con otros modulos.
+-- Módulo exemplo: tarefas pessoais por membro. Idempotente.
+-- As tabelas de um módulo levam o nome do módulo como prefixo para não colidir
+-- com o núcleo nem com outros módulos.
 
 create table if not exists ejemplo_tareas (
   id         uuid primary key default gen_random_uuid(),
@@ -12,8 +12,8 @@ create table if not exists ejemplo_tareas (
 
 create index if not exists ejemplo_tareas_member_idx on ejemplo_tareas (member_id, hecha, created_at desc);
 
--- RLS obligatorio (constitucion IV). La app escribe por Drizzle (bypass); esto
--- protege la API publica de Supabase: cada miembro lee solo lo suyo.
+-- RLS obrigatório (constituição IV). O app escreve pelo Drizzle (bypass); isto
+-- protege a API pública do Supabase: cada membro lê só o que é seu.
 alter table ejemplo_tareas enable row level security;
 drop policy if exists ejemplo_tareas_select on ejemplo_tareas;
 create policy ejemplo_tareas_select on ejemplo_tareas for select to authenticated

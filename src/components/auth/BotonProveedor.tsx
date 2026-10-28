@@ -13,8 +13,8 @@ interface Props {
 }
 
 /**
- * Entrar con un proveedor externo. El boton solo se dibuja si el proveedor esta
- * encendido en el servidor de autenticacion, asi que aca no hay nada que configurar.
+ * Entrar com um provedor externo. O botão só se desenha se o provedor está
+ * ligado no servidor de autenticação, então aqui não há nada para configurar.
  */
 export function BotonProveedor({ proveedor, nombre, deshabilitado }: Props) {
   const [cargando, setCargando] = useState(false);
@@ -32,7 +32,7 @@ export function BotonProveedor({ proveedor, nombre, deshabilitado }: Props) {
       setError(err.message);
       setCargando(false);
     }
-    // Si salio bien, el navegador ya se fue al proveedor.
+    // Se deu certo, o navegador já foi para o provedor.
   }
 
   return (

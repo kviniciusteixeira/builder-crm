@@ -3,9 +3,9 @@ import { MODULOS_SERVIDOR } from "./registro.generated";
 import type { ModuloServidor, MetodoHttp, HandlerModulo, PaginaModulo } from "./types";
 
 /**
- * Lado servidor del sistema de modulos. El registro (`registro.generated.ts`) lo
- * escribe scripts/generar-registro-modulos.mjs a partir de config/modulos.json, con
- * imports estaticos: solo los modulos activos entran al bundle.
+ * Lado servidor do sistema de módulos. O registro (`registro.generated.ts`) o
+ * escreve scripts/generar-registro-modulos.mjs a partir de config/modulos.json, com
+ * imports estáticos: só os módulos ativos entram no bundle.
  */
 
 export function modulosActivos(): ModuloServidor[] {
@@ -16,14 +16,14 @@ export function obtenerModulo(nombre: string): ModuloServidor | null {
   return MODULOS_SERVIDOR[nombre] ?? null;
 }
 
-/** Todas las tools de los modulos activos (el agente las suma a las del nucleo). */
+/** Todas as tools dos módulos ativos (o agente as soma às do núcleo). */
 export function toolsDeModulos() {
   return modulosActivos().flatMap((m) => m.tools ?? []);
 }
 
 /**
- * Resuelve un patron ("", "nueva", "[id]", "[id]/editar") contra los segmentos de la
- * URL. Prefiere el patron con mas segmentos literales (los `[x]` capturan).
+ * Resolve um padrão ("", "nueva", "[id]", "[id]/editar") contra os segmentos da
+ * URL. Prefere o padrão com mais segmentos literais (os `[x]` capturam).
  */
 export function resolverPatron<T>(
   patrones: Record<string, T>,

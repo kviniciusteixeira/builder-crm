@@ -1,13 +1,13 @@
-// Prepara el bucket de documentos y comprueba que funciona.
+// Prepara o bucket de documentos e confere que funciona.
 //
 //   node scripts/storage-setup.mjs [--origins https://crm.tu-dominio.com,http://localhost:3000]
 //
-// 1. Lee S3_* de .env.local.
-// 2. Pone la regla CORS del bucket (PUT/GET desde los origenes del CRM) — sin esto el
-//    navegador no puede subir directo. Con --origins se agregan a los de APP_BASE_URL.
-// 3. Ida y vuelta: sube un objeto chico, lo lee con URL firmada, lo borra.
+// 1. Lê S3_* de .env.local.
+// 2. Põe a regra CORS do bucket (PUT/GET a partir das origens do CRM) — sem isto o
+//    navegador não consegue enviar direto. Com --origins elas se somam às de APP_BASE_URL.
+// 3. Ida e volta: sobe um objeto pequeno, lê com URL assinada, apaga.
 //
-// Sirve igual para R2, MinIO, Garage o Supabase Storage: es todo protocolo S3.
+// Serve igual para R2, MinIO, Garage ou Supabase Storage: é tudo protocolo S3.
 
 import { config } from "dotenv";
 import {
@@ -72,7 +72,7 @@ async function main() {
   const cors = await s3.send(new GetBucketCorsCommand({ Bucket: S3_BUCKET }));
   console.log("    ok:", JSON.stringify(cors.CORSRules?.[0]?.AllowedOrigins));
 
-  // --- Ida y vuelta ---
+  // --- Ida e volta ---
   const key = `_healthcheck/${Date.now()}.txt`;
   console.log(`>>> Subiendo ${key} ...`);
   await s3.send(

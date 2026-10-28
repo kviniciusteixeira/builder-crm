@@ -1,34 +1,34 @@
-# Barridos de recuperacion. SOLO hacen falta si despliegas en Vercel.
+# Varreduras de recuperação. SÓ fazem falta se você implantar na Vercel.
 #
-# En Coolify los barridos corren dentro del proceso (`src/lib/barridos.ts`), asi que este
-# workflow no tiene nada que hacer: viene con el cron APAGADO. Si lo dejara encendido,
-# cada clon del repo fallaria cada media hora para siempre (sin secretos, el curl no
-# tiene a donde ir), llenaria de correos al miembro y gastaria 1.440 minutos de Actions
-# al mes para nada.
+# No Coolify as varreduras rodam dentro do processo (`src/lib/barridos.ts`), então este
+# workflow não tem nada a fazer: vem com o cron DESLIGADO. Se ficasse ligado,
+# cada clone do repositório falharia a cada meia hora para sempre (sem segredos, o curl não
+# tem para onde ir), encheria de e-mails o membro e gastaria 1.440 minutos de Actions
+# por mês à toa.
 #
-# Como encenderlo (solo en Vercel):
-#  1. Settings -> Secrets and variables -> Actions, y crea
-#       APP_BASE_URL         (ej. https://crm.cliente.com)
-#       AGENT_WORKER_SECRET  (el mismo valor que en Vercel)
-#  2. Descomenta el bloque `schedule` de abajo.
+# Como ligá-lo (só na Vercel):
+#  1. Settings -> Secrets and variables -> Actions, e crie
+#       APP_BASE_URL         (ex. https://crm.cliente.com)
+#       AGENT_WORKER_SECRET  (o mesmo valor que na Vercel)
+#  2. Descomente o bloco `schedule` abaixo.
 #
-# Por que no van en vercel.json: el plan Hobby solo admite crons UNA VEZ POR DIA, y una
-# expresion mas frecuente hace fallar el deploy. Los crons de vercel.json quedan como
-# respaldo diario; el ritmo real lo marca este workflow.
+# Por que não vão no vercel.json: o plano Hobby só admite crons UMA VEZ POR DIA, e uma
+# expressão mais frequente faz o deploy falhar. Os crons do vercel.json ficam como
+# reserva diária; o ritmo real é este workflow.
 #
-# Por que 30 minutos y no 10: Actions factura por MINUTO REDONDEADO HACIA ARRIBA por job,
-# aunque el curl tarde 10 segundos. Con 2.000 minutos gratis al mes:
-#   cada 10 min = 4.320 ejecuciones = 4.320 min -> USD 18,56/mes de exceso
-#   cada 30 min = 1.440 ejecuciones = 1.440 min -> USD 0
-# Esto es una red de seguridad, no el camino normal: un mensaje entrante se contesta en
-# ~7 s por el webhook. Media hora de ventana sobre un fallo raro no cambia nada.
+# Por que 30 minutos e não 10: o Actions cobra por MINUTO ARREDONDADO PARA CIMA por job,
+# mesmo que o curl demore 10 segundos. Com 2.000 minutos grátis por mês:
+#   a cada 10 min = 4.320 execuções = 4.320 min -> USD 18,56/mês de excesso
+#   a cada 30 min = 1.440 execuções = 1.440 min -> USD 0
+# Isto é uma rede de segurança, não o caminho normal: uma mensagem que entra é respondida em
+# ~7 s pelo webhook. Meia hora de janela sobre uma falha rara não muda nada.
 #
-# Que barren:
-#  - /api/agent/process   -> jobs del agente que quedaron pendientes (el setTimeout del
-#    webhook murio antes de disparar el worker).
-#  - /api/webhooks/zernio -> eventos de Zernio reclamados pero sin procesar. El reintento
-#    de Zernio se auto-deduplica, asi que sin este barrido esos eventos se pierden.
-#  - /api/automations/process -> automatizaciones encoladas.
+# O que varrem:
+#  - /api/agent/process   -> jobs do agente que ficaram pendentes (o setTimeout do
+#    webhook morreu antes de disparar o worker).
+#  - /api/webhooks/zernio -> eventos do Zernio reivindicados mas sem processar. A nova tentativa
+#    do Zernio se autodeduplica, então sem esta varredura esses eventos se perdem.
+#  - /api/automations/process -> automações enfileiradas.
 
 name: Sweepers
 
@@ -44,8 +44,8 @@ jobs:
       BASE: ${{ secrets.APP_BASE_URL }}
       SECRETO: ${{ secrets.AGENT_WORKER_SECRET }}
     steps:
-      # Sin secretos no se falla: se explica y se sale. Un workflow en rojo que es rojo
-      # a proposito entrena a ignorar los rojos de verdad.
+      # Sem segredos não se falha: explica-se e sai. Um workflow vermelho que é vermelho
+      # de propósito treina a ignorar os vermelhos de verdade.
       - name: Comprobar configuracion
         id: config
         run: |

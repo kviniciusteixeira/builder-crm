@@ -1,98 +1,98 @@
-# Spec: Conectores de canales (requisito 3 del brief)
+# Spec: Conectores de canais (requisito 3 do brief)
 
-**Carril**: completo (contrato publico: la interfaz de conector)
-**Estado**: aprobada (plan de Fase 0, 2026-10-01)
-**Fecha**: 2026-10-01
-**Escrita antes del codigo**: si
+**Trilho**: completo (contrato público: a interface de conector)
+**Estado**: aprovada (plano da Fase 0, 2026-10-01)
+**Data**: 2026-10-01
+**Escrita antes do código**: sim
 
 ## Problema
 
-Hoy la salida de mensajes pasa por una interfaz comun (`ChannelAdapter.send` y
-`deliverMessage`), pero la entrada no: cada webhook (Zernio, Meta directo) verifica,
-deduplica e ingesta a su manera, y no hay forma uniforme de preguntar "este canal esta
-conectado?". El brief pide una capa de conectores con interfaz comun (enviar, recibir
-webhook, estado), con Zernio funcionando y la puerta abierta para un conector de la
-API oficial de WhatsApp (Cloud API / Tech Provider) **sin implementarlo ahora**.
+Hoje a saída de mensagens passa por uma interface comum (`ChannelAdapter.send` e
+`deliverMessage`), mas a entrada não: cada webhook (Zernio, Meta direto) verifica,
+deduplica e ingere do seu jeito, e não há forma uniforme de perguntar "este canal está
+conectado?". O brief pede uma camada de conectores com interface comum (enviar, receber
+webhook, estado), com Zernio funcionando e a porta aberta para um conector da
+API oficial do WhatsApp (Cloud API / Tech Provider) **sem implementá-lo agora**.
 
-## Decisiones del dueno
+## Decisões do dono
 
-- D1 (Fase 0) El codigo de Meta Cloud API directo no se borra ni se extiende: queda
+- D1 (Fase 0) O código da Meta Cloud API direta não se apaga nem se estende: fica
   como conector parcial documentado.
 
-## Escenarios
+## Cenários
 
-1. **Enviar** — `deliverMessage` busca el conector por `conversations.provider` y llama
-   a `enviar`. Nada mas sale a la red por otro camino.
-2. **Recibir** — `POST /api/webhooks/<conector>` verifica la firma con el conector,
-   reclama el evento en `webhook_events` (idempotencia), responde 2xx rapido y procesa
-   en `after()` con `conector.webhook.procesar`, que normaliza y persiste usando las
-   mismas funciones de `ingest.ts`. El barrido (`GET` con secreto) reprocesa lo que
-   quedo colgado, para cualquier conector.
-3. **Estado** — Ajustes → Canales muestra, por conector, si esta configurado, que
-   variables faltan y las cuentas conectadas; viene de `conector.estado()`.
-4. **Agregar Cloud API** — Un desarrollador crea `conectores/meta-cloud.ts` completo
-   siguiendo `conectores/README.md`, lo registra en el indice y agrega la ruta
-   `/api/webhooks/meta-cloud` de 10 lineas. La bandeja y el agente no cambian.
-5. **Leads por webhook** — Formularios externos pegan a `/api/webhooks/leads` (publico,
-   con secreto), que antes vivia en `/api/webhook` y el middleware bloqueaba.
+1. **Enviar** — `deliverMessage` busca o conector por `conversations.provider` e chama
+   `enviar`. Nada mais sai para a rede por outro caminho.
+2. **Receber** — `POST /api/webhooks/<conector>` verifica a assinatura com o conector,
+   reivindica o evento em `webhook_events` (idempotência), responde 2xx rápido e processa
+   em `after()` com `conector.webhook.procesar`, que normaliza e persiste usando as
+   mesmas funções de `ingest.ts`. A varredura (`GET` com segredo) reprocessa o que
+   ficou pendente, para qualquer conector.
+3. **Estado** — Ajustes → Canales mostra, por conector, se está configurado, quais
+   variáveis faltam e as contas conectadas; vem de `conector.estado()`.
+4. **Adicionar Cloud API** — Um desenvolvedor cria `conectores/meta-cloud.ts` completo
+   seguindo `conectores/README.md`, registra no índice e adiciona a rota
+   `/api/webhooks/meta-cloud` de 10 linhas. A caixa de entrada e o agente não mudam.
+5. **Leads por webhook** — Formulários externos postam em `/api/webhooks/leads` (público,
+   com segredo), que antes vivia em `/api/webhook` e o middleware bloqueava.
 
 ## Requisitos
 
 - FR-001 `src/lib/channels/conector.ts` define `Conector { id, nombre, canales,
-  enviar(), webhook?: { verificar, idEvento, procesar }, estado() }` y los tipos de
-  mensaje saliente, resultado de envio y estado.
-- FR-002 `src/lib/channels/conectores/index.ts` registra los conectores por id;
-  `conectorParaConversacion(conv)` resuelve por `provider`.
-- FR-003 `conectores/zernio.ts` implementa la interfaz completa reutilizando el codigo
-  actual (envio por `inbox.sendMessage`, firma HMAC, `processZernioEvent`). Sin cambios
-  de comportamiento ni de URL (`/api/webhooks/zernio` sigue siendo la que esta
-  registrada en Zernio).
-- FR-004 `conectores/meta-cloud.ts` implementa `enviar` y `estado` con el codigo de
-  `meta-whatsapp.ts`; `webhook` queda sin implementar y documentado (la ingesta legacy
-  sigue en `/api/webhooks/whatsapp` mientras `WHATSAPP_PROVIDER=meta`).
-- FR-005 `src/lib/channels/webhook.ts` concentra la mecanica generica de webhooks
-  (verificar, reclamar, `after()`, barrido) para que cada ruta sea minima e importe lo
-  menos posible (Zernio exige 2xx en 5 s).
-- FR-006 `GET /api/channels` devuelve `conectores: EstadoConector[]`; la UI los muestra.
-- FR-007 El webhook de leads pasa a `/api/webhooks/leads` (publico por prefijo) y
-  Ajustes muestra esa URL.
-- FR-008 Credenciales solo por entorno (`ZERNIO_*`, `WHATSAPP_*`), nunca en codigo.
+  enviar(), webhook?: { verificar, idEvento, procesar }, estado() }` e os tipos de
+  mensagem de saída, resultado de envio e estado.
+- FR-002 `src/lib/channels/conectores/index.ts` registra os conectores por id;
+  `conectorParaConversacion(conv)` resolve por `provider`.
+- FR-003 `conectores/zernio.ts` implementa a interface completa reutilizando o código
+  atual (envio por `inbox.sendMessage`, assinatura HMAC, `processZernioEvent`). Sem mudanças
+  de comportamento nem de URL (`/api/webhooks/zernio` continua sendo a que está
+  registrada no Zernio).
+- FR-004 `conectores/meta-cloud.ts` implementa `enviar` e `estado` com o código de
+  `meta-whatsapp.ts`; `webhook` fica sem implementar e documentado (a ingestão legada
+  continua em `/api/webhooks/whatsapp` enquanto `WHATSAPP_PROVIDER=meta`).
+- FR-005 `src/lib/channels/webhook.ts` concentra a mecânica genérica de webhooks
+  (verificar, reivindicar, `after()`, varredura) para que cada rota seja mínima e importe o
+  mínimo possível (o Zernio exige 2xx em 5 s).
+- FR-006 `GET /api/channels` devolve `conectores: EstadoConector[]`; a UI os mostra.
+- FR-007 O webhook de leads passa a `/api/webhooks/leads` (público por prefixo) e
+  Ajustes mostra essa URL.
+- FR-008 Credenciais só por ambiente (`ZERNIO_*`, `WHATSAPP_*`), nunca no código.
 
-## Configuracion y modulos
+## Configuração e módulos
 
-Ninguno. (Un conector no es un modulo: es nucleo, porque la bandeja depende de el.)
+Nenhum. (Um conector não é um módulo: é núcleo, porque a caixa de entrada depende dele.)
 
-## Modelo de datos
+## Modelo de dados
 
-Ninguno. `webhook_events.provider` ya distingue el conector.
+Nenhum. `webhook_events.provider` já distingue o conector.
 
 ## Agente de IA
 
-Sin cambios: responde por `deliverMessage`.
+Sem mudanças: responde por `deliverMessage`.
 
-## Criterios de aceptacion
+## Critérios de aceitação
 
-- CA-001 Un `POST /api/webhooks/zernio` con firma valida y un `message.received`
-  termina con una fila en `messages` y un job del agente, exactamente como hoy.
-- CA-002 Con firma invalida responde 401; repetido con el mismo id responde
+- CA-001 Um `POST /api/webhooks/zernio` com assinatura válida e um `message.received`
+  termina com uma linha em `messages` e um job do agente, exatamente como hoje.
+- CA-002 Com assinatura inválida responde 401; repetido com o mesmo id responde
   `duplicate: true`.
-- CA-003 `GET /api/channels` incluye `conectores` con `zernio` y `meta-cloud`, cada uno
-  con `configurado` y `faltan`.
-- CA-004 `POST /api/webhooks/leads` sin sesion y con el secreto correcto crea el
-  contacto; sin secreto responde 401.
-- CA-005 `typecheck + lint + build` en verde.
+- CA-003 `GET /api/channels` inclui `conectores` com `zernio` e `meta-cloud`, cada um
+  com `configurado` e `faltan`.
+- CA-004 `POST /api/webhooks/leads` sem sessão e com o segredo correto cria o
+  contato; sem segredo responde 401.
+- CA-005 `typecheck + lint + build` em verde.
 
 ## Constitution Check
 
-- I. Nucleo intocable: los conectores son nucleo; un cliente no los edita, los
+- I. Núcleo intocável: os conectores são núcleo; um cliente não os edita, os
   configura por env.
-- II. Spec antes que codigo: esta spec.
-- III. Autoverificacion: CA-001..005; el simulador (Fase 7) sera un conector mas.
-- IV. Cero secretos: solo variables de entorno.
+- II. Spec antes do código: esta spec.
+- III. Autoverificação: CA-001..005; o simulador (Fase 7) será mais um conector.
+- IV. Zero segredos: só variáveis de ambiente.
 
-## Fuera de alcance
+## Fora de escopo
 
-- Implementar el conector Cloud API completo (ingesta, conexion desde la UI, Tech
-  Provider). Queda la interfaz, el `enviar` existente y la guia.
-- Mover la ingesta legacy de `/api/webhooks/whatsapp` al conector (se hace al
+- Implementar o conector Cloud API completo (ingestão, conexão a partir da UI, Tech
+  Provider). Ficam a interface, o `enviar` existente e o guia.
+- Mover a ingestão legada de `/api/webhooks/whatsapp` para o conector (faz-se ao
   implementar Cloud API).

@@ -7,14 +7,14 @@ import { resumirCampos } from "@/lib/config/campos";
 export const SYSTEM_PROMPT_SETTINGS_KEY = "agent.system_prompt";
 
 /**
- * Prompt base del nucleo: generico, sirve para cualquier negocio. Lo que es propio de
- * un cliente va en `config/cliente.ts` (`agente.prompt`, que lo reemplaza como base) o
- * en una plantilla de nicho. Cascada completa:
+ * Prompt base do núcleo: genérico, serve para qualquer negócio. O que é próprio de
+ * um cliente vai em `config/cliente.ts` (`agente.prompt`, que o substitui como base) ou
+ * num template de nicho. Cascata completa:
  *
  *   agent_configs[canal] -> crm_settings global -> config.agente.prompt -> este default
  *
- * Placeholders: {{agente}}, {{negocio}}, {{fecha}}, {{canal}}. Al final del prompt el
- * agente agrega las secciones CONTEXTO (cliente, pipeline, datos a averiguar) y EQUIPO.
+ * Placeholders: {{agente}}, {{negocio}}, {{fecha}}, {{canal}}. No final do prompt o
+ * agente acrescenta as seções CONTEXTO (cliente, pipeline, dados a descobrir) e EQUIPO.
  */
 const DEFAULT_SYSTEM_PROMPT = `# ROL
 Sos {{agente}}, parte del equipo de {{negocio}}. Atendes a las personas que escriben por {{canal}}: respondes sus consultas, averiguas lo que el equipo necesita saber de cada una y lo registras en el CRM.
@@ -35,8 +35,8 @@ Sos {{agente}}, parte del equipo de {{negocio}}. Atendes a las personas que escr
 - Despues de usar una herramienta, integras la informacion en tu respuesta natural; nunca copias el JSON.`;
 
 /**
- * Guia de estilo segun por donde entra el mensaje. Un DM de Instagram no se escribe
- * como un WhatsApp. Es el piso comun; el prompt propio de cada canal lo puede pisar.
+ * Guia de estilo conforme por onde entra a mensagem. Um DM de Instagram não se escreve
+ * como um WhatsApp. É o piso comum; o prompt próprio de cada canal pode pisá-lo.
  */
 const CHANNEL_HINTS: Record<string, string> = {
   whatsapp: "Manten cada respuesta corta y natural (1-3 parrafos cortos). Podes incluir links si aportan.",
@@ -52,14 +52,14 @@ const CHANNEL_NAMES: Record<string, string> = {
   simulador: "el simulador",
 };
 
-/** Prompt base de la instancia: el de config/cliente.ts si existe, si no el del nucleo. */
+/** Prompt base da instância: o de config/cliente.ts se existe, senão o do núcleo. */
 export function getDefaultSystemPromptTemplate(): string {
   return getConfig().agente.prompt?.trim() || DEFAULT_SYSTEM_PROMPT;
 }
 
 /**
- * Template global (override en `crm_settings`, editable desde Ajustes) SIN reemplazar
- * placeholders. Cae al default de la instancia.
+ * Template global (override em `crm_settings`, editável em Ajustes) SEM substituir
+ * placeholders. Cai no default da instância.
  */
 export async function getSystemPromptTemplate(): Promise<string> {
   try {
@@ -74,14 +74,14 @@ export async function getSystemPromptTemplate(): Promise<string> {
 
 export const getGlobalSystemPromptTemplate = getSystemPromptTemplate;
 
-/** Reemplaza placeholders y agrega la guia del canal. */
+/** Substitui placeholders e acrescenta o guia do canal. */
 export function renderSystemPrompt(template: string, opts: { now?: Date; channel?: string } = {}): string {
   const now = opts.now ?? new Date();
   const channel = opts.channel ?? "whatsapp";
   const { marca, agente, idioma, zonaHoraria } = getConfig();
 
-  // La zona es la del negocio, no la del proceso: el contenedor corre en UTC, y sin esto
-  // el agente le dice "manana" al cliente que escribe de noche.
+  // O fuso é o do negócio, não o do processo: o contêiner roda em UTC, e sem isto
+  // o agente diz "amanhã" ao cliente que escreve de noite.
   const fecha = now.toLocaleDateString(idioma === "en" ? "en-US" : "es", {
     timeZone: zonaHoraria,
     weekday: "long",
@@ -101,9 +101,9 @@ export function renderSystemPrompt(template: string, opts: { now?: Date; channel
 }
 
 /**
- * Seccion CONTEXTO: lo que el agente sabe del cliente, en que etapa esta, que etapas
- * existen y que datos tiene que averiguar. Es lo que hace utiles a mover_etapa y
- * actualizar_contacto sin cablear nada del negocio en el codigo.
+ * Seção CONTEXTO: o que o agente sabe do cliente, em que etapa está, que etapas
+ * existem e que dados tem que descobrir. É o que torna úteis mover_etapa e
+ * actualizar_contacto sem cabear nada do negócio no código.
  */
 export async function renderContexto(contactId: string): Promise<string> {
   const [contact] = await db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1);
@@ -152,7 +152,7 @@ export async function renderContexto(contactId: string): Promise<string> {
   return partes.join("\n");
 }
 
-/** Prompt final con el template global (sin contexto de contacto). Para previews. */
+/** Prompt final com o template global (sem contexto de contato). Para previews. */
 export async function buildSystemPrompt(now: Date, channel = "whatsapp"): Promise<string> {
   const template = await getSystemPromptTemplate();
   return renderSystemPrompt(template, { now, channel });

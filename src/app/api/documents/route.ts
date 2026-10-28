@@ -13,12 +13,12 @@ async function accessibleContact(member: TeamMember, contactId: string) {
     .from(contacts)
     .where(eq(contacts.id, contactId))
     .limit(1);
-  // Ajeno = inexistente.
+  // Alheio = inexistente.
   if (!contact || !canAccessContact(member, contact)) return null;
   return contact;
 }
 
-/** GET /api/documents?contactId=... — documentos listos de un contacto visible. */
+/** GET /api/documents?contactId=... — documentos prontos de um contato visível. */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/documents — paso 1 de la subida: valida, crea la fila `pending` y devuelve
- * la URL firmada. El archivo va del navegador al bucket; por aca no pasa.
+ * POST /api/documents — passo 1 do upload: valida, cria a linha `pending` e devolve
+ * a URL assinada. O arquivo vai do navegador ao bucket; por aqui não passa.
  */
 export async function POST(request: NextRequest) {
   const auth = await requireMember();

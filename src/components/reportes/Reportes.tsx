@@ -24,10 +24,10 @@ import type { LeadSource } from "@/types";
 import type { Channel } from "@/lib/channels/types";
 
 /**
- * Reportes con datos reales. Paleta de series validada (ver skill dataviz, slots 1 y
- * 2 de la paleta de referencia): una sola serie va en --viz-1; la linea de mensajes
- * usa dos series con leyenda. Las etapas del embudo usan su propio color (es la
- * identidad de la etapa en todo el CRM) y llevan el valor directo al final de la barra.
+ * Relatórios com dados reais. Paleta de séries validada (ver skill dataviz, slots 1 e
+ * 2 da paleta de referência): uma só série vai em --viz-1; a linha de mensagens
+ * usa duas séries com legenda. As etapas do funil usam a própria cor (é a
+ * identidade da etapa em todo o CRM) e levam o valor direto no fim da barra.
  */
 
 const ESTILO = `

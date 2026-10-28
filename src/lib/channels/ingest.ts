@@ -14,22 +14,22 @@ import { enqueueAgentJob } from "@/lib/agent/queue";
 import { CHANNEL_LABELS, type Channel, type Provider } from "./types";
 
 /**
- * Ingesta de mensajes entrantes/salientes de cualquier canal.
+ * Ingestão de mensagens entrantes/saídas de qualquer canal.
  *
- * Lo que NO se puede reusar del webhook de WhatsApp es la resolucion de identidad:
- * ese hace `findOrCreateContact(phone)` y en Instagram/Messenger no hay telefono, solo
- * un IGSID/PSID. De ahi la tabla `contact_identities`.
+ * O que NÃO se pode reutilizar do webhook de WhatsApp é a resolução de identidade:
+ * esse faz `findOrCreateContact(phone)` e no Instagram/Messenger não há telefone, só
+ * um IGSID/PSID. Daí a tabela `contact_identities`.
  */
 
 const REACTIVATION_INACTIVITY_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** No encolar al agente para mensajes viejos: protege al backfill de contestar historial. */
+/** Não enfileirar o agente para mensagens velhas: protege o backfill de responder histórico. */
 const MAX_AGE_FOR_AGENT_MS = 60 * 60 * 1000;
 
 /**
- * Ventana para reconocer el eco de un mensaje propio. Dos minutos alcanzan de sobra
- * para el ida y vuelta con el proveedor, y es lo bastante corta como para no confundir
- * con un mensaje real que un humano escribio igual desde el celular mas tarde.
+ * Janela para reconhecer o eco de uma mensagem própria. Dois minutos bastam de sobra
+ * para a ida e volta com o provedor, e é curta o bastante para não confundir
+ * com uma mensagem real que um humano escreveu igual a partir do celular mais tarde.
  */
 const ECHO_WINDOW_MS = 2 * 60 * 1000;
 
@@ -44,13 +44,13 @@ function isUniqueViolation(err: unknown): boolean {
 }
 
 // ============================================================
-// Identidad
+// Identidade
 // ============================================================
 
 export interface IdentityInput {
   tenantId: string;
   channel: Channel;
-  /** IGSID | PSID | telefono E.164. */
+  /** IGSID | PSID | telefone E.164. */
   externalId: string;
   handle?: string | null;
   name?: string | null;
@@ -69,10 +69,10 @@ function isPlaceholderName(name: string | null | undefined): boolean {
 }
 
 /**
- * Resuelve el contacto de una identidad social, creandolo si hace falta.
+ * Resolve o contato de uma identidade social, criando-o se faz falta.
  *
- * En WhatsApp, ademas de `contact_identities`, se intenta matchear por telefono para
- * no duplicar los contactos que ya existen del flujo de Meta directo.
+ * No WhatsApp, além de `contact_identities`, tenta-se casar por telefone para
+ * não duplicar os contatos que já existem do fluxo da Meta direta.
  */
 export async function findOrCreateContactByIdentity(
   input: IdentityInput
@@ -143,8 +143,8 @@ export async function findOrCreateContactByIdentity(
 }
 
 /**
- * Segunda identidad para un contacto que ya existe. El caso real es el BSUID de
- * WhatsApp: un mismo cliente puede llegar por telefono hoy y por BSUID manana.
+ * Segunda identidade para um contato que já existe. O caso real é o BSUID de
+ * WhatsApp: um mesmo cliente pode chegar por telefone hoje e por BSUID amanhã.
  */
 export async function linkExtraIdentity(
   contactId: string,
@@ -170,7 +170,7 @@ async function linkIdentity(contactId: string, input: IdentityInput): Promise<vo
     .onConflictDoNothing();
 }
 
-/** Solo pisa nombres placeholder: no sobrescribe uno que puso una persona. */
+/** Só pisa nomes placeholder: não sobrescreve um que uma pessoa pôs. */
 async function maybeImproveName(
   contactId: string,
   name: string | null | undefined
@@ -193,7 +193,7 @@ async function maybeImproveName(
 }
 
 // ============================================================
-// Conversaciones
+// Conversas
 // ============================================================
 
 export interface UpsertConversationInput {
@@ -202,7 +202,7 @@ export interface UpsertConversationInput {
   accountId: string | null;
   channel: Channel;
   provider: Provider;
-  /** conversationId del proveedor. */
+  /** conversationId do provedor. */
   externalId: string;
   participantId?: string | null;
   participantName?: string | null;
@@ -241,8 +241,8 @@ export async function upsertConversation(
         participantName: input.participantName ?? null,
         participantHandle: input.participantHandle ?? null,
         participantPicture: input.participantPicture ?? null,
-        // metadata solo se pisa si viene con algo: los eventos de mensaje no la traen
-        // y no queremos perder la atribucion capturada en conversation.started.
+        // metadata só se pisa se vem com algo: os eventos de mensagem não a trazem
+        // e não queremos perder a atribuição capturada em conversation.started.
         ...(input.metadata ? { metadata: input.metadata } : {}),
         updatedAt: now,
       },
@@ -252,7 +252,7 @@ export async function upsertConversation(
   return row;
 }
 
-/** Hilo mas reciente de un contacto en un canal. */
+/** Fio mais recente de um contato num canal. */
 export async function findConversationForContact(
   contactId: string,
   channel: Channel
@@ -272,7 +272,7 @@ export async function findConversationForContact(
 }
 
 // ============================================================
-// Mensajes
+// Mensagens
 // ============================================================
 
 export interface IngestMessageInput {
@@ -284,7 +284,7 @@ export interface IngestMessageInput {
   sentAt?: Date | null;
   status?: string;
   rawPayload?: unknown;
-  /** El backfill lo pasa en false para no contestarle a cientos de hilos viejos. */
+  /** O backfill o passa em false para não responder a centenas de fios velhos. */
   enqueueAgent?: boolean;
 }
 
@@ -309,16 +309,16 @@ export async function ingestMessage(
     if (existing) return { duplicate: true, messageId: existing.id, jobId: null };
   }
 
-  // Eco de un mensaje que mando el propio CRM.
+  // Eco de uma mensagem que o próprio CRM mandou.
   //
-  // Zernio dispara `message.sent` por CADA mensaje que sale, incluidos los que
-  // acabamos de enviar nosotros. Normalmente el chequeo de arriba lo frena, porque
-  // `deliverMessage` guarda el external_id que devuelve el envio. Pero hay una ventana:
-  // entre que se inserta la fila optimista y que llega la respuesta del proveedor, esa
-  // fila tiene external_id NULL. Si el webhook entra en ese hueco, el indice unico no
-  // aplica (es parcial) y el mensaje termina duplicado en la bandeja.
+  // O Zernio dispara `message.sent` por CADA mensagem que sai, incluídas as que
+  // acabamos de enviar nós. Normalmente a checagem de cima a freia, porque
+  // `deliverMessage` guarda o external_id que o envio devolve. Mas há uma janela:
+  // entre se inserir a linha otimista e chegar a resposta do provedor, essa
+  // linha tem external_id NULL. Se o webhook entra nesse vão, o índice único não
+  // se aplica (é parcial) e a mensagem termina duplicada na caixa de entrada.
   //
-  // En vez de insertar otro, se adopta el que ya esta: se le pega el id que faltaba.
+  // Em vez de inserir outra, adota-se a que já está: cola-se o id que faltava.
   if (input.direction === "out" && input.externalId && input.body) {
     const [propio] = await db
       .select({ id: messages.id })
@@ -366,8 +366,8 @@ export async function ingestMessage(
       .returning({ id: messages.id });
     messageId = inserted.id;
   } catch (err) {
-    // El indice unico sobre external_id es la idempotencia real: si dos entregas del
-    // mismo evento corren en paralelo, el SELECT de arriba puede no verlas.
+    // O índice único sobre external_id é a idempotência real: se duas entregas do
+    // mesmo evento correm em paralelo, o SELECT de cima pode não vê-las.
     if (isUniqueViolation(err)) {
       return { duplicate: true, messageId: null, jobId: null };
     }
@@ -400,7 +400,7 @@ export async function ingestMessage(
   return { duplicate: false, messageId, jobId };
 }
 
-/** Mantiene al dia los campos materializados del hilo (lista + ventana de 24h). */
+/** Mantém em dia os campos materializados do fio (lista + janela de 24h). */
 export async function touchConversation(
   conversationId: string,
   last: { direction: "in" | "out"; body: string | null; sentAt: Date }
@@ -423,9 +423,9 @@ export async function touchConversation(
 }
 
 /**
- * Si el bot esta apagado en esta conversacion y no hubo actividad en mas de una semana,
- * se vuelve a prender. Portado del webhook de WhatsApp, pero por conversacion: derivar
- * a un humano en Instagram no deberia reactivar (ni apagar) el bot de WhatsApp.
+ * Se o bot está desligado nesta conversa e não houve atividade em mais de uma semana,
+ * volta a ligar-se. Portado do webhook de WhatsApp, mas por conversa: transferir
+ * a um humano no Instagram não deveria reativar (nem desligar) o bot de WhatsApp.
  */
 async function maybeReactivateAfterInactivity(
   conversationId: string,
@@ -484,9 +484,9 @@ export interface MessageStatusUpdate {
 }
 
 /**
- * @returns false si el mensaje todavia no existe. Los eventos de estado pueden llegar
- * antes que el mensaje: el llamador reintenta en vez de perder el evento en silencio
- * (que es lo que hace hoy el webhook de WhatsApp).
+ * @returns false se a mensagem ainda não existe. Os eventos de estado podem chegar
+ * antes da mensagem: quem chama tenta de novo em vez de perder o evento em silêncio
+ * (que é o que faz hoje o webhook de WhatsApp).
  */
 export async function updateMessageStatus(
   update: MessageStatusUpdate

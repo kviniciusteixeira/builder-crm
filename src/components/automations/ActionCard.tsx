@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { CatalogAction, RuleAction } from "./types";
 
-/** Color e icono por tipo de accion: la cadena se lee de un vistazo. */
+/** Cor e ícone por tipo de ação: a cadeia se lê de uma olhada. */
 export const ACTION_STYLE: Record<string, { icon: typeof Bell; bg: string; fg: string; ring: string }> = {
   push: { icon: Bell, bg: "bg-primary/10", fg: "text-primary", ring: "ring-primary/20" },
   add_tag: { icon: Tag, bg: "bg-amber-500/10", fg: "text-amber-700", ring: "ring-amber-500/20" },
@@ -51,7 +51,7 @@ interface Props {
   onRemove: () => void;
 }
 
-/** Una accion del flujo: su formulario de parametros y el menu de subir/bajar/eliminar. */
+/** Uma ação do fluxo: seu formulário de parâmetros e o menu de subir/descer/apagar. */
 export function ActionCard({
   index,
   total,

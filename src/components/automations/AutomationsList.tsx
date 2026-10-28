@@ -22,7 +22,7 @@ import { es } from "date-fns/locale";
 import { ACTION_STYLE } from "./ActionCard";
 import type { RuleListItem, RunItem } from "./types";
 
-/** Lista de reglas con ON/OFF, acceso al editor, y el historial de ejecuciones. */
+/** Lista de regras com ON/OFF, acesso ao editor, e o histórico de execuções. */
 export function AutomationsList() {
   const [items, setItems] = useState<RuleListItem[]>([]);
   const [runs, setRuns] = useState<RunItem[]>([]);

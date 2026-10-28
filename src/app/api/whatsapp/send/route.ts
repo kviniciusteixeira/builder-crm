@@ -16,12 +16,12 @@ import { whatsappProvider } from "@/lib/channels/provider";
 import { requireMember } from "@/lib/api-auth";
 
 /**
- * Envio de WhatsApp identificando al destinatario por TELEFONO.
+ * Envio de WhatsApp identificando o destinatário por TELEFONE.
  *
- * Existe aparte de `/api/messages/send` (que va por conversacion) porque hay un caso que
- * no se puede expresar por hilo: escribirle a un numero con el que todavia no hay
- * conversacion. WhatsApp no permite abrir con texto libre, asi que ese camino exige
- * plantilla y en Zernio se resuelve con `POST /v1/inbox/conversations`.
+ * Existe à parte de `/api/messages/send` (que vai por conversa) porque há um caso que
+ * não se pode expressar por fio: escrever a um número com o qual ainda não há
+ * conversa. O WhatsApp não permite abrir com texto livre, então esse caminho exige
+ * template e no Zernio se resolve com `POST /v1/inbox/conversations`.
  */
 
 interface SendBody {
@@ -32,7 +32,7 @@ interface SendBody {
     name: string;
     language?: string;
     components?: unknown[];
-    /** Texto ya renderizado (variables rellenas) para mostrar en el chat. */
+    /** Texto já renderizado (variáveis preenchidas) para mostrar no chat. */
     previewText?: string;
   };
 }
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
   const existing = await findConversationForContact(contactId, "whatsapp");
 
-  // Hilo abierto: sale por el camino comun (adapter + persistencia unificada).
+  // Fio aberto: sai pelo caminho comum (adapter + persistência unificada).
   if (existing) {
     const result = await deliverMessage(
       existing.id,
@@ -120,8 +120,8 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Primer contacto con un numero. WhatsApp exige plantilla aprobada para abrir hilo;
- * sin ella Zernio devuelve TEMPLATE_REQUIRED.
+ * Primeiro contato com um número. O WhatsApp exige template aprovado para abrir o fio;
+ * sem ele o Zernio devolve TEMPLATE_REQUIRED.
  */
 async function openConversation(args: {
   contactId: string;
@@ -155,7 +155,7 @@ async function openConversation(args: {
   const { createConversation } = await import("@/lib/zernio/inbox");
   const result = await createConversation({
     accountId: account.zernioAccountId,
-    // Zernio espera el telefono internacional sin el `+`.
+    // O Zernio espera o telefone internacional sem o `+`.
     participantId: to.replace(/^\+/, ""),
     templateName: body.template.name,
     templateLanguage: body.template.language ?? "es",
@@ -184,8 +184,8 @@ async function openConversation(args: {
     );
   }
 
-  // Se refleja localmente para que el chat lo muestre ya. El webhook
-  // `conversation.started` / `message.sent` hace el mismo upsert, es idempotente.
+  // Reflete-se localmente para que o chat já o mostre. O webhook
+  // `conversation.started` / `message.sent` faz o mesmo upsert, é idempotente.
   const conversation = await upsertConversation({
     tenantId: tenantId ?? "",
     contactId,

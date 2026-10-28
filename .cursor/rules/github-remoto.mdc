@@ -1,0 +1,14 @@
+---
+description: Este repositório publica só no GitHub, nunca no Bitbucket
+alwaysApply: true
+---
+
+# Remoto só GitHub
+
+O remoto deste projeto é o GitHub, e só o GitHub.
+
+- `origin`: `https://github.com/kviniciusteixeira/builder-crm.git`
+- `git push`, `git pull`, `git fetch` e pull requests vão para esse remoto.
+- Use `gh` para issues, PRs, checks e releases.
+
+Não criar remoto Bitbucket, não fazer push para Bitbucket e não trocar `origin` para outro host. A exceção de Bitbucket que vale para outros repositórios não se aplica aqui.

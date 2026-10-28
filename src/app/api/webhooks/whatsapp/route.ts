@@ -19,9 +19,9 @@ const REACTIVATION_INACTIVITY_MS = REACTIVATION_INACTIVITY_DAYS * 24 * 60 * 60 *
 const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "";
 
 /**
- * Handshake de Meta: cuando configuras el webhook, Meta hace un GET con
- * `hub.mode=subscribe`, `hub.verify_token` y `hub.challenge`. Si el token
- * coincide con el que tenes en .env, devolves el challenge en text/plain.
+ * Handshake da Meta: quando se configura o webhook, a Meta faz um GET com
+ * `hub.mode=subscribe`, `hub.verify_token` e `hub.challenge`. Se o token
+ * coincide com o que está no .env, devolve-se o challenge em text/plain.
  */
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -165,11 +165,11 @@ async function findOrCreateContact(
 }
 
 /**
- * Si el bot esta apagado y no hay actividad en >REACTIVATION_INACTIVITY_DAYS dias,
- * reactivar bot automaticamente. La inactividad se mide contra el ultimo mensaje
- * registrado del contacto (cualquier direccion). Si el cliente nunca volvio a
- * escribir en una semana, asumimos que el ciclo con el asesor termino y el bot
- * vuelve a hacerse cargo.
+ * Se o bot está desligado e não há atividade em >REACTIVATION_INACTIVITY_DAYS dias,
+ * reativar o bot automaticamente. A inatividade se mede contra a última mensagem
+ * registrada do contato (qualquer direção). Se o cliente nunca voltou a
+ * escrever em uma semana, assumimos que o ciclo com o assessor terminou e o bot
+ * volta a assumir.
  */
 async function maybeReactivateAfterInactivity(contactId: string): Promise<void> {
   const [contact] = await db
@@ -226,15 +226,15 @@ async function handleInboundMessage(
   profile: MetaContactProfile | undefined,
   account: WhatsappAccount
 ): Promise<{ contactId: string; jobId: string } | null> {
-  // Gotcha A: en Coexistence wa_id puede ser un BSUID; usar siempre el numero real
-  // de messages[0].from. Gotcha B: normalizar troncal para no duplicar contactos.
+  // Gotcha A: em Coexistence wa_id pode ser um BSUID; usar sempre o número real
+  // de messages[0].from. Gotcha B: normalizar o tronco para não duplicar contatos.
   const realPhone = resolveRealPhone(profile?.wa_id, msg.from);
   const fromPhone = `+${realPhone}`;
   const toPhone = metadata?.display_phone_number
     ? `+${normalizePhone(metadata.display_phone_number)}`
     : null;
 
-  // Idempotencia: si ya existe el meta_message_id, no insertar de nuevo
+  // Idempotência: se o meta_message_id já existe, não inserir de novo
   const existingRows = await db
     .select({ id: messages.id })
     .from(messages)
@@ -248,17 +248,17 @@ async function handleInboundMessage(
     profile?.profile?.name
   );
 
-  // Si el bot esta apagado pero ya pasaron 7 dias desde el ultimo mensaje,
-  // reactivarlo antes de insertar el mensaje nuevo (asi el agente lo procesa).
+  // Se o bot está desligado mas já passaram 7 dias desde a última mensagem,
+  // reativá-lo antes de inserir a mensagem nova (assim o agente a processa).
   await maybeReactivateAfterInactivity(contactId);
 
   const sentAt = new Date(parseInt(msg.timestamp, 10) * 1000);
   const body = extractMessageBody(msg);
 
-  // La conversacion es ahora la unidad del inbox y del agente: sin engancharla, este
-  // mensaje no aparece en la lista ni entra en el historial que lee el bot.
-  // `legacy:<contactId>` es el mismo external_id que uso el backfill de la migracion,
-  // asi que este upsert cae sobre la fila existente en vez de crear un hilo nuevo.
+  // A conversa agora é a unidade da caixa de entrada e do agente: sem vinculá-la, esta
+  // mensagem não aparece na lista nem entra no histórico que o bot lê.
+  // `legacy:<contactId>` é o mesmo external_id que o backfill da migração usou,
+  // então este upsert cai sobre a linha existente em vez de criar um fio novo.
   const conversation = await upsertConversation({
     tenantId: account.tenantId,
     contactId,
@@ -291,13 +291,13 @@ async function handleInboundMessage(
 
   await touchConversation(conversation.id, { direction: "in", body, sentAt });
 
-  // Touch contact updatedAt para que ordene primero en la lista
+  // Touch contact updatedAt para que ordene primeiro na lista
   await db
     .update(contacts)
     .set({ updatedAt: new Date() })
     .where(eq(contacts.id, contactId));
 
-  // Encolar job para el agente IA (debounce + skip si ai_enabled=false)
+  // Enfileirar job para o agente de IA (debounce + skip se ai_enabled=false)
   const enqueued = await enqueueAgentJob(contactId, msg.id, conversation.id);
   return { contactId, jobId: enqueued.jobId };
 }
@@ -346,13 +346,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (payload.object !== "whatsapp_business_account") {
-    // Devolver 200 igual: Meta retira el webhook si responde mal
+    // Devolver 200 mesmo assim: a Meta retira o webhook se responde mal
     return NextResponse.json({ ignored: true });
   }
 
-  // WhatsApp sale por Zernio. Este handler queda como valvula de escape
-  // (WHATSAPP_PROVIDER=meta) y no procesa nada mientras Zernio sea el proveedor: si los
-  // dos caminos ingestaran el mismo mensaje, el agente contestaria dos veces.
+  // O WhatsApp sai pelo Zernio. Este handler fica como válvula de escape
+  // (WHATSAPP_PROVIDER=meta) e não processa nada enquanto o Zernio for o provedor: se os
+  // dois caminhos ingerissem a mesma mensagem, o agente responderia duas vezes.
   if (!metaWebhookActive()) {
     return NextResponse.json({ ignored: true, reason: "whatsapp_provider=zernio" });
   }
@@ -365,9 +365,9 @@ export async function POST(request: NextRequest) {
 
       const value = change.value;
 
-      // Routing por phone_number_id: SOLO procesamos numeros de nuestra tabla.
-      // Cualquier otro numero que comparta la Meta App se ignora con
-      // 200 para no robarle/duplicarle mensajes ni crear contactos basura.
+      // Routing por phone_number_id: SÓ processamos números da nossa tabela.
+      // Qualquer outro número que compartilhe o Meta App é ignorado com
+      // 200 para não roubar/duplicar mensagens nem criar contatos lixo.
       const account = await getAccountByPhoneNumberId(
         value.metadata?.phone_number_id
       );
@@ -405,18 +405,18 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Disparar el worker del agente IA despues de devolver 200 OK.
-  // Cada job hace su propio debounce: si llegan mas mensajes en los proximos
-  // 6s del mismo contacto, el worker se ejecuta pero claimAgentJob detecta
-  // debounce_still_active y se sale; el siguiente setTimeout va a procesar.
+  // Disparar o worker do agente de IA depois de devolver 200 OK.
+  // Cada job faz o próprio debounce: se chegam mais mensagens nos próximos
+  // 6s do mesmo contato, o worker executa mas claimAgentJob detecta
+  // debounce_still_active e sai; o setTimeout seguinte é que processa.
   if (enqueuedJobs.length > 0) {
     after(async () => {
       const uniqueJobIds = Array.from(
         new Set(enqueuedJobs.map((j) => j.jobId))
       );
       const baseUrl = getWorkerBaseUrl(request);
-      // Vacio = falta APP_BASE_URL en produccion. No se dispara: mandar el secreto a un
-      // host sacado de la cabecera seria entregarselo a quien la puso. Lo levanta el barrido.
+      // Vazio = falta APP_BASE_URL em produção. Não se dispara: mandar o segredo a um
+      // host tirado do cabeçalho seria entregá-lo a quem o colocou. Quem retoma é a varredura.
       if (!baseUrl) {
         console.error(
           `[meta-webhook] sin APP_BASE_URL no se dispara el worker; quedan ${uniqueJobIds.length} en cola`
@@ -452,22 +452,22 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Meta espera 200 OK; si tarda demasiado o devuelve error retira el webhook
+  // A Meta espera 200 OK; se demora demais ou devolve erro, retira o webhook
   return NextResponse.json({ received: true });
 }
 
 /**
- * URL publica de la app para que el webhook pueda llamarse a si mismo.
+ * URL pública do app para que o webhook possa chamar a si mesmo.
  *
- * A esta URL se le manda AGENT_WORKER_SECRET en una cabecera, asi que NO puede salir de
- * la peticion entrante: quien controle el `Host` de una peticion que llegue hasta aca se
- * lleva el secreto a su propio servidor. Hoy el camino esta detras de la firma HMAC del
- * webhook, pero eso es una defensa de otro, no de esta funcion.
+ * A esta URL se manda AGENT_WORKER_SECRET num cabeçalho, então NÃO pode sair da
+ * requisição que entra: quem controlar o `Host` de uma requisição que chegue até aqui
+ * leva o segredo ao próprio servidor. Hoje o caminho está atrás da assinatura HMAC do
+ * webhook, mas isso é uma defesa de outra coisa, não desta função.
  *
- * En produccion se exige APP_BASE_URL (o NEXT_PUBLIC_APP_URL). Si falta, se devuelve
- * cadena vacia y quien llama no dispara nada: el agente queda sin procesar y queda dicho
- * en el log, que es preferible a filtrar el secreto. Fuera de produccion se cae a
- * localhost, que es donde corre `npm run dev`.
+ * Em produção exige-se APP_BASE_URL (ou NEXT_PUBLIC_APP_URL). Se falta, devolve-se
+ * cadeia vazia e quem chama não dispara nada: o agente fica sem processar e fica dito
+ * no log, o que é preferível a vazar o segredo. Fora de produção cai em
+ * localhost, que é onde roda `npm run dev`.
  */
 function getWorkerBaseUrl(_request?: NextRequest): string {
   const fromEnv = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;

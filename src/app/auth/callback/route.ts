@@ -2,21 +2,21 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Vuelta del login con un proveedor externo (Google y companeros).
+ * Volta do login com um provedor externo (Google e similares).
  *
- * El navegador manda al usuario al proveedor con `signInWithOAuth`; el proveedor lo
- * devuelve aca con un codigo, y este handler lo canjea por la sesion y deja las cookies.
+ * O navegador manda o usuário ao provedor com `signInWithOAuth`; o provedor o
+ * devolve aqui com um código, e este handler o troca pela sessão e deixa os cookies.
  *
- * Entrar NO da acceso por si solo: quien no tenga fila en `team_members` termina en
- * `/sin-acceso`, igual que con email y contrasena. El alta la hace un administrador
- * desde Ajustes -> Equipo con el mismo correo.
+ * Entrar NÃO dá acesso por si só: quem não tiver linha em `team_members` termina em
+ * `/sin-acceso`, assim como com e-mail e senha. Um administrador faz o cadastro
+ * em Ajustes -> Equipo com o mesmo e-mail.
  */
 
 /**
- * Detras de un proxy, el `origin` de la peticion es la direccion interna del contenedor
- * (`https://0.0.0.0:3000`), asi que redirigir a eso manda al usuario a la nada. La
- * direccion publica sale de la configuracion, que es la fuente que no se puede falsear
- * desde fuera, y solo si falta se miran las cabeceras del proxy.
+ * Atrás de um proxy, o `origin` da requisição é o endereço interno do contêiner
+ * (`https://0.0.0.0:3000`), então redirecionar para isso manda o usuário para o nada. O
+ * endereço público sai da configuração, que é a fonte que não se pode falsificar
+ * de fora, e só se falta é que se olham os cabeçalhos do proxy.
  */
 function baseDelSitio(request: NextRequest, origin: string): string {
   const configurada = (process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "").trim();
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${base}/login?error=${encodeURIComponent(error.message)}`);
   }
 
-  // Ruta relativa siempre: evita que un `next` manipulado mande a otro sitio.
+  // Rota relativa sempre: evita que um `next` manipulado mande a outro site.
   const seguro = destino.startsWith("/") && !destino.startsWith("//") ? destino : "/";
   return NextResponse.redirect(`${base}${seguro}`);
 }

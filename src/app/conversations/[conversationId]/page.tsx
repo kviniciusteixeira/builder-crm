@@ -10,7 +10,7 @@ import { ConversationsListLive } from "@/components/conversations/ConversationsL
 import { ConversationView } from "@/components/conversations/ConversationView";
 import { canAccessContact, getCurrentMember, visibleOwnerId } from "@/lib/team";
 
-// El inbox lee la base en cada request: nunca se prerenderiza en build.
+// A caixa de entrada lê a base em cada request: nunca se pré-renderiza no build.
 export const dynamic = "force-dynamic";
 
 interface Props {
@@ -25,8 +25,8 @@ export default async function ConversationPage({ params }: Props) {
 
   const { conversation, contact, messages } = await getConversation(conversationId);
 
-  // Retrocompatibilidad: hasta la migracion multicanal la ruta era /conversations/<contactId>.
-  // Los links y bookmarks viejos se redirigen al hilo mas reciente de ese contacto.
+  // Retrocompatibilidade: até a migração multicanal a rota era /conversations/<contactId>.
+  // Os links e bookmarks antigos se redirecionam ao fio mais recente desse contato.
   if (!conversation) {
     const resolved = await resolveConversationId(conversationId);
     if (resolved && resolved !== conversationId) {
@@ -35,7 +35,7 @@ export default async function ConversationPage({ params }: Props) {
     notFound();
   }
 
-  // Hilo de un contacto ajeno: como si no existiera.
+  // Fio de um contato alheio: como se não existisse.
   const accesible = contact
     ? canAccessContact(member, contact)
     : member.role === "admin";

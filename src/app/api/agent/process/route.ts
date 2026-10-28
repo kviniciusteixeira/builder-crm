@@ -7,15 +7,15 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Worker del agente. Recibe { jobId } y procesa el job.
+ * Worker do agente. Recebe { jobId } e processa o job.
  *
- * Se invoca desde:
- * - El webhook de WhatsApp via `after()` con setTimeout (debounce)
- * - Un cron periodico (que llama GET y barre jobs stale)
+ * É chamado a partir de:
+ * - O webhook do WhatsApp via `after()` com setTimeout (debounce)
+ * - Um cron periódico (que chama GET e varre jobs stale)
  *
- * Auth: `x-agent-secret` (o Bearer) debe coincidir con AGENT_WORKER_SECRET. Sin esa
- * variable NO se atiende a nadie: la ruta es publica en el middleware y el secreto es
- * lo unico que la protege.
+ * Auth: `x-agent-secret` (ou Bearer) deve coincidir com AGENT_WORKER_SECRET. Sem essa
+ * variável NÃO se atende ninguém: a rota é pública no middleware e o segredo é
+ * o único que a protege.
  */
 export async function POST(request: NextRequest) {
   if (!autorizadoPorSecreto(request)) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET = scan de jobs stale (cron). Procesa hasta 5 en serie.
+ * GET = scan de jobs stale (cron). Processa até 5 em série.
  */
 export async function GET(request: NextRequest) {
   if (!autorizadoPorSecreto(request)) {
@@ -72,9 +72,9 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Los jobs nuevos traen `conversationId` y se corren por hilo; los que quedaron
- * encolados antes de la migracion multicanal solo tienen contacto y caen al wrapper,
- * que resuelve su conversacion mas reciente.
+ * Os jobs novos trazem `conversationId` e rodam por fio; os que ficaram
+ * enfileirados antes da migração multicanal só têm contato e caem no wrapper,
+ * que resolve a conversa mais recente.
  */
 function runClaim(claim: {
   contactId: string;

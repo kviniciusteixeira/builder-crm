@@ -2,15 +2,15 @@ import { pgTable, text, integer, numeric, boolean, timestamp, jsonb, vector } fr
 import { sql } from "drizzle-orm";
 
 /**
- * Catalogo de propiedades (espejo tipado de migrations/0000_propiedades.sql).
- * `embedding` requiere la extension pgvector; es nullable: sin OPENAI_API_KEY el
- * catalogo funciona igual con busqueda por filtros.
+ * Catálogo de propriedades (espelho tipado de migrations/0000_propiedades.sql).
+ * `embedding` exige a extensão pgvector; é nullable: sem OPENAI_API_KEY o
+ * catálogo funciona igual com busca por filtros.
  */
 export const propiedades = pgTable("propiedades", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  /** Id en el origen (Tokko u otro). Unico. */
+  /** Id na origem (Tokko ou outro). Único. */
   externalId: text("external_id").notNull().unique(),
   referenceCode: text("reference_code"),
   title: text("title"),

@@ -6,22 +6,22 @@ import type { ModuloServidor, HandlerModulo } from "@/lib/modules/types";
 import manifiesto from "./manifiesto";
 
 /**
- * PLANTILLA DE MODULO — lado servidor.
+ * MODELO DE MÓDULO — lado servidor.
  *
- * - `paginas`: componentes por patron de ruta relativa a /m/<nombre>:
+ * - `paginas`: componentes por padrão de rota relativa a /m/<nombre>:
  *     ""            -> /m/<nombre>
  *     "nueva"       -> /m/<nombre>/nueva
  *     "[id]"        -> /m/<nombre>/abc   (params.id = "abc")
  *     "[id]/editar" -> /m/<nombre>/abc/editar
- *   Reciben { params, searchParams, member }. Pueden ser async (server) y renderizar
+ *   Recebem { params, searchParams, member }. Podem ser async (server) e renderizar
  *   componentes cliente ("use client") de ./componentes.
- * - `api`: handlers por patron y metodo, ya protegidos por requireMember.
- *   Reciben (request, { params, member }) y devuelven Response.
- * - `tools`: lo que el agente puede hacer con este modulo (nombre unico).
- * - `seed`: datos de demostracion, idempotente.
+ * - `api`: handlers por padrão e método, já protegidos por requireMember.
+ *   Recebem (request, { params, member }) e devolvem Response.
+ * - `tools`: o que o agente pode fazer com este módulo (nome único).
+ * - `seed`: dados de demonstração, idempotente.
  *
- * Las tablas del modulo viven en migrations/ (no en src/db/schema.ts) y se consultan
- * con `sql` tipado. Prefijo = nombre del modulo. RLS obligatorio.
+ * As tabelas do módulo vivem em migrations/ (não em src/db/schema.ts) e consultam-se
+ * com `sql` tipado. Prefixo = nome do módulo. RLS obrigatório.
  */
 
 const listar: HandlerModulo = async (_req, { member }) => {
@@ -48,7 +48,7 @@ const modulo: ModuloServidor = {
   tools: [],
 
   async seed() {
-    // insertar datos de demostracion si no existen
+    // inserir dados de demonstração se não existirem
   },
 };
 

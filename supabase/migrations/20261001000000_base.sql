@@ -1,21 +1,21 @@
 -- ============================================================================
--- Builder CRM - migracion base (schema completo del nucleo)
+-- Builder CRM - migração base (schema completo do núcleo)
 -- ============================================================================
--- Generada desde src/db/schema.ts con drizzle-kit y completada a mano con lo que
--- Drizzle no describe: extensiones, indices, funciones SQL y filas semilla.
+-- Gerada a partir de src/db/schema.ts com drizzle-kit e completada à mão com o que
+-- o Drizzle não descreve: extensões, índices, funções SQL e linhas semente.
 --
--- Idempotente: se puede correr sobre una base vacia o sobre una que ya la tenga.
--- Hasta la version 1.0.0 este archivo se REGENERA cuando cambia el schema; desde
--- 1.0.0 solo se agregan migraciones nuevas (ver specs/nucleo/06-base-desplegable.md).
+-- Idempotente: pode rodar sobre uma base vazia ou sobre uma que já a tenha.
+-- Até a versão 1.0.0 este arquivo se REGENERA quando o schema muda; a partir de
+-- 1.0.0 só se adicionam migrações novas (ver specs/nucleo/06-base-desplegable.md).
 --
--- Requiere Supabase (o Postgres con el schema `auth` y la funcion auth.uid()): la
--- migracion de RLS que sigue a esta depende de eso.
+-- Exige Supabase (ou Postgres com o schema `auth` e a função auth.uid()): a
+-- migração de RLS que segue a esta depende disso.
 -- ============================================================================
 
--- Extensiones -----------------------------------------------------------------
+-- Extensões -----------------------------------------------------------------
 create extension if not exists pgcrypto;   -- gen_random_uuid()
 
--- Tablas ----------------------------------------------------------------------
+-- Tabelas ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS "activities" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" text NOT NULL,
@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS "whatsapp_templates" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
--- Claves foraneas ---------------------------------------------------------------
+-- Chaves estrangeiras ---------------------------------------------------------------
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'activities_contact_id_contacts_id_fk') THEN
     ALTER TABLE "activities" ADD CONSTRAINT "activities_contact_id_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."contacts"("id") ON DELETE no action ON UPDATE no action;
@@ -448,7 +448,7 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- Indices -----------------------------------------------------------------------
+-- Índices -----------------------------------------------------------------------
 create index if not exists contacts_owner_id_idx       on contacts (owner_id);
 create index if not exists contacts_tenant_idx         on contacts (tenant_id);
 create index if not exists contacts_needs_human_idx    on contacts (needs_human) where needs_human = true;
@@ -463,10 +463,10 @@ create index if not exists conversations_tenant_idx    on conversations (tenant_
 create index if not exists conversations_channel_idx   on conversations (channel);
 create index if not exists conversations_last_msg_idx  on conversations (last_message_at desc nulls last);
 
--- OJO: unicidad sobre external_id SOLO, a proposito y no sobre (provider, external_id):
--- en el dual-run del cutover de WhatsApp el mismo wamid.* puede entrar por el webhook de
--- Meta y por el de Zernio; con clave compuesta se duplicaria. ingest.ts hace ON CONFLICT
--- sobre este indice.
+-- ATENÇÃO: unicidade sobre external_id SÓ, de propósito e não sobre (provider, external_id):
+-- no dual-run do cutover de WhatsApp o mesmo wamid.* pode entrar pelo webhook da
+-- Meta e pelo do Zernio; com chave composta se duplicaria. ingest.ts faz ON CONFLICT
+-- sobre este índice.
 create unique index if not exists messages_external_id_key on messages (external_id) where external_id is not null;
 create index if not exists messages_conversation_idx  on messages (conversation_id, created_at);
 create index if not exists messages_contact_idx       on messages (contact_id);
@@ -486,14 +486,14 @@ create index if not exists notifications_member_created_idx on notifications (me
 
 create index if not exists documents_contact_ready_idx on documents (contact_id, created_at desc) where status = 'ready';
 
--- Semillas (idempotentes) -------------------------------------------------------
--- Una instancia = un negocio. `tenants` queda por compatibilidad con el routing de
--- cuentas; siempre hay exactamente una fila, la `default`.
+-- Sementes (idempotentes) -------------------------------------------------------
+-- Uma instância = um negócio. `tenants` fica por compatibilidade com o routing de
+-- contas; sempre há exatamente uma linha, a `default`.
 insert into tenants (name, slug) values ('Default', 'default')
 on conflict (slug) do nothing;
 
--- Un agente por canal. WhatsApp arranca encendido; Instagram y Messenger apagados:
--- hasta que no tengan prompt propio contestarian con el de WhatsApp.
+-- Um agente por canal. WhatsApp começa ligado; Instagram e Messenger desligados:
+-- até que tenham prompt próprio responderiam com o de WhatsApp.
 insert into agent_configs (tenant_id, channel, enabled)
 select t.id, ch.channel, ch.enabled
 from tenants t
@@ -501,7 +501,7 @@ cross join (values ('whatsapp', true), ('instagram', false), ('facebook', false)
 where t.slug = 'default'
 on conflict (tenant_id, channel) do nothing;
 
--- Automatizacion de ejemplo (source = seed: se puede apagar, no borrar).
+-- Automação de exemplo (source = seed: pode desligar, não apagar).
 insert into automations (key, name, description, trigger, enabled, filters, actions, source)
 values (
   'contact_assigned_push',

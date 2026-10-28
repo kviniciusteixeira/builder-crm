@@ -45,7 +45,7 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-/** PUT directo al bucket con progreso (fetch no reporta progreso de subida; XHR si). */
+/** PUT direto no bucket com progresso (fetch não reporta progresso de upload; XHR sim). */
 function putWithProgress(url: string, file: File, onProgress: (pct: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -64,8 +64,8 @@ function putWithProgress(url: string, file: File, onProgress: (pct: number) => v
 }
 
 /**
- * Documentos de la ficha: lista + subida por boton o arrastrando. El archivo va del
- * navegador al bucket; el servidor solo firma y confirma.
+ * Documentos da ficha: lista + envio por botão ou arrastando. O arquivo vai do
+ * navegador ao bucket; o servidor só assina e confirma.
  */
 export function DocumentsPanel({ contactId }: { contactId: string }) {
   const [items, setItems] = useState<DocItem[]>([]);

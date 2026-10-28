@@ -1,7 +1,7 @@
 /**
- * Embeddings con OpenAI (text-embedding-3-small, 1536 dims), directo a OpenAI: OpenRouter
- * no expone /embeddings de forma confiable. Opcional: sin OPENAI_API_KEY la busqueda
- * cae a filtros SQL.
+ * Embeddings com OpenAI (text-embedding-3-small, 1536 dims), direto na OpenAI: o OpenRouter
+ * não expõe /embeddings de forma confiável. Opcional: sem OPENAI_API_KEY a busca
+ * cai para filtros SQL.
  */
 import OpenAI from "openai";
 
@@ -37,7 +37,7 @@ export async function embedBatch(texts: string[], batchSize = 100): Promise<numb
   return out;
 }
 
-/** Literal que entiende pgvector: "[0.1,0.2,...]". */
+/** Literal que o pgvector entende: "[0.1,0.2,...]". */
 export function toVectorLiteral(embedding: number[]): string {
   return `[${embedding.join(",")}]`;
 }

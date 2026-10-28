@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 
 /**
- * Las plantillas las descarga el servidor de autenticacion y las rellena el: si se pierde
- * un marcador, el correo sale sin el enlace y la persona no puede entrar. Y como el
- * nombre de la marca lo escribe cada miembro en su `config/cliente.ts`, tiene que salir
- * escapado o un `&` deja el correo roto en la mitad de los clientes de correo.
+ * Os templates quem baixa é o servidor de autenticação, e ele os preenche: se se perde
+ * um marcador, o e-mail sai sem o link e a pessoa não consegue entrar. E como o
+ * nome da marca cada membro escreve no seu `config/cliente.ts`, tem que sair
+ * escapado ou um `&` deixa o e-mail quebrado na metade dos clientes de e-mail.
  */
 
 vi.mock("@/lib/config", async () => {
@@ -49,7 +49,7 @@ describe("plantillas de los correos de acceso", () => {
   });
 
   it("usa el color de la marca y un logo absoluto", () => {
-    // En un correo no hay rutas relativas: sin la URL publica delante, el logo no carga.
+    // Num e-mail não há rotas relativas: sem a URL pública na frente, o logo não carrega.
     const html = plantillaCorreo("invitacion", "https://crm.ejemplo.com");
     expect(html).toContain("#0E7C7B");
     expect(html).toContain("https://crm.ejemplo.com/marca/logo.png");

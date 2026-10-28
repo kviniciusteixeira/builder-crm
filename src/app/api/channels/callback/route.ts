@@ -8,20 +8,20 @@ import { requireMember } from "@/lib/api-auth";
 export const dynamic = "force-dynamic";
 
 /**
- * Vuelta del OAuth de Zernio: `?connected=<platform>&profileId=&accountId=&username=`.
+ * Volta do OAuth do Zernio: `?connected=<platform>&profileId=&accountId=&username=`.
  *
- * Se abre dentro de un popup, asi que en vez de redirigir devuelve una pagina minima que
- * le avisa al CRM por `postMessage` y se cierra sola. Si no hay `opener` (popup
- * bloqueado, o alguien pego la URL a mano) cae al redirect de siempre.
+ * Abre dentro de um popup, então em vez de redirecionar devolve uma página mínima que
+ * avisa o CRM por `postMessage` e se fecha sozinha. Se não há `opener` (popup
+ * bloqueado, ou alguém colou a URL à mão) cai no redirect de sempre.
  *
- * El webhook `account.connected` guarda lo mismo de forma idempotente: esto es UX para
- * que la cuenta aparezca al instante, no la fuente de verdad.
+ * O webhook `account.connected` guarda o mesmo de forma idempotente: isto é UX para
+ * que a conta apareça na hora, não a fonte da verdade.
  *
- * Lo que llega en la URL NO se cree: se le pregunta a Zernio por ese `accountId` con la
- * clave de esta instancia antes de guardarlo. Sin esa comprobacion, un enlace preparado
- * y abierto por cualquiera del equipo conectaba al CRM una cuenta ajena, porque el
- * identificador venia del query y nadie verificaba que esa conexion la hubiera iniciado
- * este CRM. La clave de la API solo ve las cuentas propias, asi que una ajena no existe.
+ * O que chega na URL NÃO se acredita: pergunta-se ao Zernio por esse `accountId` com a
+ * chave desta instância antes de guardá-lo. Sem essa verificação, um link preparado
+ * e aberto por qualquer pessoa da equipe conectava ao CRM uma conta alheia, porque o
+ * identificador vinha da query e ninguém verificava que essa conexão a tivesse iniciado
+ * este CRM. A chave da API só vê as contas próprias, então uma alheia não existe.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         await upsertZernioAccount({
           tenantId,
           platform,
-          // Lo que se guarda sale de la respuesta de Zernio, no del query.
+          // O que se guarda sai da resposta do Zernio, não da query.
           zernioAccountId: cuenta.data.id,
           zernioProfileId: cuenta.data.profileId ?? params.get("profileId"),
           username: cuenta.data.username ?? username,
@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Origen REAL desde donde se sirve esta pagina, no el de la env: el opener es
-  // same-origin con ella por definicion, y si NEXT_PUBLIC_APP_URL no coincide exacto
-  // (otro puerto en dev, por ejemplo) el postMessage se descarta sin avisar.
+  // Origem REAL de onde esta página é servida, não a da env: o opener é
+  // same-origin com ela por definição, e se NEXT_PUBLIC_APP_URL não coincide exatamente
+  // (outra porta em dev, por exemplo) o postMessage é descartado sem avisar.
   const origin = request.nextUrl.origin;
 
   return new NextResponse(
@@ -86,7 +86,7 @@ interface PopupHtmlArgs {
 }
 
 function popupHtml({ origin, payload }: PopupHtmlArgs): string {
-  // Escapar `<` evita que un username con markup pueda cerrar el <script>.
+  // Escapar `<` evita que um username com markup possa fechar o <script>.
   const data = JSON.stringify({ source: "zernio-connect", ...payload }).replace(
     /</g,
     "\\u003c"

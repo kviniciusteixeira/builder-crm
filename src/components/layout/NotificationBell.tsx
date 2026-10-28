@@ -23,9 +23,9 @@ interface Item {
 const POLL_MS = 30_000;
 
 /**
- * La campanita: notificaciones internas del miembro actual. Se refresca cada 30 s y al
- * volver a la pestana; una notificacion nueva mientras el CRM esta abierto ademas sale
- * como toast. Si este dispositivo no tiene push activado, lo ofrece aca mismo.
+ * O sininho: notificações internas do membro atual. Atualiza a cada 30 s e ao
+ * voltar à aba; uma notificação nova enquanto o CRM está aberto ainda sai
+ * como toast. Se este dispositivo não tem push ativado, oferece aqui mesmo.
  */
 export function NotificationBell() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export function NotificationBell() {
     if (!res?.ok) return;
     const data = (await res.json()) as { items: Item[]; unread: number };
 
-    // Toast solo para lo que llego DESPUES de la primera carga.
+    // Toast só para o que chegou DEPOIS da primeira carga.
     const newest = data.items[0];
     if (newest && newestSeen.current && newest.id !== newestSeen.current && !newest.readAt) {
       toast(newest.title, {

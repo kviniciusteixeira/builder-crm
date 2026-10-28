@@ -1,103 +1,103 @@
-# Entrar con Google
+# Entrar com o Google
 
-Opcional y apagado de fabrica. Si lo configuras, aparece el boton **Continuar con
-Google** en el login; si no, no aparece y nadie se entera. El CRM no tiene ninguna
-variable propia para esto: le pregunta al servidor de autenticacion que proveedores
-tiene encendidos, asi que se configura en un solo lugar.
+Opcional e desligado de fábrica. Se você configurar, aparece o botão **Continuar com
+Google** no login; se não, não aparece e ninguém fica sabendo. O CRM não tem nenhuma
+variável própria para isso: pergunta ao servidor de autenticação quais provedores
+estão ligados, então se configura num só lugar.
 
-## Lo primero, porque cambia como piensas el resto
+## O primeiro ponto, porque muda como se pensa o resto
 
-**Entrar con Google NO da acceso al CRM.** Igual que con email y contrasena, quien no
-este dado de alta en Ajustes -> Equipo con ese mismo correo termina en `/sin-acceso`. El
-proveedor dice *quien sos*; `team_members` dice *si entras y con que rol*. Sin esto,
-encender Google seria abrirle la puerta a cualquiera con una cuenta de Gmail.
+**Entrar com o Google NÃO dá acesso ao CRM.** Igual a e-mail e senha, quem não
+estiver cadastrado em Ajustes -> Equipo com esse mesmo e-mail termina em `/sin-acceso`. O
+provedor diz *quem você é*; `team_members` diz *se você entra e com qual papel*. Sem isso,
+ligar o Google seria abrir a porta para qualquer um com uma conta do Gmail.
 
-Orden de trabajo: primero das de alta a la persona en Ajustes -> Equipo con el correo
-exacto de su cuenta de Google, **dejando la contrasena temporal vacia**, y despues ella
-entra con el boton.
+Ordem de trabalho: primeiro você cadastra a pessoa em Ajustes -> Equipo com o e-mail
+exato da conta Google dela, **deixando a senha temporária vazia**, e depois ela
+entra pelo botão.
 
-## Un cliente de OAuth por instancia
+## Um cliente OAuth por instância
 
-Cada instancia necesita el suyo. No se comparte entre clientes: la pantalla de
-consentimiento de Google muestra el nombre del proyecto, y la URL de retorno es la de
-esa instancia concreta.
+Cada instância precisa do seu. Não se compartilha entre clientes: a tela de
+consentimento do Google mostra o nome do projeto, e a URL de retorno é a
+dessa instância concreta.
 
-1. Entra a [Google Cloud Console](https://console.cloud.google.com/) y crea un proyecto,
-   o elige uno.
-2. **APIs y servicios -> Pantalla de consentimiento de OAuth**. Tipo **Externo**. Nombre
-   de la aplicacion y correo de contacto: los del cliente, no los tuyos. Mientras este
-   en modo de prueba solo entran los correos que agregues como usuarios de prueba; para
-   abrirlo al equipo del cliente, publicala.
-3. **Credenciales -> Crear credenciales -> ID de cliente de OAuth**, tipo **Aplicacion
-   web**.
-4. En **URIs de redireccionamiento autorizados** va UNA sola, la de tu servidor de
-   autenticacion:
+1. Entre no [Google Cloud Console](https://console.cloud.google.com/) e crie um projeto,
+   ou escolha um.
+2. **APIs e serviços -> Tela de consentimento OAuth**. Tipo **Externo**. Nome
+   do aplicativo e e-mail de contato: os do cliente, não os seus. Enquanto estiver
+   em modo de teste só entram os e-mails que você adicionar como usuários de teste; para
+   abrir para a equipe do cliente, publique.
+3. **Credenciais -> Criar credenciais -> ID do cliente OAuth**, tipo **Aplicativo
+   da Web**.
+4. Em **URIs de redirecionamento autorizados** vai UMA só, a do seu servidor de
+   autenticação:
 
    ```
-   https://auth.tudominio.com/auth/v1/callback
+   https://auth.seudominio.com/auth/v1/callback
    ```
 
-   Con Supabase cloud es `https://TU_REF.supabase.co/auth/v1/callback`. Tiene que
-   coincidir caracter por caracter, incluido `https`.
-5. Guarda el **ID de cliente** y el **secreto**.
+   Com Supabase cloud é `https://SEU_REF.supabase.co/auth/v1/callback`. Tem que
+   coincidir caractere por caractere, inclusive o `https`.
+5. Guarde o **ID do cliente** e o **segredo**.
 
-## Encenderlo
+## Ligar
 
-### Autoalojado (GoTrue en tu VPS)
+### Auto-hospedado (GoTrue no seu VPS)
 
-Tres variables en el contenedor de autenticacion, y reiniciarlo:
+Três variáveis no contêiner de autenticação, e reiniciá-lo:
 
 ```
 GOTRUE_EXTERNAL_GOOGLE_ENABLED=true
 GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
 GOTRUE_EXTERNAL_GOOGLE_SECRET=...
-GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI=https://auth.tudominio.com/auth/v1/callback
+GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI=https://auth.seudominio.com/auth/v1/callback
 ```
 
-Ademas, `GOTRUE_URI_ALLOW_LIST` tiene que incluir la URL del CRM, porque ahi vuelve el
-usuario despues de entrar:
+Além disso, `GOTRUE_URI_ALLOW_LIST` tem que incluir a URL do CRM, porque é para lá que o
+usuário volta depois de entrar:
 
 ```
-GOTRUE_URI_ALLOW_LIST=https://crm.tudominio.com/**
+GOTRUE_URI_ALLOW_LIST=https://crm.seudominio.com/**
 ```
 
 ### Supabase cloud
 
-Panel del proyecto -> **Authentication -> Providers -> Google**: pega el ID de cliente y
-el secreto, y encendelo. En **URL Configuration** agrega `https://crm.tudominio.com/**`
-a las *Redirect URLs*.
+Painel do projeto -> **Authentication -> Providers -> Google**: cole o ID do cliente e
+o segredo, e ligue. Em **URL Configuration** adicione `https://crm.seudominio.com/**`
+às *Redirect URLs*.
 
-## Comprobarlo
+## Conferir
 
 ```bash
-curl https://auth.tudominio.com/auth/v1/settings -H "apikey: TU_ANON_KEY"
+curl https://auth.seudominio.com/auth/v1/settings -H "apikey: SUA_ANON_KEY"
 ```
 
-Tiene que traer `"external": { ..., "google": true }`. Eso es exactamente lo que mira el
-CRM para dibujar el boton, asi que si sale `true` y recargas el login, el boton esta.
+Tem que trazer `"external": { ..., "google": true }`. É exatamente o que o
+CRM olha para desenhar o botão, então se sair `true` e você recarregar o login, o botão está lá.
 
-`npm run verificar` tambien lo informa, en la linea **Formas de entrar**.
+`npm run verificar` também informa, na linha **Formas de entrar**.
 
 ## Como funciona por dentro
 
-1. El boton llama a `signInWithOAuth` en el navegador y manda al usuario a Google.
-2. Google lo devuelve a tu servidor de autenticacion, que lo manda a
-   `https://crm.tudominio.com/auth/callback` con un codigo.
-3. Esa ruta (`src/app/auth/callback/route.ts`) canjea el codigo por la sesion y deja las
+1. O botão chama `signInWithOAuth` no navegador e manda o usuário para o Google.
+2. O Google devolve para o seu servidor de autenticação, que manda para
+   `https://crm.seudominio.com/auth/callback` com um código.
+3. Essa rota (`src/app/auth/callback/route.ts`) troca o código pela sessão e deixa os
    cookies.
-4. El usuario cae en el inicio. Si no esta en `team_members`, va a `/sin-acceso`.
+4. O usuário cai no início. Se não estiver em `team_members`, vai para `/sin-acceso`.
 
-## Lo que se rompe y por que
+## O que quebra e por quê
 
-- **`redirect_uri_mismatch` de Google.** La URI de retorno del paso 4 no coincide con la
-  de la consola. Ojo con el `https`, con la barra final y con el dominio: va el del
-  **servidor de autenticacion**, no el del CRM.
-- **Vuelve al login sin error visible.** Suele ser `GOTRUE_URI_ALLOW_LIST` sin la URL del
-  CRM: el proveedor se niega a redirigir a un destino que no esta en la lista.
-- **Entra y cae en `/sin-acceso`.** Es lo correcto: falta darlo de alta en Ajustes ->
-  Equipo con ese correo. No es un error de configuracion.
-- **El boton no aparece.** El CRM cachea la respuesta de `/auth/v1/settings` cinco
-  minutos. Espera o vuelve a desplegar.
-- **La persona ya tenia cuenta con contrasena.** Google se vincula a la cuenta existente
-  si el correo es el mismo y esta confirmado. Las cuentas que crea Ajustes -> Equipo
-  nacen confirmadas, asi que se vinculan solas.
+- **`redirect_uri_mismatch` do Google.** A URI de retorno do passo 4 não coincide com a
+  do console. Cuidado com o `https`, com a barra final e com o domínio: vai o do
+  **servidor de autenticação**, não o do CRM.
+- **Volta ao login sem erro visível.** Costuma ser `GOTRUE_URI_ALLOW_LIST` sem a URL do
+  CRM: o provedor se recusa a redirecionar para um destino que não está na lista.
+- **Entra e cai em `/sin-acceso`.** É o correto: falta cadastrá-lo em Ajustes ->
+  Equipo com esse e-mail. Não é um erro de configuração.
+- **O botão não aparece.** O CRM cacheia a resposta de `/auth/v1/settings` por cinco
+  minutos. Espere ou implante de novo.
+- **A pessoa já tinha conta com senha.** O Google se vincula à conta existente
+  se o e-mail for o mesmo e estiver confirmado. As contas que Ajustes -> Equipo
+  cria nascem confirmadas, então se vinculam sozinhas.

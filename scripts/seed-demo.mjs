@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Carga los datos de demostracion en una instancia (local o desplegada).
+// Carrega os dados de demonstração numa instância (local ou implantada).
 //
 //   npm run seed                              -> contra APP_BASE_URL / NEXT_PUBLIC_APP_URL / localhost:3000
 //   node scripts/seed-demo.mjs --url https://crm.cliente.com
 //
-// Pega a POST /api/seed/demo con AGENT_WORKER_SECRET como Bearer (la ruta tambien
-// acepta un admin con sesion desde el boton del inicio). Es idempotente.
+// Bate em POST /api/seed/demo com AGENT_WORKER_SECRET como Bearer (a rota também
+// aceita um admin com sessão a partir do botão do início). É idempotente.
 
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -17,7 +17,7 @@ if (!process.env.AGENT_WORKER_SECRET && existsSync(join(raiz, ".env.local"))) {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
   } catch {
-    /* sin dotenv */
+    /* sem dotenv */
   }
 }
 

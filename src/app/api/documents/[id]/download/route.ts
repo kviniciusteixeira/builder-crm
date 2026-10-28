@@ -4,8 +4,8 @@ import { canAccessContact } from "@/lib/team";
 import { documentContact, documentDownloadUrl, getDocument } from "@/lib/documents";
 
 /**
- * Redirige a una URL firmada de un minuto. El link que se comparte es este (estable y
- * con sesion), nunca el del bucket. `?dl=1` fuerza descarga; sin eso abre en pestana.
+ * Redireciona para uma URL assinada de um minuto. O link que se compartilha é este (estável e
+ * com sessão), nunca o do bucket. `?dl=1` força o download; sem isso abre em aba.
  */
 export async function GET(
   request: NextRequest,

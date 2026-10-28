@@ -10,7 +10,7 @@ export interface ScrapeResult {
   error?: string;
 }
 
-/** Scrapea una URL (portal inmobiliario) con Firecrawl y devuelve markdown. Opcional. */
+/** Faz scrape de uma URL (portal imobiliário) com Firecrawl e devolve markdown. Opcional. */
 export async function scrapeUrl(url: string): Promise<ScrapeResult> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
   if (!apiKey) return { ok: false, error: "FIRECRAWL_API_KEY no configurada" };

@@ -9,12 +9,12 @@ const APP_SECRET = process.env.WHATSAPP_APP_SECRET || "";
 
 const GRAPH_BASE = `https://graph.facebook.com/${API_VERSION}`;
 
-// La fuente unica de normalizePhone esta en phone.ts; re-export por compatibilidad.
+// A fonte única de normalizePhone está em phone.ts; reexport por compatibilidade.
 export { normalizePhone };
 
 /**
- * Credenciales de envio que se pasan a las funciones de envio. `accessToken` puede
- * venir null (cuenta sin token cargado); en ese caso se usa el fallback de env.
+ * Credenciais de envio que se passam às funções de envio. `accessToken` pode
+ * vir null (conta sem token carregado); nesse caso usa-se o fallback de env.
  */
 export interface WhatsappSendCredentials {
   phoneNumberId: string;
@@ -27,8 +27,8 @@ interface ResolvedCreds {
 }
 
 /**
- * Resuelve credenciales de envio: usa las de la cuenta (multi-tenant) o cae a las
- * env globales (fallback de transicion para no romper el flujo single-tenant).
+ * Resolve credenciais de envio: usa as da conta (multi-tenant) ou cai nas
+ * env globais (fallback de transição para não quebrar o fluxo single-tenant).
  */
 function resolveCreds(
   account?: WhatsappSendCredentials | null
@@ -173,9 +173,9 @@ export interface CreateTemplatePayload {
 }
 
 /**
- * Credenciales para operar plantillas. Las plantillas viven en el WABA (no en el
- * phone number), por eso esto pide `wabaId` en vez de `phoneNumberId`. La interfaz
- * `WhatsappAccount` (whatsapp-accounts.ts) es asignable a esto.
+ * Credenciais para operar templates. Os templates vivem no WABA (não no
+ * phone number), por isso isto pede `wabaId` em vez de `phoneNumberId`. A interface
+ * `WhatsappAccount` (whatsapp-accounts.ts) é atribuível a isto.
  */
 export interface WhatsappTemplateCredentials {
   wabaId: string | null;
@@ -187,7 +187,7 @@ interface ResolvedWabaCreds {
   accessToken: string;
 }
 
-/** Resuelve WABA + token: prioriza la cuenta multi-tenant, cae a env (transicion). */
+/** Resolve WABA + token: prioriza a conta multi-tenant, cai em env (transição). */
 function resolveWabaCreds(
   account?: WhatsappTemplateCredentials | null
 ): ResolvedWabaCreds | null {
@@ -284,12 +284,12 @@ export async function getTemplates(
 }
 
 /**
- * Valida la firma X-Hub-Signature-256 que Meta envia con cada webhook.
- * El formato del header es "sha256=<hex>".
+ * Valida a assinatura X-Hub-Signature-256 que a Meta envia com cada webhook.
+ * O formato do header é "sha256=<hex>".
  *
- * Si APP_SECRET no esta seteado, retorna `false` y loguea un warning. NUNCA
- * dejar que pase un webhook sin firma valida en produccion — atacante podria
- * inyectar mensajes/leads falsos.
+ * Se APP_SECRET não está definido, retorna `false` e loga um warning. NUNCA
+ * deixar passar um webhook sem assinatura válida em produção — um atacante poderia
+ * injetar mensagens/leads falsos.
  */
 export function verifyWebhookSignature(
   rawBody: string,

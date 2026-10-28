@@ -26,7 +26,7 @@ function label(m: Member) {
   return m.name?.trim() || m.email.split("@")[0];
 }
 
-/** Lista del equipo + quien soy. Se comparte entre todos los selectores de la pagina. */
+/** Lista da equipe + quem sou. Compartilha-se entre todos os seletores da página. */
 let cache: Promise<{ members: Member[]; me: Member | null }> | null = null;
 function loadTeam() {
   if (!cache) {
@@ -34,25 +34,25 @@ function loadTeam() {
       fetch("/api/team").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/team/me").then((r) => (r.ok ? r.json() : { member: null })),
     ]).then(([members, me]) => ({ members, me: me.member }));
-    // La cache dura lo que dura la navegacion; un cambio en el equipo se ve al recargar.
+    // O cache dura o que dura a navegação; uma mudança na equipe se vê ao recarregar.
     setTimeout(() => (cache = null), 60_000);
   }
   return cache;
 }
 
 interface Props {
-  /** Si viene, el cambio se guarda solo (PUT /api/contacts/:id). Si no, es controlado. */
+  /** Se vier, a mudança se salva sozinha (PUT /api/contacts/:id). Se não, é controlado. */
   contactId?: string;
   value: string | null;
   onChange?: (ownerId: string | null) => void;
   className?: string;
-  /** Variante compacta para paneles laterales. */
+  /** Variante compacta para painéis laterais. */
   compact?: boolean;
 }
 
 /**
- * Selector de propietario. El admin cambia; el asesor solo ve el nombre. Si el
- * contacto tiene id, guarda al vuelo y dispara la automatizacion en el servidor.
+ * Seletor de proprietário. O admin muda; o assessor só vê o nome. Se o
+ * contato tem id, salva na hora e dispara a automação no servidor.
  */
 export function OwnerSelect({ contactId, value, onChange, className, compact }: Props) {
   const [members, setMembers] = useState<Member[]>([]);

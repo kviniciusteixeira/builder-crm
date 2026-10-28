@@ -4,8 +4,8 @@ import { esquemaCampo, type CampoConfig } from "@/lib/config/schema";
 import type { ManifiestoModulo, ItemNavModulo } from "./types";
 
 /**
- * Lado navegador del sistema de modulos: solo manifiestos (nav, campos). Lo usan el
- * sidebar y la configuracion. Nada de aqui toca la base de datos.
+ * Lado navegador do sistema de módulos: só manifestos (nav, campos). Usam o
+ * sidebar e a configuração. Nada daqui toca a base de dados.
  */
 
 export function manifiestosActivos(): ManifiestoModulo[] {
@@ -43,13 +43,13 @@ function parsearCampos() {
   erroresCache = errores;
 }
 
-/** Campos de contacto aportados por los modulos activos (ya validados). */
+/** Campos de contato aportados pelos módulos ativos (já validados). */
 export function camposDeModulos(): CampoConfig[] {
   parsearCampos();
   return camposCache ?? [];
 }
 
-/** Problemas en los manifiestos de los modulos activos (vacio si todo esta bien). */
+/** Problemas nos manifestos dos módulos ativos (vazio se tudo está bem). */
 export function erroresDeModulos(): string[] {
   parsearCampos();
   return erroresCache ?? [];

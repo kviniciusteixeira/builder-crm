@@ -1,56 +1,56 @@
 # Builder CRM
 
-**CRM multicanal con agente de IA, hecho para entregarle una instancia propia a cada
-cliente.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
-leads y mueve el pipeline, y un arnes de Claude Code que adapta, despliega y prueba
-una instancia con un solo prompt.
+**CRM multicanal com agente de IA, feito para entregar uma instância própria a cada
+cliente.** Uma caixa de entrada para WhatsApp, Instagram e Messenger, um agente que qualifica
+leads e move o pipeline, e um arnês de Claude Code que adapta, implanta e testa
+uma instância com um único prompt.
 
-Open source, licencia **MIT**: usalo, modificalo, desplegalo para tus clientes y cobra
-por eso. Nacio dentro de la comunidad IA Builder Lab, que es donde se ensena a usarlo,
-pero no hace falta ser miembro de nada para que sea tuyo.
+Código aberto, licença **MIT**: use, modifique, implante para os seus clientes e cobre
+por isso. Nasceu dentro da comunidade IA Builder Lab, que é onde se ensina a usá-lo,
+mas não precisa ser membro de nada para que seja seu.
 
-> *"Adapta Builder CRM para una inmobiliaria llamada Casa Sur, con modulo de
-> propiedades y agendamiento de visitas, y despliegalo en mi Coolify."*
-> Claude escribe la spec, configura, construye, despliega, prueba y entrega la URL.
+> *"Adapta o Builder CRM para uma imobiliária chamada Casa Sur, com módulo de
+> imóveis e agendamento de visitas, e implanta no meu Coolify."*
+> O Claude escreve a spec, configura, constrói, implanta, testa e entrega a URL.
 
-## Que trae el nucleo
+## O que o núcleo traz
 
-- **Login con roles** admin y asesor (Supabase Auth): un asesor ve solo sus contactos.
-- **Bandeja** multicanal en tiempo real (Zernio: WhatsApp, Instagram DM, Messenger),
-  ventana de 24 h y plantillas de WhatsApp.
-- **Contactos** con ficha, documentos (bucket S3 opcional), campos personalizados por
-  cliente y resumen del agente.
-- **Pipeline** kanban con etapas configurables que el agente puede mover.
-- **Agente de IA** (OpenRouter, modelo por variable): lee el historial, responde por
-  el canal, actualiza la ficha, mueve etapas, registra actividades, deja un resumen y
-  deriva a una persona (pausa por conversacion).
-- **Reportes** reales por periodo y **dashboard** honesto.
-- **Ajustes**: canales, agente por canal, equipo, notificaciones push.
-- **Entrar con Google** y otros proveedores, opcional: ver [`docs/GOOGLE-AUTH.md`](docs/GOOGLE-AUTH.md).
-- **Invitaciones por correo** y "olvide mi contrasena", opcional: ver
-  [`docs/CORREO.md`](docs/CORREO.md). Sin esto, el admin crea la cuenta y pasa la
-  contrasena temporal a mano, que es como viene de fabrica.
-- **Automatizaciones** (disparador -> filtros -> acciones), **PWA** instalable.
-- **Simulador**: chatear con el agente sin ningun canal conectado (demos y
-  autoverificacion).
-- **Modulos**: todo lo especifico de un cliente vive en `modules/` y se enciende por
-  configuracion. Plantilla de nicho incluida: **inmobiliaria** (propiedades + visitas).
+- **Login com papéis** admin e assessor (Supabase Auth): um assessor vê só os seus contatos.
+- **Caixa de entrada** multicanal em tempo real (Zernio: WhatsApp, Instagram DM, Messenger),
+  janela de 24 h e templates de WhatsApp.
+- **Contatos** com ficha, documentos (bucket S3 opcional), campos personalizados por
+  cliente e resumo do agente.
+- **Pipeline** kanban com etapas configuráveis que o agente pode mover.
+- **Agente de IA** (OpenRouter, modelo por variável): lê o histórico, responde pelo
+  canal, atualiza a ficha, move etapas, registra atividades, deixa um resumo e
+  encaminha a uma pessoa (pausa por conversa).
+- **Relatórios** reais por período e **dashboard** honesto.
+- **Ajustes**: canais, agente por canal, equipe, notificações push.
+- **Entrar com o Google** e outros provedores, opcional: ver [`docs/GOOGLE-AUTH.md`](docs/GOOGLE-AUTH.md).
+- **Convites por e-mail** e "esqueci a senha", opcional: ver
+  [`docs/CORREIO.md`](docs/CORREIO.md). Sem isso, o admin cria a conta e passa a
+  senha temporária à mão, que é como vem de fábrica.
+- **Automações** (gatilho -> filtros -> ações), **PWA** instalável.
+- **Simulador**: conversar com o agente sem nenhum canal conectado (demos e
+  autoverificação).
+- **Módulos**: tudo o que é específico de um cliente vive em `modules/` e se liga por
+  configuração. Modelo de nicho incluído: **imobiliária** (imóveis + visitas).
 
 ## Requisitos
 
-- Node.js 22 y npm. **Nada mas para probarlo**: el modo local trae su propia base.
-  En Windows, clona en una ruta corta (`C:\proyectos\...`): con carpetas muy
-  anidadas, el compilador de Next falla por el limite de caracteres del sistema de
-  archivos.
-- Para una instancia de verdad: una cuenta de **Supabase** (un proyecto por cliente;
-  el plan gratuito alcanza), o tu propio Postgres mas GoTrue en el VPS (ver
-  [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
-- Para desplegar: un VPS con **Coolify** y un dominio.
-- Opcional: **OpenRouter** (agente), **Zernio** (canales), bucket S3 (documentos).
-- **Claude Code** con el repo abierto; ver [`CLAUDE.md`](CLAUDE.md) y
+- Node.js 22 e npm. **Nada mais para testar**: o modo local traz a própria base.
+  No Windows, clone num caminho curto (`C:\projetos\...`): com pastas muito
+  aninhadas, o compilador do Next falha pelo limite de caracteres do sistema de
+  arquivos.
+- Para uma instância de verdade: uma conta do **Supabase** (um projeto por cliente;
+  o plano gratuito alcança), ou o seu próprio Postgres mais GoTrue no VPS (ver
+  [`docs/SUPABASE-NO-VPS.md`](docs/SUPABASE-NO-VPS.md)).
+- Para implantar: um VPS com **Coolify** e um domínio.
+- Opcional: **OpenRouter** (agente), **Zernio** (canais), bucket S3 (documentos).
+- **Claude Code** com o repositório aberto; ver [`CLAUDE.md`](CLAUDE.md) e
   [`docs/MCP.md`](docs/MCP.md).
 
-## Probarlo en tu PC (2 minutos, sin crear ninguna cuenta)
+## Testar no seu PC (2 minutos, sem criar nenhuma conta)
 
 ```bash
 git clone https://github.com/diegovasquez-ai/builder-crm.git && cd builder-crm
@@ -58,79 +58,79 @@ npm install
 npm run local
 ```
 
-Y ya esta: `http://localhost:3000` con el CRM lleno de datos de demostracion. No hace
-falta Supabase, ni Docker, ni un archivo `.env`.
+E pronto: `http://localhost:3000` com o CRM cheio de dados de demonstração. Não faz
+falta Supabase, nem Docker, nem um arquivo `.env`.
 
-`npm run local` levanta un **Postgres embebido** (un paquete de npm compilado a
-WebAssembly, guardado en `.local/db`), aplica las mismas migraciones que una instancia
-desplegada —con su RLS—, carga los datos demo y abre el CRM. **No hay login**: en modo
-local no hay servidor de autenticacion, asi que entras directo como administrador y el
-menu lateral te lo recuerda.
+`npm run local` sobe um **Postgres embutido** (um pacote de npm compilado para
+WebAssembly, guardado em `.local/db`), aplica as mesmas migrações que uma instância
+implantada — com o RLS —, carrega os dados demo e abre o CRM. **Não há login**: no modo
+local não há servidor de autenticação, então você entra direto como administrador e o
+menu lateral lembra disso.
 
 | | |
 |---|---|
-| `npm run local -- --reset` | borra la base local y empieza de cero |
-| `npm run local -- --sin-datos` | sin datos de demostracion |
-| `npm run local -- --puerto 3001` | otro puerto |
+| `npm run local -- --reset` | apaga a base local e começa do zero |
+| `npm run local -- --sin-datos` | sem dados de demonstração |
+| `npm run local -- --puerto 3001` | outra porta |
 
-Para que el **agente responda** en el simulador hace falta una clave de OpenRouter:
-copia `.env.example` a `.env.local` y pone `OPENROUTER_API_KEY`. Sin ella el CRM
-funciona igual (los mensajes entran a la bandeja y crean el contacto), solo que nadie
-contesta del otro lado.
+Para o **agente responder** no simulador faz falta uma chave do OpenRouter:
+copie `.env.example` para `.env.local` e ponha `OPENROUTER_API_KEY`. Sem ela o CRM
+funciona igual (as mensagens entram na caixa de entrada e criam o contato), só que ninguém
+responde do outro lado.
 
-Lo que el modo local **no** tiene, porque necesita una instancia de verdad: login,
-equipo con roles, invitaciones por correo y la busqueda semantica del modulo
-propiedades (el Postgres embebido no trae pgvector).
+O que o modo local **não** tem, porque precisa de uma instância de verdade: login,
+equipe com papéis, convites por e-mail e a busca semântica do módulo
+imóveis (o Postgres embutido não traz pgvector).
 
-## Con tu propio Supabase (para adaptar y desplegar)
+## Com o seu próprio Supabase (para adaptar e implantar)
 
 ```bash
-cp .env.example .env.local        # completar al menos Supabase (4 variables)
-npm run db:migrar                 # crea tablas, RLS y el trigger del primer admin
+cp .env.example .env.local        # completar pelo menos o Supabase (4 variáveis)
+npm run db:migrar                 # cria tabelas, RLS e o trigger do primeiro admin
 npm run dev                       # http://localhost:3000
 ```
 
-1. Abre `/signup`: mientras no haya miembros, el registro esta abierto y **la primera
-   cuenta queda como administrador**. Despues se cierra solo.
-2. En el inicio pulsa **Cargar demo** (o `npm run seed`) para ver el CRM lleno.
-3. Abre **Simulador** y chatea con el agente (necesita `OPENROUTER_API_KEY`).
-4. Conecta WhatsApp/Instagram/Messenger cuando quieras: skill `conectar-zernio`.
+1. Abra `/signup`: enquanto não houver membros, o cadastro está aberto e **a primeira
+   conta fica como administrador**. Depois se fecha sozinho.
+2. No início pulse **Cargar demo** (ou `npm run seed`) para ver o CRM cheio.
+3. Abra **Simulador** e converse com o agente (precisa de `OPENROUTER_API_KEY`).
+4. Conecte WhatsApp/Instagram/Messenger quando quiser: skill `conectar-zernio`.
 
-Sin interfaz: `npm run admin:crear -- --email a@b.com --password 'xxxxxxxx'`.
+Sem interface: `npm run admin:crear -- --email a@b.com --password 'xxxxxxxx'`.
 
-## Desplegar en Coolify
+## Implantar no Coolify
 
-Resumen (el detalle paso a paso esta en la skill `deploy-coolify`):
+Resumo (o detalhe passo a passo está na skill `deploy-coolify`):
 
-1. Base y Auth. Dos caminos y conviene elegir antes de empezar:
-   - **Supabase cloud**, un proyecto por cliente. Mas rapido, con panel y respaldos; el
-     plan gratuito pausa los proyectos inactivos.
-   - **Autoalojados en el mismo Coolify** (Postgres + GoTrue): sin cuenta de Supabase,
-     sin pausas y sin costo por cliente, pero los respaldos son tuyos. Es el camino de
-     la instancia de demostracion. Guia:
-     [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md).
+1. Base e Auth. Dois caminhos e convém escolher antes de começar:
+   - **Supabase cloud**, um projeto por cliente. Mais rápido, com painel e backups; o
+     plano gratuito pausa os projetos inativos.
+   - **Auto-hospedados no mesmo Coolify** (Postgres + GoTrue): sem conta do Supabase,
+     sem pausas e sem custo por cliente, mas os backups são seus. É o caminho da
+     instância de demonstração. Guia:
+     [`docs/SUPABASE-NO-VPS.md`](docs/SUPABASE-NO-VPS.md).
 
-   Despues, desde tu maquina: `npm run db:migrar` y `npm run admin:crear`.
-2. En Coolify: aplicacion desde el repo (build pack **Dockerfile**, puerto 3000,
-   dominio) y las variables de [`.env.example`](.env.example), **todas en runtime**. No
-   hace falta marcar ninguna como "Build Variable": desde 1.2.2 el servidor le pasa al
-   navegador la configuracion publica en tiempo de ejecucion, asi que la misma imagen
-   sirve para cualquier instancia. El `Dockerfile` igual acepta las `NEXT_PUBLIC_*` como
-   build args, por si construis en una plataforma que las hornea (Vercel).
-3. Deploy. Las migraciones corren solas al arrancar el contenedor.
-4. `curl https://<dominio>/api/health` -> `{"ok":true,"version":"<la del package.json>","db":"ok"}`.
-5. `node scripts/seed-demo.mjs --url https://<dominio>` y
+   Depois, da sua máquina: `npm run db:migrar` e `npm run admin:crear`.
+2. No Coolify: aplicativo a partir do repositório (build pack **Dockerfile**, porta 3000,
+   domínio) e as variáveis de [`.env.example`](.env.example), **todas em runtime**. Não
+   faz falta marcar nenhuma como "Build Variable": desde 1.2.2 o servidor passa ao
+   navegador a configuração pública em tempo de execução, então a mesma imagem
+   serve para qualquer instância. O `Dockerfile` ainda aceita as `NEXT_PUBLIC_*` como
+   build args, para o caso de construir numa plataforma que as grava na imagem (Vercel).
+3. Deploy. As migrações rodam sozinhas ao iniciar o contêiner.
+4. `curl https://<dominio>/api/health` -> `{"ok":true,"version":"<a do package.json>","db":"ok"}`.
+5. `node scripts/seed-demo.mjs --url https://<dominio>` e
    `node scripts/verificar-instancia.mjs --url https://<dominio> --email ... --password ...`.
 
-Tambien funciona con `docker compose up -d --build` (solo la app; la base es
-Supabase) o en Vercel (`vercel.json` + barridos por GitHub Actions).
+Também funciona com `docker compose up -d --build` (só o app; a base é
+Supabase) ou na Vercel (`vercel.json` + varreduras pelo GitHub Actions).
 
-## Adaptarlo a un cliente (sin tocar el nucleo)
+## Adaptar a um cliente (sem tocar no núcleo)
 
-Zona del cliente: `config/cliente.ts` (marca, pipeline, campos, agente),
+Zona do cliente: `config/cliente.ts` (marca, pipeline, campos, agente),
 `config/modulos.json`, `modules/<nombre>/`, `public/marca/`, `specs/<cliente>/`.
-Nucleo: `src/`, `supabase/`, `scripts/`, Docker. Reglas en
-[`specs/CONSTITUCION.md`](specs/CONSTITUCION.md).
+Núcleo: `src/`, `supabase/`, `scripts/`, Docker. Regras em
+[`specs/CONSTITUICAO.md`](specs/CONSTITUICAO.md).
 
 ```ts
 // config/cliente.ts
@@ -140,69 +140,69 @@ export default definirConfig({ ...plantillaInmobiliaria, marca: { ...plantillaIn
 
 `config/modulos.json`: `{ "activos": ["propiedades", "visitas"] }` -> `npm run db:migrar`.
 
-Con Claude Code: abre el repo y pide la adaptacion en lenguaje natural; la skill
-`adaptar-a-cliente` sigue el flujo entender -> especificar -> configurar -> construir ->
-desplegar -> probar -> entregar. Para un modulo nuevo: `crear-modulo`. Para una
-plantilla nueva: `nueva-plantilla-nicho`.
+Com Claude Code: abra o repositório e peça a adaptação em linguagem natural; a skill
+`adaptar-a-cliente` segue o fluxo entender -> especificar -> configurar -> construir ->
+implantar -> testar -> entregar. Para um módulo novo: `crear-modulo`. Para um
+modelo novo: `nueva-plantilla-nicho`.
 
-## Estructura
+## Estrutura
 
 ```
-config/            zona del cliente: cliente.ts, modulos.json, plantillas/
-modules/           modulos (ejemplo, propiedades, visitas, _plantilla)
-public/marca/      logo e icono del cliente
-specs/             constitucion, plantilla de spec, specs del nucleo y del cliente
-tests/             invariantes que fallan en silencio (firma, ventana 24h, roles)
-.local/            base embebida del modo local (no se versiona)
-src/               nucleo (app, lib, components, db)
-supabase/          migraciones del nucleo (base, RLS, primer admin)
-scripts/           migrar, crear-admin, seed-demo, verificar-instancia, zernio:*
+config/            zona do cliente: cliente.ts, modulos.json, plantillas/
+modules/           módulos (ejemplo, propiedades, visitas, _plantilla)
+public/marca/      logo e ícone do cliente
+specs/             constituição, modelo de spec, specs do núcleo e do cliente
+tests/             invariantes que falham em silêncio (assinatura, janela 24h, papéis)
+.local/            base embutida do modo local (não se versiona)
+src/               núcleo (app, lib, components, db)
+supabase/          migrações do núcleo (base, RLS, primeiro admin)
+scripts/           migrar, criar-admin, seed-demo, verificar-instancia, zernio:*
 docker/, Dockerfile, docker-compose.yml
-.claude/skills/    el arnes: 7 skills del flujo one-shot
-docs/              MCP, agente, Zernio, Supabase en tu VPS, entrar con Google, correo
+.claude/skills/    o arnês: 7 skills do fluxo one-shot
+docs/              MCP, agente, Zernio, Supabase no seu VPS, entrar com o Google, e-mail
 ```
 
 ## Scripts
 
-| Comando | Que hace |
+| Comando | O que faz |
 |---|---|
-| `npm run local` | **probarlo en tu PC sin cuentas**: Postgres embebido, datos demo, sin login |
-| `npm run dev` / `build` / `start` | desarrollo contra tu Supabase, build, servidor |
-| `npm test` | invariantes del nucleo (vitest, sin base ni red, ~1 s) |
-| `npm run typecheck` / `lint` | gate tecnico (CI corre los tres + build) |
-| `npm run db:migrar` / `db:status` | migraciones del nucleo + modulos activos |
-| `npm run admin:crear -- --email --password` | crea o promueve un administrador |
-| `npm run claves:supabase` / `auth:preparar` | base y Auth en tu propio VPS, sin Supabase cloud |
-| `npm run seed` | datos de demostracion (`POST /api/seed/demo`) |
-| `npm run verificar -- --url ...` | autoverificacion de una instancia |
-| `npm run zernio:setup` / `zernio:webhook` / `zernio:whatsapp` | canales via Zernio (`connect:whatsapp` para Meta directo) |
-| `npm run pwa:icons` | iconos de la PWA desde `public/marca/icono.png` |
-| `npm run sync:tokko` | catalogo del modulo propiedades desde Tokko |
+| `npm run local` | **testar no seu PC sem contas**: Postgres embutido, dados demo, sem login |
+| `npm run dev` / `build` / `start` | desenvolvimento contra o seu Supabase, build, servidor |
+| `npm test` | invariantes do núcleo (vitest, sem base nem rede, ~1 s) |
+| `npm run typecheck` / `lint` | gate técnico (o CI roda os três + build) |
+| `npm run db:migrar` / `db:status` | migrações do núcleo + módulos ativos |
+| `npm run admin:crear -- --email --password` | cria ou promove um administrador |
+| `npm run claves:supabase` / `auth:preparar` | base e Auth no seu próprio VPS, sem Supabase cloud |
+| `npm run seed` | dados de demonstração (`POST /api/seed/demo`) |
+| `npm run verificar -- --url ...` | autoverificação de uma instância |
+| `npm run zernio:setup` / `zernio:webhook` / `zernio:whatsapp` | canais via Zernio (`connect:whatsapp` para Meta direto) |
+| `npm run pwa:icons` | ícones da PWA a partir de `public/marca/icono.png` |
+| `npm run sync:tokko` | catálogo do módulo imóveis a partir do Tokko |
 
-## Versiones
+## Versões
 
-La version corre en `package.json`, se ve en `/api/health` y al pie del menu. SemVer
-desde el punto de vista de quien opera una instancia:
+A versão corre em `package.json`, se vê em `/api/health` e no rodapé do menu. SemVer
+do ponto de vista de quem opera uma instância:
 
-| | Cuando sube |
+| | Quando sobe |
 |---|---|
-| **Mayor** (`2.0.0`) | Hay que hacer algo a mano al actualizar (variable nueva obligatoria, cambio del contrato de modulos o de conectores). |
-| **Menor** (`1.1.0`) | Funciones nuevas. Actualizar es mergear y redesplegar. |
-| **Parche** (`1.0.1`) | Arreglos. Actualizar es mergear y redesplegar. |
+| **Maior** (`2.0.0`) | Há que fazer algo à mão ao atualizar (variável nova obrigatória, mudança do contrato de módulos ou de conectores). |
+| **Menor** (`1.1.0`) | Funções novas. Atualizar é mesclar e reimplantar. |
+| **Patch** (`1.0.1`) | Correções. Atualizar é mesclar e reimplantar. |
 
-Como traer una version nueva a una instancia adaptada: [`ACTUALIZAR.md`](ACTUALIZAR.md).
-Cambios por version: [`CHANGELOG.md`](CHANGELOG.md). Secretos, roles y RLS:
-[`SEGURIDAD.md`](SEGURIDAD.md).
+Como trazer uma versão nova a uma instância adaptada: [`ATUALIZAR.md`](ATUALIZAR.md).
+Mudanças por versão: [`CHANGELOG.md`](CHANGELOG.md). Segredos, papéis e RLS:
+[`SEGURANCA.md`](SEGURANCA.md).
 
-## Licencia
+## Licença
 
-**MIT.** Copyright (c) 2026 Diego Vásquez. Podes usarlo, copiarlo, modificarlo,
-desplegarlo para tus clientes, cobrar por eso y distribuirlo. La unica condicion es
-conservar el aviso de copyright. Sin garantia: quien despliega una instancia es
-responsable de sus datos, de sus credenciales y de lo que el agente le responda a las
-personas que escriben. El texto completo esta en [`LICENSE`](LICENSE).
+**MIT.** Copyright (c) 2026 Diego Vásquez. Você pode usá-lo, copiá-lo, modificá-lo,
+implantá-lo para os seus clientes, cobrar por isso e distribuí-lo. A única condição é
+conservar o aviso de copyright. Sem garantia: quem implanta uma instância é
+responsável pelos dados, pelas credenciais e pelo que o agente responder às
+pessoas que escrevem. O texto completo está em [`LICENSE`](LICENSE).
 
-Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), tambien MIT; su
-aviso de copyright se conserva en [`NOTICE`](NOTICE), junto con el de las dependencias.
-La arquitectura de entrega para agencias toma ideas de
+Nasceu como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), também MIT; o
+aviso de copyright se conserva em [`NOTICE`](NOTICE), junto com o das dependências.
+A arquitetura de entrega para agências toma ideias de
 [vocero-crm](https://github.com/kevinrivm/vocero-crm).

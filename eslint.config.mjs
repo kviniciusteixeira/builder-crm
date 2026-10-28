@@ -7,18 +7,18 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      // DEUDA CONOCIDA, a proposito y con fecha. La regla llego activa al actualizar a
-      // eslint-config-next 16.4.3 (en 16.2.2 no estaba) y marca 9 sitios que ya existian:
-      // componentes que cargan datos con `useEffect(() => { load() }, [load])` donde
-      // `load` toca el estado antes del primer `await`. Provoca renders en cascada al
-      // montar; no es un fallo de correccion ni de seguridad.
+      // DÍVIDA CONHECIDA, de propósito e com data. A regra chegou ativa ao atualizar para
+      // eslint-config-next 16.4.3 (em 16.2.2 não estava) e marca 9 lugares que já existiam:
+      // componentes que carregam dados com `useEffect(() => { load() }, [load])` onde
+      // `load` mexe no estado antes do primeiro `await`. Provoca renders em cascata ao
+      // montar; não é uma falha de correção nem de segurança.
       //
-      // Queda en `warn` y no en `error` porque arreglarlo bien es reestructurar la carga
-      // de datos de nueve componentes y eso no entra en una version de seguridad: cada
-      // uno necesita que alguien recorra la pantalla y compruebe los estados de carga.
-      // Sigue saliendo en cada `npm run lint` para que no se olvide.
+      // Fica em `warn` e não em `error` porque arrumar direito é reestruturar a carga
+      // de dados de nove componentes e isso não entra numa versão de segurança: cada
+      // um precisa que alguém percorra a tela e confira os estados de carregamento.
+      // Continua saindo em cada `npm run lint` para que não se esqueça.
       //
-      // Los nueve: app/plantillas/page.tsx, contacts/OwnerSelect, conversations/
+      // Os nove: app/plantillas/page.tsx, contacts/OwnerSelect, conversations/
       // ContactDetailPanel, conversations/TemplatePicker, pipeline/KanbanBoard,
       // pipeline/PipelineEditor, settings/AgentSettings, settings/ChannelsSettings,
       // lib/use-push.

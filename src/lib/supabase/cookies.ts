@@ -1,15 +1,15 @@
 /**
- * Opciones de las cookies de sesion, compartidas por el middleware y el cliente de
- * servidor para que no se puedan desincronizar.
+ * Opções dos cookies de sessão, compartilhadas pelo middleware e pelo cliente de
+ * servidor para que não possam se desincronizar.
  *
- * `@supabase/ssr` trae `path`, `sameSite`, `httpOnly` y `maxAge` por defecto, pero NO
- * `secure`. Sin ese atributo el navegador adjunta `sb-*-auth-token` —el JWT de acceso y
- * el token de refresco— a cualquier peticion `http://` al dominio del CRM: la primera
- * visita escrita a mano, un enlace viejo, una red hostil. Quien mire esa peticion se
- * lleva la sesion entera.
+ * `@supabase/ssr` traz `path`, `sameSite`, `httpOnly` e `maxAge` por padrão, mas NÃO
+ * `secure`. Sem esse atributo o navegador anexa `sb-*-auth-token` —o JWT de acesso e
+ * o token de refresh— a qualquer requisição `http://` ao domínio do CRM: a primeira
+ * visita escrita à mão, um link velho, uma rede hostil. Quem olhar essa requisição
+ * leva a sessão inteira.
  *
- * En desarrollo `secure` queda apagado, porque `http://localhost` no tiene certificado y
- * si no el navegador descarta la cookie y no se puede iniciar sesion.
+ * Em desenvolvimento `secure` fica desligado, porque `http://localhost` não tem certificado e
+ * senão o navegador descarta o cookie e não se pode iniciar sessão.
  */
 export function opcionesDeCookie() {
   return {

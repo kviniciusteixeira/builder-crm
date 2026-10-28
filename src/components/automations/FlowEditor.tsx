@@ -18,7 +18,7 @@ import type { Catalog, RuleAction, RuleDraft, RuleRecord } from "./types";
 
 interface Props {
   catalog: Catalog;
-  /** null = regla nueva. */
+  /** null = regra nova. */
   initial: RuleRecord | null;
   isAdmin: boolean;
 }
@@ -34,8 +34,8 @@ function emptyDraft(catalog: Catalog): RuleDraft {
 }
 
 /**
- * El constructor: nombre y estado arriba, disparador, y la cadena de acciones con un
- * (+) entre cada paso. Todo el estado vive aca; las tarjetas solo reportan cambios.
+ * O construtor: nome e estado em cima, gatilho, e a cadeia de ações com um
+ * (+) entre cada passo. Todo o estado vive aqui; os cartões só reportam mudanças.
  */
 export function FlowEditor({ catalog, initial, isAdmin }: Props) {
   const router = useRouter();
@@ -123,7 +123,7 @@ export function FlowEditor({ catalog, initial, isAdmin }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Cabecera: volver, nombre, estado, guardar */}
+      {/* Cabeçalho: voltar, nome, estado, salvar */}
       <div className="rounded-2xl border border-border bg-card px-4 py-3 flex flex-wrap items-center gap-3 shadow-sm">
         <button
           type="button"
@@ -155,7 +155,7 @@ export function FlowEditor({ catalog, initial, isAdmin }: Props) {
         )}
       </div>
 
-      {/* Lienzo */}
+      {/* Tela */}
       <div className="rounded-2xl border border-border bg-[#F6F8FB] bg-[radial-gradient(circle,#c9d0dc_1px,transparent_1px)] bg-size-[20px_20px] px-4 py-8 md:py-10">
         <div className="mx-auto w-full max-w-xl">
           <TriggerCard
@@ -267,7 +267,7 @@ function StatusToggle({
   );
 }
 
-/** Linea vertical entre pasos, con espacio para el boton (+). */
+/** Linha vertical entre passos, com espaço para o botão (+). */
 function Connector({ children }: { children?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center py-1.5">

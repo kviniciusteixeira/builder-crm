@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 
 /**
- * Registra el service worker. Va en el layout raiz para que corra en toda pagina.
+ * Registra o service worker. Vai no layout raiz para que rode em toda página.
  *
- * Se usa la URL absoluta con `window.location.origin`: iOS rechaza el registro si
- * el scope no coincide exactamente con el origen.
+ * Usa-se a URL absoluta com `window.location.origin`: o iOS recusa o registro se
+ * o scope não coincide exatamente com a origem.
  */
 export function PWARegister() {
   useEffect(() => {
@@ -18,7 +18,7 @@ export function PWARegister() {
       .register(`${window.location.origin}/sw.js`, { scope: "/" })
       .then((registration) => {
         if (cancelled) return;
-        // Cada hora se busca una version nueva del worker, por si cambio el deploy.
+        // A cada hora se busca uma versão nova do worker, caso o deploy tenha mudado.
         const timer = setInterval(() => registration.update(), 60 * 60 * 1000);
         return () => clearInterval(timer);
       })

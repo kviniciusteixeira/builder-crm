@@ -1,16 +1,16 @@
 import "server-only";
 
 /**
- * Que formas de entrar admite esta instancia.
+ * Que formas de entrar esta instância admite.
  *
- * No se configura dos veces: en lugar de una variable propia del CRM, se le pregunta al
- * proveedor de autenticacion por su endpoint publico `/auth/v1/settings`, que devuelve
- * los proveedores externos encendidos. Asi, encender Google es poner sus variables en
- * GoTrue (o el interruptor en el panel de Supabase cloud) y nada mas: el boton aparece
- * solo, y si no esta configurado no aparece.
+ * Não se configura duas vezes: em vez de uma variável própria do CRM, pergunta-se ao
+ * provedor de autenticação pelo seu endpoint público `/auth/v1/settings`, que devolve
+ * os provedores externos ligados. Assim, ligar o Google é pôr as variáveis no
+ * GoTrue (ou o interruptor no painel do Supabase cloud) e nada mais: o botão aparece
+ * sozinho, e se não está configurado não aparece.
  *
- * Falla cerrado: si la consulta no responde, se devuelve lista vacia y queda solo el
- * acceso por email y contrasena, que no depende de esto.
+ * Falha fechado: se a consulta não responde, devolve-se lista vazia e fica só o
+ * acesso por e-mail e senha, que não depende disto.
  */
 
 export type ProveedorExterno = "google" | "github" | "azure" | "facebook" | "apple";
@@ -25,8 +25,8 @@ export async function proveedoresExternos(): Promise<ProveedorExterno[]> {
   try {
     const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/settings`, {
       headers: { apikey: anon },
-      // La configuracion del proveedor no cambia cada minuto, y esto corre en cada
-      // carga del login: se cachea cinco minutos.
+      // A configuração do provedor não muda a cada minuto, e isto roda em cada
+      // carga do login: cacheia-se cinco minutos.
       next: { revalidate: 300 },
       signal: AbortSignal.timeout(5_000),
     });
@@ -39,7 +39,7 @@ export async function proveedoresExternos(): Promise<ProveedorExterno[]> {
   }
 }
 
-/** Nombre para mostrar en el boton. */
+/** Nome para mostrar no botão. */
 export const NOMBRE_PROVEEDOR: Record<ProveedorExterno, string> = {
   google: "Google",
   github: "GitHub",

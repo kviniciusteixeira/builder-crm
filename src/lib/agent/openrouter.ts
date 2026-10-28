@@ -7,9 +7,9 @@ const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 let client: OpenAI | null = null;
 
 /**
- * Cliente OpenAI-compatible apuntando a OpenRouter.
- * OpenRouter normaliza tool calling y response_format al formato OpenAI,
- * asi que el resto del codigo del agente no cambia.
+ * Cliente compatível com OpenAI apontando para o OpenRouter.
+ * O OpenRouter normaliza tool calling e response_format ao formato OpenAI,
+ * então o resto do código do agente não muda.
  */
 export function getOpenRouterClient(): OpenAI {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -21,7 +21,7 @@ export function getOpenRouterClient(): OpenAI {
       apiKey,
       baseURL: OPENROUTER_BASE_URL,
       defaultHeaders: {
-        // OpenRouter usa estos headers para ranking en su leaderboard (opcional)
+        // O OpenRouter usa estes headers para ranking no seu leaderboard (opcional)
         "HTTP-Referer": process.env.APP_BASE_URL || "http://localhost:3000",
         "X-Title": marca().nombre,
       },
@@ -30,7 +30,7 @@ export function getOpenRouterClient(): OpenAI {
   return client;
 }
 
-/** AGENT_MODEL (entorno) -> config.agente.modelo -> default del nucleo. */
+/** AGENT_MODEL (ambiente) -> config.agente.modelo -> default do núcleo. */
 export function getAgentModel(): string {
   return process.env.AGENT_MODEL || getConfig().agente.modelo || DEFAULT_MODEL;
 }

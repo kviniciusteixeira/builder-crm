@@ -1,12 +1,12 @@
 /**
- * Barridos de recuperacion dentro del proceso (para Coolify / docker / cualquier host
- * con un proceso Node vivo).
+ * Varreduras de recuperação dentro do processo (para Coolify / docker / qualquer host
+ * com um processo Node vivo).
  *
- * El camino normal no necesita esto: un mensaje entrante se contesta en ~7 s por el
- * webhook y `after()`. Pero si ese `after()` muere a mitad de camino, quedan jobs del
- * agente, eventos de webhook y corridas de automatizacion a medio procesar. Estos
- * barridos pegan cada SWEEP_INTERVAL_MIN (default 30) a los mismos endpoints que
- * usaba el cron de GitHub Actions, con el mismo secreto. En Vercel no corren (ahi
+ * O caminho normal não precisa disto: uma mensagem entrante se responde em ~7 s pelo
+ * webhook e `after()`. Mas se esse `after()` morre no meio do caminho, ficam jobs do
+ * agente, eventos de webhook e execuções de automação pela metade. Estas
+ * varreduras batem a cada SWEEP_INTERVAL_MIN (default 30) nos mesmos endpoints que
+ * usava o cron do GitHub Actions, com o mesmo segredo. Na Vercel não rodam (aí
  * manda vercel.json + .github/workflows/sweepers.yml).
  */
 
@@ -46,7 +46,7 @@ export function iniciarBarridos() {
     }
   };
 
-  // Primer barrido al minuto de arrancar (deja que el servidor termine de levantar).
+  // Primeira varredura ao minuto de arrancar (deixa que o servidor termine de subir).
   const primero = setTimeout(correr, 60_000);
   primero.unref?.();
   globalThis.__builderBarridos = setInterval(correr, minutos * 60_000);

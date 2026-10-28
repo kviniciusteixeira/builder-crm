@@ -6,9 +6,9 @@ import type { MetodoHttp } from "@/lib/modules/types";
 export const dynamic = "force-dynamic";
 
 /**
- * Catch-all de la API de modulos: /api/m/<modulo>/<ruta...>.
- * Exige miembro (requireMember) antes de delegar al handler que el modulo declara en
- * servidor.ts. Modulo inactivo o ruta sin match -> 404; metodo sin handler -> 405.
+ * Catch-all da API de módulos: /api/m/<modulo>/<ruta...>.
+ * Exige membro (requireMember) antes de delegar ao handler que o módulo declara em
+ * servidor.ts. Módulo inativo ou rota sem match -> 404; método sem handler -> 405.
  */
 async function despachar(
   request: NextRequest,

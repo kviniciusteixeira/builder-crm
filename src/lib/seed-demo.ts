@@ -20,18 +20,18 @@ import type { CampoConfig } from "@/lib/config/schema";
 import type { ValoresCampos } from "@/lib/config/campos";
 
 /**
- * Datos de demostracion. Cero datos reales: nombres, telefonos y empresas inventados.
+ * Dados de demonstração. Zero dados reais: nomes, telefones e empresas inventados.
  *
- * Idempotente: los contactos llevan la etiqueta `demo`; si ya hay alguno, el nucleo no
- * vuelve a sembrar. Despues corre el `seed()` de cada modulo activo (cada uno decide
- * si ya tiene datos).
+ * Idempotente: os contatos levam a etiqueta `demo`; se já há algum, o núcleo não
+ * volta a semear. Depois corre o `seed()` de cada módulo ativo (cada um decide
+ * se já tem dados).
  *
- * Las conversaciones usan el conector `simulador`: en una demo se les puede responder
- * desde la bandeja y el agente contesta, sin que nada salga a un canal real. No se
- * excluyen de Reportes (solo se excluyen los contactos creados desde /simulador).
+ * As conversas usam o conector `simulador`: numa demo pode-se responder-lhes
+ * a partir da caixa de entrada e o agente responde, sem que nada saia a um canal real. Não se
+ * excluem de Relatórios (só se excluem os contatos criados a partir de /simulador).
  *
- * Los campos personalizados se completan segun config/cliente.ts: la misma demo sirve
- * para cualquier plantilla.
+ * Os campos personalizados se completam conforme config/cliente.ts: a mesma demo serve
+ * para qualquer template.
  */
 
 const PERSONAS = [
@@ -51,7 +51,7 @@ const PERSONAS = [
 
 const ZONAS = ["Providencia", "Las Condes", "Nunoa", "La Reina", "Vitacura", "Santiago Centro", "Maipu", "Colina"];
 
-/** Valor plausible para cada campo segun su tipo (misma demo para cualquier plantilla). */
+/** Valor plausível para cada campo conforme o seu tipo (mesma demo para qualquer template). */
 function valorDemo(campo: CampoConfig, i: number): ValoresCampos[string] {
   switch (campo.tipo) {
     case "seleccion":
@@ -146,7 +146,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
   const ahora = Date.now();
   const dia = 86_400_000;
 
-  // Contactos repartidos en los ultimos 40 dias, con campos de la plantilla.
+  // Contatos repartidos nos últimos 40 dias, com campos do template.
   const creados: Array<{ id: string; name: string; source: string }> = [];
   for (let i = 0; i < PERSONAS.length; i++) {
     const p = PERSONAS[i];
@@ -175,7 +175,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
   }
   r.contactos = creados.length;
 
-  // Operaciones repartidas por etapa del pipeline por defecto.
+  // Operações repartidas por etapa do pipeline padrão.
   const [pipeline] = await db.select().from(pipelines).where(eq(pipelines.isDefault, true)).limit(1);
   if (pipeline) {
     const stages = await db.select().from(pipelineStages).where(eq(pipelineStages.pipelineId, pipeline.id)).orderBy(asc(pipelineStages.order));
@@ -201,7 +201,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
     }
   }
 
-  // Actividades.
+  // Atividades.
   const notas = [
     "Llamada inicial: le interesa visitar el fin de semana.",
     "Envie propuesta por correo, espera respuesta del banco.",
@@ -219,7 +219,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
     });
   }
 
-  // Conversaciones por el simulador: se pueden responder y el agente contesta.
+  // Conversas pelo simulador: pode-se responder e o agente responde.
   const canales = ["whatsapp", "instagram", "whatsapp", "facebook", "whatsapp", "instagram"] as const;
   for (let i = 0; i < GUIONES.length && i < creados.length; i++) {
     const contacto = creados[i];
@@ -272,8 +272,8 @@ async function sembrarNucleo(r: ResultadoSeed) {
       .update(contacts)
       .set({ updatedAt: ultimoAt })
       .where(eq(contacts.id, contacto.id));
-    // Con el constructor, no con db.execute(sql``): en SQL crudo el driver no
-    // serializa objetos Date y la consulta falla antes de salir.
+    // Com o construtor, não com db.execute(sql``): em SQL cru o driver não
+    // serializa objetos Date e a consulta falha antes de sair.
     const idxUltimoEntrante = guion
       .map((g, idx) => (g.dir === "in" ? idx : -1))
       .filter((x) => x >= 0)
@@ -290,7 +290,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
       .where(eq(conversations.id, conv.id));
   }
 
-  // Un hilo derivado a humano, para que la bandeja muestre el estado.
+  // Um fio transferido a humano, para que a caixa de entrada mostre o estado.
   if (creados[4]) {
     await db.execute(sql`
       update conversations set ai_enabled = false, needs_human = true,

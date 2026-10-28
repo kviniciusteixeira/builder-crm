@@ -58,7 +58,7 @@ export async function PUT(
   const updateData: Record<string, unknown> = { updatedAt: new Date() };
   if (body.title !== undefined) updateData.title = body.title;
   if (body.value !== undefined) updateData.value = body.value;
-  // La etapa va por `setDealStage`, que emite el evento de la automatizacion.
+  // A etapa passa por `setDealStage`, que emite o evento da automação.
   if (body.stageId !== undefined && body.stageId !== existing.stageId) {
     const moved = await setDealStage({ dealId: id, stageId: body.stageId });
     if (!moved.ok) {

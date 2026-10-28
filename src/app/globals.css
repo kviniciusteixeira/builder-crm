@@ -53,12 +53,12 @@
 }
 
 /*
-  Builder CRM - paleta base (config/cliente.ts la pisa en runtime)
+  Builder CRM - paleta base (config/cliente.ts a sobrescreve em runtime)
   Filosofia 60/30/10:
-    60% Blanco #FFFFFF (lienzo limpio, mensajeria estilo GHL/Intercom)
+    60% Branco #FFFFFF (tela limpa, mensagens no estilo GHL/Intercom)
     30% Navy #0A1628 (texto, sidebar, headings)
-    10% Verde teal base #2E4A47 (CTAs y acciones primarias, color del logo)
-  Light = blanco puro, sidebar negro permanente, teal en CTAs.
+    10% Verde teal base #2E4A47 (CTAs e ações primárias, cor do logo)
+  Light = branco puro, sidebar preto permanente, teal nos CTAs.
 */
 
 :root {
@@ -74,7 +74,7 @@
   --popover: #FFFFFF;
   --popover-foreground: #0A1628;
 
-  /* Primary = verde teal base (CTAs por defecto en shadcn) */
+  /* Primary = verde teal base (CTAs padrão no shadcn) */
   --primary: #2E4A47;
   --primary-foreground: #FFFFFF;
 
@@ -82,7 +82,7 @@
   --secondary: #F4F4F5;
   --secondary-foreground: #0A1628;
 
-  /* Muted = zinc claro (un toque mas fresco para diferenciar columnas) */
+  /* Muted = zinc claro (um toque mais fresco para diferenciar colunas) */
   --muted: #E8EBF1;
   --muted-foreground: #52525B;
 
@@ -106,7 +106,7 @@
 
   --radius: 0.75rem;
 
-  /* Sidebar = negro neutro permanente (estilo Attio/SHARP) */
+  /* Sidebar = preto neutro permanente (estilo Attio/SHARP) */
   --sidebar: #0F1419;
   --sidebar-foreground: #E8EDF5;
   --sidebar-foreground-muted: rgba(232, 237, 245, 0.55);

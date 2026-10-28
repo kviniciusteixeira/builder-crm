@@ -3,14 +3,14 @@ import { esPlantilla, plantillaCorreo } from "@/lib/plantillas-correo";
 import { urlPublica } from "@/lib/auth-correo";
 
 /**
- * Plantillas de los correos de acceso, en HTML y con la marca de la instancia.
+ * Templates dos e-mails de acesso, em HTML e com a marca da instância.
  *
  *   GET /correo/invitacion.html
  *   GET /correo/recuperacion.html
  *
- * Es publica (esta en la lista del middleware) porque la descarga el servidor de
- * autenticacion, que no tiene sesion en el CRM. No expone nada: es la plantilla vacia,
- * sin datos de nadie; el enlace y el destinatario los pone GoTrue al enviar.
+ * É pública (está na lista do middleware) porque o servidor de
+ * autenticação a baixa, e ele não tem sessão no CRM. Não expõe nada: é o template vazio,
+ * sem dados de ninguém; o link e o destinatário o GoTrue coloca ao enviar.
  */
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export async function GET(
   return new NextResponse(plantillaCorreo(nombre, urlPublica()), {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      // GoTrue la relee cada tanto: que no se quede con una version vieja de la marca.
+      // O GoTrue a relê de vez em quando: que não fique com uma versão velha da marca.
       "Cache-Control": "public, max-age=60",
     },
   });

@@ -4,7 +4,7 @@ import { listNotifications } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-/** Notificaciones del miembro actual (mas recientes primero) y cuantas sin leer. */
+/** Notificações do membro atual (mais recentes primeiro) e quantas sem ler. */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

@@ -4,7 +4,7 @@ import { sendPushToMember } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
 
-/** Manda un push de prueba a los dispositivos del miembro actual. */
+/** Envia um push de teste aos dispositivos do membro atual. */
 export async function POST() {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
@@ -18,8 +18,8 @@ export async function POST() {
     });
     return NextResponse.json(outcome);
   } catch (err) {
-    // El mensaje del proveedor de push puede traer detalles internos (endpoints,
-    // claves parciales): queda en el log del servidor y afuera va algo generico.
+    // A mensagem do provedor de push pode trazer detalhes internos (endpoints,
+    // chaves parciais): fica no log do servidor e para fora vai algo genérico.
     console.error("[push] fallo la notificacion de prueba:", err);
     return NextResponse.json(
       { error: "No se pudo enviar la notificacion de prueba" },

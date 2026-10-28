@@ -40,12 +40,12 @@ export interface ContactThread {
 interface Props {
   contact: Contact;
   open?: boolean;
-  /** Todos los hilos del contacto, para saltar entre canales. */
+  /** Todos os fios do contato, para saltar entre canais. */
   threads?: ContactThread[];
   activeConversationId?: string;
-  /** metadata de la conversacion: campos ctwa_* / meta_ad_* que captura Zernio. */
+  /** metadata da conversa: campos ctwa_* / meta_ad_* que o Zernio captura. */
   metadata?: unknown;
-  /** Estado del agente en ESTE hilo (combinado con el kill-switch del contacto). */
+  /** Estado do agente NESTE fio (combinado com o kill-switch do contato). */
   agente?: { aiEnabled: boolean; needsHuman: boolean; needsHumanReason: string | null };
 }
 
@@ -96,7 +96,7 @@ export function ContactDetailPanel({
   const updateAi = async (body: { enabled?: boolean; clearNeedsHuman?: boolean }) => {
     setAiBusy(true);
     try {
-      // Con hilo activo se pausa/reactiva SOLO ese hilo; sin hilo, el contacto entero.
+      // Com fio ativo pausa/reativa SÓ esse fio; sem fio, o contato inteiro.
       const url = activeConversationId
         ? `/api/conversations/${activeConversationId}/agente`
         : `/api/contacts/${contact.id}/ai`;
@@ -177,8 +177,8 @@ export function ContactDetailPanel({
     }, 800);
   };
 
-  // El early-return va DESPUES de los hooks: si estuviera arriba, togglear el panel
-  // cambiaria la cantidad de hooks entre renders y React tira "rendered fewer hooks".
+  // O early-return vai DEPOIS dos hooks: se estivesse acima, alternar o painel
+  // mudaria a quantidade de hooks entre renders e o React dispara "rendered fewer hooks".
   if (!open) return null;
 
   const attribution = extractAttribution(metadata);
@@ -469,12 +469,12 @@ interface Attribution {
 }
 
 /**
- * Saca la atribucion de origen de la metadata del hilo.
+ * Extrai a atribuição de origem da metadata do fio.
  *
- * Zernio expone dos familias segun de donde vino el lead: `ctwa_*` para Click-To-WhatsApp
- * Ads y `meta_ad_*` para anuncios de Instagram/Messenger. Es informacion que llega gratis
- * en el webhook y responde la pregunta cara de cualquier inmobiliaria: que aviso trajo
- * a este cliente.
+ * O Zernio expõe duas famílias conforme de onde veio o lead: `ctwa_*` para Click-To-WhatsApp
+ * Ads e `meta_ad_*` para anúncios de Instagram/Messenger. É informação que chega de graça
+ * no webhook e responde a pergunta cara de qualquer imobiliária: qual anúncio trouxe
+ * este cliente.
  */
 function extractAttribution(metadata: unknown): Attribution | null {
   if (!metadata || typeof metadata !== "object") return null;

@@ -24,7 +24,7 @@ export async function GET(
     .limit(1);
   const contact = contactRows[0];
 
-  // 404 tambien para lo ajeno: no confirmar que existe.
+  // 404 também para o alheio: não confirmar que existe.
   if (!contact || !canAccessContact(auth.member, contact)) {
     return NextResponse.json(
       { error: "Contacto no encontrado" },
@@ -87,8 +87,8 @@ export async function PUT(
     );
   }
 
-  // El propietario va por `assignContact`: es lo que emite el evento de la
-  // automatizacion. Solo el admin reasigna; un asesor no puede regalar ni robar.
+  // O proprietário passa por `assignContact`: é o que emite o evento da
+  // automação. Só o admin reatribui; um assessor não pode presentear nem roubar.
   if (body.ownerId !== undefined) {
     if (auth.member.role !== "admin") {
       return NextResponse.json(
@@ -123,7 +123,7 @@ export async function PUT(
       : [];
   }
   if (body.customFields !== undefined) {
-    // Parcial: se mezclan con lo guardado, solo se validan las claves que vienen.
+    // Parcial: mistura-se com o que está guardado, só se validam as chaves que vêm.
     const campos = validarCamposPersonalizados(camposContacto(), body.customFields, { parcial: true });
     if (!campos.ok) {
       return NextResponse.json({ error: campos.error }, { status: 400 });
@@ -166,7 +166,7 @@ export async function DELETE(
     );
   }
 
-  // Los archivos del bucket no se van por cascade: primero ellos, despues la fila.
+  // Os arquivos do bucket não saem por cascade: primeiro eles, depois a linha.
   await purgeContactDocuments(id);
   await db.delete(contacts).where(eq(contacts.id, id));
   return NextResponse.json({ success: true });

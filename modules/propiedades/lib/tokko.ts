@@ -1,9 +1,9 @@
 /**
- * Cliente de la API REST de Tokko Broker (catalogo inmobiliario).
+ * Cliente da API REST do Tokko Broker (catálogo imobiliário).
  * Docs: https://developers.tokkobroker.com/  ·  base v1, auth por query param `key`.
  *
- * Solo lectura: lista propiedades del catalogo y las mapea a filas de la tabla `propiedades`.
- * El token va en TOKKO_API_KEY (.env.local, nunca en el repo).
+ * Só leitura: lista propriedades do catálogo e as mapeia para linhas da tabela `propiedades`.
+ * O token vai em TOKKO_API_KEY (.env.local, nunca no repositório).
  */
 
 const TOKKO_BASE = "https://www.tokkobroker.com/api/v1";
@@ -14,7 +14,7 @@ function getTokkoKey(): string {
   return key;
 }
 
-// ---- Tipos parciales de la respuesta de Tokko (solo lo que usamos) ----
+// ---- Tipos parciais da resposta do Tokko (só o que usamos) ----
 interface TokkoPrice {
   currency: string;
   price: number;
@@ -78,7 +78,7 @@ interface TokkoListResponse {
   objects: TokkoProperty[];
 }
 
-/** Trae TODAS las propiedades del catalogo, paginando de a `pageSize`. */
+/** Traz TODAS as propriedades do catálogo, paginando de `pageSize` em `pageSize`. */
 export async function listAllProperties(pageSize = 100): Promise<TokkoProperty[]> {
   const key = getTokkoKey();
   const all: TokkoProperty[] = [];
@@ -103,7 +103,7 @@ export async function listAllProperties(pageSize = 100): Promise<TokkoProperty[]
   return all;
 }
 
-// ---- Mapeo Tokko -> fila de la tabla `propiedades` ----
+// ---- Mapeamento Tokko -> linha da tabela `propiedades` ----
 function toNumber(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = typeof v === "number" ? v : parseFloat(String(v));
@@ -184,7 +184,7 @@ export function mapTokkoToPropertyRow(p: TokkoProperty): PropertyRow {
   return row;
 }
 
-/** Texto canonico que se vectoriza: mezcla atributos duros + descripcion libre. */
+/** Texto canônico que se vetoriza: mistura atributos duros + descrição livre. */
 export function buildEmbeddingText(r: PropertyRow): string {
   const parts: string[] = [];
   if (r.property_type) parts.push(r.property_type);

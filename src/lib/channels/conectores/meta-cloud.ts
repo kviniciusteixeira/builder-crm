@@ -2,21 +2,21 @@ import "server-only";
 import type { Conector, EstadoConector } from "../conector";
 
 /**
- * Conector Meta Cloud API (WhatsApp directo, sin Zernio). PARCIAL a proposito.
+ * Conector Meta Cloud API (WhatsApp direto, sem Zernio). PARCIAL de propósito.
  *
- * Que hay:
- *  - `enviar`: texto y plantillas por Graph API (src/lib/meta-whatsapp.ts), con las
- *    credenciales de `whatsapp_accounts` o del entorno (WHATSAPP_*).
- *  - `estado`: que falta para operar.
+ * O que há:
+ *  - `enviar`: texto e templates pela Graph API (src/lib/meta-whatsapp.ts), com as
+ *    credenciais de `whatsapp_accounts` ou do ambiente (WHATSAPP_*).
+ *  - `estado`: o que falta para operar.
  *
- * Que NO hay todavia (y es lo que implementa el futuro conector "Cloud API / Tech
+ * O que NÃO há ainda (e é o que implementa o futuro conector "Cloud API / Tech
  * Provider", ver ../README.md):
- *  - `webhook`: la ingesta sigue en la ruta legacy /api/webhooks/whatsapp, que solo
- *    procesa mensajes con WHATSAPP_PROVIDER=meta. Al implementarla aqui, esa ruta
- *    pasa a ser `manejarWebhook(metaCloud, req)` y se borra su logica propia.
- *  - Conexion desde la UI (Embedded Signup). Hoy: scripts/connect-whatsapp-account.ts.
+ *  - `webhook`: a ingestão segue na rota legacy /api/webhooks/whatsapp, que só
+ *    processa mensagens com WHATSAPP_PROVIDER=meta. Ao implementá-la aqui, essa rota
+ *    passa a ser `manejarWebhook(metaCloud, req)` e apaga-se a lógica própria.
+ *  - Conexão a partir da UI (Embedded Signup). Hoje: scripts/connect-whatsapp-account.ts.
  *
- * Se activa como transporte de WhatsApp con WHATSAPP_PROVIDER=meta (valvula de escape).
+ * Ativa-se como transporte de WhatsApp com WHATSAPP_PROVIDER=meta (válvula de escape).
  */
 export const metaCloud: Conector = {
   id: "meta",
@@ -57,7 +57,7 @@ export const metaCloud: Conector = {
     return { success: true, externalId: result.messageId ?? null };
   },
 
-  // webhook: pendiente (ver cabecera). La ruta legacy /api/webhooks/whatsapp sigue activa.
+  // webhook: pendente (ver cabeçalho). A rota legacy /api/webhooks/whatsapp segue ativa.
 
   async estado(): Promise<EstadoConector> {
     const activo = (process.env.WHATSAPP_PROVIDER || "zernio").toLowerCase() === "meta";
@@ -78,7 +78,7 @@ export const metaCloud: Conector = {
         ];
       }
     } catch {
-      /* sin base o sin tabla: se evalua solo por entorno */
+      /* sem base ou sem tabela: avalia-se só pelo ambiente */
     }
 
     if (cuentas.length === 0) {
@@ -106,7 +106,7 @@ export const metaCloud: Conector = {
   },
 };
 
-/** Codigos de Graph mas comunes, en lenguaje humano. */
+/** Códigos de Graph mais comuns, em linguagem humana. */
 function hintForMetaError(code: number | undefined): string | undefined {
   switch (code) {
     case 131030:

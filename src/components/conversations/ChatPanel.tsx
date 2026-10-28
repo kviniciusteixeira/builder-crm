@@ -30,7 +30,7 @@ interface Contact {
 interface ConversationHeaderInfo {
   conversationId: string;
   channel: Channel;
-  /** Telefono en WhatsApp, @usuario en Instagram, nombre en Messenger. */
+  /** Telefone no WhatsApp, @usuário no Instagram, nome no Messenger. */
   handle: string | null;
   lastInboundAt?: Date | string | null;
 }
@@ -39,7 +39,7 @@ interface Props {
   contact: Contact;
   conversation: ConversationHeaderInfo;
   messages: ConversationMessage[];
-  /** El menu de eliminar solo se le muestra al admin. */
+  /** O menu de apagar só aparece para o admin. */
   isAdmin?: boolean;
   detailsOpen?: boolean;
   onToggleDetails?: () => void;
@@ -70,9 +70,9 @@ export function ChatPanel({
   const prevContactIdRef = useRef<string | null>(null);
   const prevCountRef = useRef(messages.length);
 
-  // Ultimo mensaje entrante del cliente: define la ventana de 24h para texto libre.
-  // El servidor ya lo materializa en la conversacion; se recalcula desde los mensajes
-  // como respaldo para que el banner reaccione al polling sin recargar la pagina.
+  // Última mensagem recebida do cliente: define a janela de 24h para texto livre.
+  // O servidor já a materializa na conversa; recalcula-se a partir das mensagens
+  // como reserva para que o banner reaja ao polling sem recarregar a página.
   const lastInboundAt = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].direction === "in") {

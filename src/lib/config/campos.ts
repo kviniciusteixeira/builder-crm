@@ -1,8 +1,8 @@
 import type { CampoConfig } from "./schema";
 
 /**
- * Valores de los campos personalizados del contacto (`contacts.custom_fields`).
- * Validacion pura: la usan el servidor (POST/PUT /api/contacts) y el formulario.
+ * Valores dos campos personalizados do contato (`contacts.custom_fields`).
+ * Validação pura: usam o servidor (POST/PUT /api/contacts) e o formulário.
  */
 export type ValorCampo = string | number | boolean | null;
 export type ValoresCampos = Record<string, ValorCampo>;
@@ -47,9 +47,9 @@ function limpiar(campo: CampoConfig, crudo: unknown): { ok: true; valor: ValorCa
 }
 
 /**
- * Valida un objeto de valores contra la configuracion.
- * - `parcial: true` (PUT): solo se validan las claves presentes y no se exigen requeridos.
- * - Claves que no existen en la config se rechazan: suelen ser errores de tipeo.
+ * Valida um objeto de valores contra a configuração.
+ * - `parcial: true` (PUT): só se validam as chaves presentes e não se exigem os obrigatórios.
+ * - Chaves que não existem na config são rejeitadas: costumam ser erros de digitação.
  */
 export function validarCamposPersonalizados(
   campos: CampoConfig[],
@@ -88,7 +88,7 @@ export function validarCamposPersonalizados(
   return { ok: true, valores };
 }
 
-/** Texto para mostrar un valor segun el tipo del campo. */
+/** Texto para mostrar um valor conforme o tipo do campo. */
 export function formatearValorCampo(campo: CampoConfig, valor: unknown, moneda = "USD"): string {
   if (valor === null || valor === undefined || valor === "") return "—";
   switch (campo.tipo) {
@@ -111,7 +111,7 @@ export function formatearValorCampo(campo: CampoConfig, valor: unknown, moneda =
   }
 }
 
-/** Resumen "Etiqueta: valor" de los campos con valor, para el prompt del agente y la ficha. */
+/** Resumo "Etiqueta: valor" dos campos com valor, para o prompt do agente e a ficha. */
 export function resumirCampos(campos: CampoConfig[], valores: ValoresCampos | null | undefined): string[] {
   if (!valores) return [];
   return campos

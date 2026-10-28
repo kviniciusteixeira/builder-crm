@@ -15,7 +15,7 @@ interface Props {
   channel: Channel;
   contactId: string;
   contactPhone: string;
-  /** Fecha del ultimo mensaje entrante del cliente (para la ventana de 24h). */
+  /** Data da última mensagem recebida do cliente (para a janela de 24h). */
   lastInboundAt?: Date | string | null;
 }
 
@@ -47,8 +47,8 @@ export function ChatInput({
     setSending(true);
     toast.message("Enviando...", { id: "sending-msg" });
     try {
-      // Endpoint generico por conversacion: el servidor resuelve el canal, el proveedor
-      // y (en IG/Messenger) si hace falta la etiqueta HUMAN_AGENT.
+      // Endpoint genérico por conversa: o servidor resolve o canal, o provedor
+      // e (em IG/Messenger) se faz falta a etiqueta HUMAN_AGENT.
       const res = await fetch("/api/messages/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +120,7 @@ export function ChatInput({
         onSubmit={handleSubmit}
         className="max-w-2xl mx-auto flex items-end gap-2.5"
       >
-        {/* Las plantillas son un concepto exclusivo de WhatsApp. */}
+        {/* Os templates são um conceito exclusivo do WhatsApp. */}
         {caps.templates && (
           <button
             type="button"

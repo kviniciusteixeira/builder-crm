@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { getCurrentMember, type TeamMember } from "@/lib/team";
 
 /**
- * Guardas para route handlers. Devuelven el miembro o la respuesta de error ya
- * armada, para que cada ruta sea:
+ * Guardas para route handlers. Devolvem o membro ou a resposta de erro já
+ * montada, para que cada rota seja:
  *
  *   const auth = await requireMember();
  *   if ("response" in auth) return auth.response;

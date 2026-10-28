@@ -1,21 +1,21 @@
 import type { ZernioError, ZernioResult } from "./types";
 
 /**
- * Nucleo del cliente HTTP de Zernio.
+ * Núcleo do cliente HTTP do Zernio.
  *
- * Sigue la convencion de los otros integradores del repo (meta-whatsapp.ts, ghl.ts,
- * tokko.ts): `fetch` a mano y NUNCA lanza. Todo error vuelve como
- * `{ success: false, error }` para que el llamador no tenga que envolver en try/catch.
+ * Segue a convenção dos outros integradores do repo (meta-whatsapp.ts, ghl.ts,
+ * tokko.ts): `fetch` à mão e NUNCA lança. Todo erro volta como
+ * `{ success: false, error }` para que quem chama não tenha que envolver em try/catch.
  */
 
 /**
- * Las credenciales se leen DENTRO de las funciones, no al importar el modulo.
+ * As credenciais se leem DENTRO das funções, não ao importar o módulo.
  *
- * Son variables de ejecucion: la instancia se construye una vez y cada cliente pone las
- * suyas al desplegar. Capturarlas en constantes del modulo ataba su valor al momento del
- * primer import, que es el mismo tropiezo que obligo a volver perezoso el cliente de base
- * (ver src/db/index.ts y la nota en CLAUDE.md). Esto no cuesta nada: son lecturas de un
- * objeto en memoria.
+ * São variáveis de execução: a instância se constrói uma vez e cada cliente põe as
+ * suas ao implantar. Capturá-las em constantes do módulo atava o valor ao momento do
+ * primeiro import, que é o mesmo tropeço que obrigou a tornar preguiçoso o cliente de base
+ * (ver src/db/index.ts e a nota em CLAUDE.md). Isto não custa nada: são leituras de um
+ * objeto em memória.
  */
 const API_BASE_POR_DEFECTO = "https://zernio.com/api/v1";
 
@@ -44,11 +44,11 @@ export interface ZernioFetchOptions {
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
   timeoutMs?: number;
-  /** Desactiva el reintento (util en handlers con presupuesto de tiempo ajustado). */
+  /** Desativa a nova tentativa (útil em handlers com orçamento de tempo apertado). */
   noRetry?: boolean;
   /**
-   * Headers extra. El caso principal es `Idempotency-Key`: Zernio replica la respuesta
-   * original en vez de mandar el mensaje dos veces si reintentamos tras un timeout.
+   * Headers extras. O caso principal é `Idempotency-Key`: o Zernio replica a resposta
+   * original em vez de mandar a mensagem duas vezes se tentarmos de novo após um timeout.
    */
   headers?: Record<string, string>;
 }
@@ -133,7 +133,7 @@ async function attemptFetch<T>(
     return {
       success: false,
       error: {
-        // 408 marca el timeout como retriable sin inventar un status del servidor.
+        // 408 marca o timeout como retriable sem inventar um status do servidor.
         status: isTimeout ? 408 : 0,
         message: err instanceof Error ? err.message : "Network error",
       },
@@ -161,7 +161,7 @@ function isRetriable(error: ZernioError): boolean {
   return RETRIABLE_STATUS.has(error.status) || error.status === 408;
 }
 
-/** Backoff exponencial con jitter; respeta Retry-After si Zernio lo manda. */
+/** Backoff exponencial com jitter; respeita Retry-After se o Zernio o mandar. */
 function backoffMs(attempt: number, retryAfterSeconds?: number): number {
   if (retryAfterSeconds && retryAfterSeconds > 0) {
     return Math.min(retryAfterSeconds * 1000, 10_000);
@@ -198,9 +198,9 @@ function fail(status: number, message: string): { success: false; error: ZernioE
   return { success: false, error: { status, message } };
 }
 
-/** Estado de la configuracion, para Ajustes -> Canales. Es una funcion, no una constante:
- *  lo que vale es el entorno de ahora, no el del primer import. Nunca devuelve la clave,
- *  solo si esta puesta: esto viaja al navegador por /api/channels. */
+/** Estado da configuração, para Ajustes -> Canales. É uma função, não uma constante:
+ *  o que vale é o ambiente de agora, não o do primeiro import. Nunca devolve a chave,
+ *  só se está definida: isto viaja ao navegador por /api/channels. */
 export function zernioConfig() {
   return {
     hasApiKey: hasZernioKey(),

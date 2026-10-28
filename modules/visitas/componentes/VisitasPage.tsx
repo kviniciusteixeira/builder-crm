@@ -33,7 +33,7 @@ export function VisitasPage() {
   const [editing, setEditing] = useState<Visita | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<EstadoVisita>("coordinating");
 
-  // `reloadKey` dispara la carga; `load()` solo se llama desde handlers de eventos.
+  // `reloadKey` dispara a carga; `load()` só se chama a partir de handlers de eventos.
   const [reloadKey, setReloadKey] = useState(0);
   const load = useCallback(() => {
     setLoading(true);

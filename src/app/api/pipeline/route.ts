@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Deal no encontrado" }, { status: 404 });
     }
 
-    // Unico camino de cambio de etapa: emite `deal.stage_changed`.
+    // Único caminho de mudança de etapa: emite `deal.stage_changed`.
     const moved = await setDealStage({ dealId: body.dealId, stageId: body.stageId });
     if (!moved.ok) {
       return NextResponse.json({ error: moved.error }, { status: 400 });

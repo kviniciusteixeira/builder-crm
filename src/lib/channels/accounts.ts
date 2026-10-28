@@ -5,10 +5,10 @@ import { and, asc, eq } from "drizzle-orm";
 import type { Channel, Provider } from "./types";
 
 /**
- * Resolucion de cuentas conectadas por canal. Espeja `whatsapp-accounts.ts`, que hace
- * lo mismo pero solo para WhatsApp por Meta directo:
- *  - Entrante (webhook): se rutea por `zernioAccountId`.
- *  - Saliente (envio/agente): se resuelve por la conversacion o por tenant + canal.
+ * Resolução de contas conectadas por canal. Espelha `whatsapp-accounts.ts`, que faz
+ * o mesmo mas só para WhatsApp pela Meta direta:
+ *  - Entrante (webhook): roteia-se por `zernioAccountId`.
+ *  - Saída (envio/agente): resolve-se pela conversa ou por tenant + canal.
  */
 
 export interface ChannelAccount {
@@ -16,12 +16,12 @@ export interface ChannelAccount {
   tenantId: string;
   provider: Provider;
   platform: Channel;
-  /** Id de la cuenta en Zernio: la clave de routing entrante. */
+  /** Id da conta no Zernio: a chave de routing de entrada. */
   zernioAccountId: string | null;
   zernioProfileId: string | null;
   username: string | null;
   displayName: string | null;
-  /** phone_number_id | page_id | ig_business_id, segun la plataforma. */
+  /** phone_number_id | page_id | ig_business_id, conforme a plataforma. */
   externalRef: string | null;
   status: string;
 }
@@ -43,7 +43,7 @@ function mapRow(row: Row): ChannelAccount {
   };
 }
 
-/** Routing entrante: resuelve la cuenta del CRM por el accountId que manda Zernio. */
+/** Routing de entrada: resolve a conta do CRM pelo accountId que o Zernio manda. */
 export async function getAccountByZernioId(
   zernioAccountId: string | null | undefined
 ): Promise<ChannelAccount | null> {
@@ -69,11 +69,11 @@ export async function getAccountById(
 }
 
 /**
- * Saliente: cuenta activa de un canal dentro de un tenant.
+ * Saída: conta ativa de um canal dentro de um tenant.
  *
- * Prioriza la cuenta de Zernio sobre cualquier resto de la integracion directa con Meta.
- * Sin esto, un WhatsApp migrado quedaria con dos filas y la mas vieja (la de Meta, que
- * no tiene `zernioAccountId`) ganaria por fecha, haciendo fallar todos los envios.
+ * Prioriza a conta do Zernio sobre qualquer resto da integração direta com a Meta.
+ * Sem isto, um WhatsApp migrado ficaria com duas linhas e a mais velha (a da Meta, que
+ * não tem `zernioAccountId`) ganharia por data, fazendo falhar todos os envios.
  */
 export async function getAccountForChannel(
   tenantId: string | null | undefined,
@@ -127,8 +127,8 @@ export interface UpsertChannelAccountInput {
 }
 
 /**
- * Alta/actualizacion idempotente por `zernioAccountId`. La usan tanto el callback de
- * OAuth como el webhook `account.connected`, que pueden llegar en cualquier orden.
+ * Alta/atualização idempotente por `zernioAccountId`. Usam tanto o callback de
+ * OAuth como o webhook `account.connected`, que podem chegar em qualquer ordem.
  */
 export async function upsertZernioAccount(
   input: UpsertChannelAccountInput

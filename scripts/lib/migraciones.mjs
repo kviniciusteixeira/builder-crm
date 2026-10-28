@@ -1,12 +1,12 @@
-// Que archivos de migracion hay que aplicar y en que orden.
+// Quais arquivos de migração há que aplicar e em que ordem.
 //
-// Lo usan los dos corredores: `scripts/migrar.mjs` (Postgres de verdad, por red) y
-// `scripts/local.mjs` (Postgres embebido, modo local). La lista tiene que ser la misma
-// en los dos: si no, una instancia local y una desplegada tendrian esquemas distintos y
-// el modo local dejaria de servir para probar nada.
+// Usam os dois executores: `scripts/migrar.mjs` (Postgres de verdade, pela rede) e
+// `scripts/local.mjs` (Postgres embutido, modo local). A lista tem que ser a mesma
+// nos dois: senão, uma instância local e uma implantada teriam esquemas distintos e
+// o modo local deixaria de servir para testar qualquer coisa.
 //
-//   1. supabase/migrations/*.sql           (nucleo)
-//   2. modules/<modulo>/migrations/*.sql   (solo modulos activos)
+//   1. supabase/migrations/*.sql           (núcleo)
+//   2. modules/<modulo>/migrations/*.sql   (só módulos ativos)
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -19,7 +19,7 @@ function listarSql(dir, prefijo) {
     .map((f) => ({ nombre: `${prefijo}${f}`, ruta: join(dir, f) }));
 }
 
-/** Modulos activos segun config/modulos.json (la misma lista que lee config/cliente.ts). */
+/** Módulos ativos segundo config/modulos.json (a mesma lista que lê config/cliente.ts). */
 export function modulosActivos(raiz) {
   const archivo = join(raiz, "config", "modulos.json");
   if (!existsSync(archivo)) return [];
@@ -32,7 +32,7 @@ export function modulosActivos(raiz) {
   }
 }
 
-/** `[{ nombre, ruta }]` en orden de aplicacion. */
+/** `[{ nombre, ruta }]` em ordem de aplicação. */
 export function listarMigraciones(raiz) {
   return [
     ...listarSql(join(raiz, "supabase", "migrations"), ""),

@@ -4,7 +4,7 @@ import { markNotificationsRead } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-/** Marca leidas. Body `{ ids: [...] }`, o `{}` para todas. */
+/** Marca como lidas. Body `{ ids: [...] }`, ou `{}` para todas. */
 export async function POST(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    /* sin cuerpo = todas */
+    /* sem corpo = todas */
   }
   const ids = Array.isArray(body.ids) ? body.ids.filter((x) => typeof x === "string") : undefined;
   const updated = await markNotificationsRead(auth.member.id, ids);

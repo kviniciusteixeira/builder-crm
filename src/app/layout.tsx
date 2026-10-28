@@ -8,7 +8,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { getConfig, cssVariablesMarca } from "@/lib/config";
 import { ID_CONFIG_PUBLICA, configPublicaSerializada } from "@/lib/config-publica";
 
-// Todo lo visible de la marca sale de config/cliente.ts (zona del cliente).
+// Tudo o que é visível da marca sai de config/cliente.ts (zona do cliente).
 export function generateMetadata(): Metadata {
   const { marca, idioma } = getConfig();
   return {
@@ -31,7 +31,7 @@ export function generateViewport(): Viewport {
     themeColor: marca.colorSidebar,
     width: "device-width",
     initialScale: 1,
-    // Deja pintar debajo del notch; los paddings usan env(safe-area-inset-*).
+    // Deixa pintar debaixo do notch; os paddings usam env(safe-area-inset-*).
     viewportFit: "cover",
   };
 }
@@ -45,9 +45,9 @@ export default function RootLayout({
   return (
     <html lang={idioma} className="h-full antialiased">
       <head>
-        {/* Colores de la marca en SSR: sin flash del color por defecto. */}
+        {/* Cores da marca no SSR: sem flash da cor padrão. */}
         <style dangerouslySetInnerHTML={{ __html: cssVariablesMarca() }} />
-        {/* Config publica en tiempo de ejecucion: ver src/lib/config-publica.ts. */}
+        {/* Config pública em tempo de execução: ver src/lib/config-publica.ts. */}
         <script
           id={ID_CONFIG_PUBLICA}
           type="application/json"

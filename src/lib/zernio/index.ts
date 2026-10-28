@@ -1,13 +1,13 @@
 /**
- * Cliente de Zernio (https://docs.zernio.com) — proveedor unificado de mensajeria para
- * Instagram DM, Facebook Messenger y WhatsApp.
+ * Cliente do Zernio (https://docs.zernio.com) — provedor unificado de mensageria para
+ * Instagram DM, Facebook Messenger e WhatsApp.
  *
- * Se usa `fetch` a mano y no el SDK `@zernio/node` por tres razones:
- *  - los 4 integradores externos del repo (meta-whatsapp, ghl, tokko, firecrawl) son
- *    fetch a mano con el mismo contrato de retorno; un SDK rompe la convencion;
- *  - el SDK es pre-1.0 autogenerado y se publica casi por commit: un rename en la
- *    superficie generada rompe el build en un `npm i`;
- *  - la verificacion de firma necesita el raw body, o sea codigo propio igual.
+ * Usa-se `fetch` à mão e não o SDK `@zernio/node` por três razões:
+ *  - os 4 integradores externos do repo (meta-whatsapp, ghl, tokko, firecrawl) são
+ *    fetch à mão com o mesmo contrato de retorno; um SDK quebra a convenção;
+ *  - o SDK é pré-1.0 autogerado e se publica quase por commit: um rename na
+ *    superfície gerada quebra o build num `npm i`;
+ *  - a verificação de assinatura precisa do raw body, ou seja, código próprio de qualquer forma.
  */
 
 export {

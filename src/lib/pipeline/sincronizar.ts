@@ -5,18 +5,18 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { getConfig } from "@/lib/config";
 
 /**
- * Lleva el pipeline por defecto al estado que describe config/cliente.ts.
+ * Leva o pipeline padrão ao estado que descreve config/cliente.ts.
  *
- * Corre al arrancar (instrumentation.ts) y es idempotente:
- *  - Si no hay pipeline por defecto, lo crea con el nombre de la config.
- *  - Cada etapa de la config se busca por `key`; si no tiene key todavia, por nombre
- *    (para adoptar las etapas que ya existian antes de la config); si no existe, se crea.
- *  - Nombre, color, orden y ganada/perdida se actualizan desde la config.
- *  - Las etapas que estan en la base pero NO en la config se conservan (pueden tener
- *    operaciones) y se ordenan despues; se borran solo si no tienen operaciones y
- *    `borrarSobrantes` es true (no es el default).
+ * Roda ao iniciar (instrumentation.ts) e é idempotente:
+ *  - Se não há pipeline padrão, cria-o com o nome da config.
+ *  - Cada etapa da config se busca por `key`; se ainda não tem key, por nome
+ *    (para adotar as etapas que já existiam antes da config); se não existe, cria-se.
+ *  - Nome, cor, ordem e ganha/perdida se atualizam a partir da config.
+ *  - As etapas que estão na base mas NÃO na config se conservam (podem ter
+ *    operações) e se ordenam depois; apagam-se só se não têm operações e
+ *    `borrarSobrantes` é true (não é o default).
  *
- * La UI sigue pudiendo crear etapas a mano; esas quedan sin key y sobreviven.
+ * A UI continua podendo criar etapas à mão; essas ficam sem key e sobrevivem.
  */
 export async function sincronizarPipeline(opts?: { borrarSobrantes?: boolean }) {
   const { pipeline } = getConfig();
@@ -89,7 +89,7 @@ export async function sincronizarPipeline(opts?: { borrarSobrantes?: boolean }) 
     }
   }
 
-  // Sobrantes: lo que esta en la base y no en la config.
+  // Sobrantes: o que está na base e não na config.
   const sobrantes = existentes.filter((e) => !usadas.has(e.id));
   let conservadas = 0;
   let borradas = 0;
@@ -111,7 +111,7 @@ export async function sincronizarPipeline(opts?: { borrarSobrantes?: boolean }) 
     }
   }
 
-  // Los demas pipelines no son el default.
+  // Os demais pipelines não são o default.
   if (existentes.length === 0 && creadas > 0) {
     await db
       .update(pipelines)

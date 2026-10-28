@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * Estado y acciones de las notificaciones push en ESTE dispositivo.
+ * Estado e ações das notificações push NESTE dispositivo.
  *
- *   unsupported   el navegador no puede (Safari en pestana, navegadores viejos)
- *   ios-install   es iPhone/iPad y la app no esta instalada en la pantalla de inicio:
- *                 ahi el push directamente no existe, hay que instalarla primero
- *   denied        el usuario bloqueo las notificaciones para este sitio
- *   subscribed    este dispositivo esta registrado en el servidor
- *   ready         se puede activar
+ *   unsupported   o navegador não consegue (Safari em aba, navegadores velhos)
+ *   ios-install   é iPhone/iPad e o app não está instalado na tela de início:
+ *                 aí o push simplesmente não existe, é preciso instalá-lo primeiro
+ *   denied        o usuário bloqueou as notificações para este site
+ *   subscribed    este dispositivo está registrado no servidor
+ *   ready         pode-se ativar
  */
 export type PushState =
   | "loading"
@@ -42,8 +42,8 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const normalized = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = atob(normalized);
-  // `new ArrayBuffer` explicito: TS 5.7+ distingue ArrayBuffer de SharedArrayBuffer y
-  // `pushManager.subscribe` solo acepta el primero.
+  // `new ArrayBuffer` explícito: TS 5.7+ distingue ArrayBuffer de SharedArrayBuffer e
+  // `pushManager.subscribe` só aceita o primeiro.
   const out = new Uint8Array(new ArrayBuffer(raw.length));
   for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
   return out;

@@ -13,17 +13,17 @@ type Estado = "verificando" | "listo" | "invalido" | "guardado";
 const MINIMO = 8;
 
 /**
- * Donde aterriza quien hace clic en un correo de acceso (invitacion o recuperacion):
- * elige su contrasena y entra.
+ * Onde aterrissa quem clica num e-mail de acesso (convite ou recuperação):
+ * escolhe a senha e entra.
  *
- * El enlace del correo pasa primero por el servidor de autenticacion, que lo canjea y
- * nos devuelve aca con la sesion en el fragmento de la URL. Por eso esto corre en el
- * navegador: el fragmento no llega al servidor, nunca. Lo primero que hace es guardar la
- * sesion y limpiar la barra de direcciones, para que el enlace no quede a la vista ni en
- * el historial.
+ * O link do e-mail passa primeiro pelo servidor de autenticação, que o resgata e
+ * nos devolve aqui com a sessão no fragmento da URL. Por isso isto roda no
+ * navegador: o fragmento não chega ao servidor, nunca. A primeira coisa que faz é guardar a
+ * sessão e limpar a barra de endereços, para que o link não fique à vista nem no
+ * histórico.
  *
- * Tambien acepta un codigo por query (flujo PKCE), que es lo que usa Supabase cloud
- * cuando la recuperacion se pide desde el mismo navegador.
+ * Também aceita um código por query (fluxo PKCE), que é o que o Supabase cloud
+ * usa quando a recuperação se pede a partir do mesmo navegador.
  */
 export function FormDefinirClave() {
   const [estado, setEstado] = useState<Estado>("verificando");
@@ -45,8 +45,8 @@ export function FormDefinirClave() {
       const access = fragmento.get("access_token");
       const refresh = fragmento.get("refresh_token");
 
-      // El token sale de la URL antes que nada: con la sesion ya en las cookies, dejarlo
-      // en la barra solo sirve para que se filtre en una captura o en el historial.
+      // O token sai da URL antes de tudo: com a sessão já nos cookies, deixá-lo
+      // na barra só serve para que vaze numa captura ou no histórico.
       window.history.replaceState({}, "", window.location.pathname);
 
       if (descripcion) return { error: descripcion };
@@ -109,8 +109,8 @@ export function FormDefinirClave() {
       return;
     }
     setEstado("guardado");
-    // Recarga completa a proposito: el servidor tiene que ver las cookies nuevas para
-    // resolver la membresia y armar el menu lateral.
+    // Recarga completa de propósito: o servidor tem que ver os cookies novos para
+    // resolver a filiação e montar o menu lateral.
     window.location.assign("/");
   }
 
@@ -197,8 +197,8 @@ export function FormDefinirClave() {
 }
 
 /**
- * Los mensajes del proveedor vienen en ingles: se traducen los dos que de verdad pasan y
- * el resto se deja pasar tal cual, para no esconder informacion a quien va a pedir ayuda.
+ * As mensagens do provedor vêm em inglês: traduzem-se as duas que de fato acontecem e
+ * o resto se deixa passar tal qual, para não esconder informação de quem vai pedir ajuda.
  */
 function explicar(mensaje: string | null | undefined): string {
   if (!mensaje) return "Abri el enlace del correo otra vez: esta pagina sola no alcanza.";

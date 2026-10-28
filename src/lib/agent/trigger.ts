@@ -1,15 +1,15 @@
 import { queueConfig } from "./queue";
 
 /**
- * Dispara el worker del agente para una lista de jobs.
+ * Dispara o worker do agente para uma lista de jobs.
  *
- * Estaba inline dentro del webhook de WhatsApp; lo necesita tambien el de Zernio, asi
- * que vive aca. Se llama SIEMPRE desde dentro de un `after()`: la idea es devolverle
- * 200 al proveedor primero y recien despues esperar el debounce.
+ * Estava inline dentro do webhook de WhatsApp; o de Zernio também precisa,
+ * então vive aqui. Chama-se SEMPRE de dentro de um `after()`: a ideia é devolver
+ * 200 ao provedor primeiro e só depois esperar o debounce.
  *
- * Cada job hace su propio debounce: si llegan mas mensajes del mismo hilo en los
- * proximos segundos, este worker corre pero `claimAgentJob` detecta
- * `debounce_still_active` y se sale; el siguiente setTimeout lo procesa.
+ * Cada job faz o próprio debounce: se chegam mais mensagens do mesmo fio nos
+ * próximos segundos, este worker corre mas `claimAgentJob` detecta
+ * `debounce_still_active` e sai; o próximo setTimeout o processa.
  */
 export async function triggerAgentWorker(
   jobIds: string[],
@@ -19,9 +19,9 @@ export async function triggerAgentWorker(
   const unique = Array.from(new Set(jobIds)).filter(Boolean);
   if (unique.length === 0) return;
 
-  // Sin URL publica no se llama a nadie: `getWorkerBaseUrl` devuelve vacio en produccion
-  // cuando falta APP_BASE_URL, justamente para no mandar el secreto a un host que vino
-  // en una cabecera. Los jobs quedan en la cola y los levanta el barrido.
+  // Sem URL pública não se chama ninguém: `getWorkerBaseUrl` devolve vazio em produção
+  // quando falta APP_BASE_URL, justamente para não mandar o segredo a um host que veio
+  // num cabeçalho. Os jobs ficam na fila e a varredura os levanta.
   if (!baseUrl) {
     console.error(`[${tag}] sin APP_BASE_URL no se dispara el worker; quedan ${unique.length} en cola`);
     return;
@@ -56,17 +56,17 @@ export async function triggerAgentWorker(
 }
 
 /**
- * URL publica de la app para que el webhook pueda llamarse a si mismo.
+ * URL pública do app para que o webhook possa chamar a si mesmo.
  *
- * A esta URL se le manda AGENT_WORKER_SECRET en una cabecera, asi que NO puede salir de
- * la peticion entrante: quien controle el `Host` de una peticion que llegue hasta aca se
- * lleva el secreto a su propio servidor. Hoy el camino esta detras de la firma HMAC del
- * webhook, pero eso es una defensa de otro, no de esta funcion.
+ * A esta URL se manda AGENT_WORKER_SECRET num cabeçalho, então NÃO pode sair da
+ * requisição entrante: quem controle o `Host` de uma requisição que chegue até aqui
+ * leva o segredo ao próprio servidor. Hoje o caminho está atrás da assinatura HMAC do
+ * webhook, mas isso é uma defesa de outro, não desta função.
  *
- * En produccion se exige APP_BASE_URL (o NEXT_PUBLIC_APP_URL). Si falta, se devuelve
- * cadena vacia y quien llama no dispara nada: el agente queda sin procesar y queda dicho
- * en el log, que es preferible a filtrar el secreto. Fuera de produccion se cae a
- * localhost, que es donde corre `npm run dev`.
+ * Em produção exige-se APP_BASE_URL (ou NEXT_PUBLIC_APP_URL). Se falta, devolve-se
+ * cadeia vazia e quem chama não dispara nada: o agente fica sem processar e fica dito
+ * no log, que é preferível a vazar o segredo. Fora de produção cai-se em
+ * localhost, que é onde roda `npm run dev`.
  */
 export function getWorkerBaseUrl(_headers?: Headers): string {
   const fromEnv = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;

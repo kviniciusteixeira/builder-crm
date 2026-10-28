@@ -1,17 +1,17 @@
-# Modulo `ejemplo` — Tareas
+# Módulo `ejemplo` — Tarefas
 
-Modulo minimo que existe para mostrar (y probar) el mecanismo de modulos. Se puede
-borrar en una instancia real sin tocar nada mas.
+Módulo mínimo que existe para mostrar (e testar) o mecanismo de módulos. Pode ser
+apagado numa instância real sem tocar em mais nada.
 
-| Que | Donde |
+| O quê | Onde |
 |---|---|
-| Menu | "Tareas" en la seccion Productividad (`manifiesto.ts`) |
-| Pagina | `/m/ejemplo` (`servidor.tsx` → `paginas[""]`) |
+| Menu | "Tareas" na seção Productividad (`manifiesto.ts`) |
+| Página | `/m/ejemplo` (`servidor.tsx` → `paginas[""]`) |
 | API | `GET/POST /api/m/ejemplo`, `PATCH/DELETE /api/m/ejemplo/<id>` |
-| Tabla | `ejemplo_tareas` (`migrations/0000_ejemplo.sql`, con RLS) |
-| Campo de contacto | `ejemplo_prioridad` (seleccion Alta/Media/Baja) |
-| Tool del agente | `anotar_tarea` |
-| Seed | dos tareas para el primer miembro |
+| Tabela | `ejemplo_tareas` (`migrations/0000_ejemplo.sql`, com RLS) |
+| Campo de contato | `ejemplo_prioridad` (seleção Alta/Media/Baja) |
+| Tool do agente | `anotar_tarea` |
+| Seed | duas tarefas para o primeiro membro |
 
-Activar: agregar `"ejemplo"` a `config/modulos.json` → `activos` y correr
-`npm run db:migrar`. Desactivar: quitarlo de la lista (la tabla queda).
+Ativar: adicionar `"ejemplo"` a `config/modulos.json` → `activos` e rodar
+`npm run db:migrar`. Desativar: tirá-lo da lista (a tabela permanece).

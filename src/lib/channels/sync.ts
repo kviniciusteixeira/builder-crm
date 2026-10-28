@@ -5,10 +5,10 @@ import { listAccounts, upsertZernioAccount, type ChannelAccount } from "./accoun
 import { isChannel } from "./types";
 
 /**
- * Sincroniza las cuentas conectadas en Zernio hacia `channel_accounts`.
+ * Sincroniza as contas conectadas no Zernio para `channel_accounts`.
  *
- * El webhook `account.connected` hace lo mismo de forma idempotente, pero no alcanza:
- * las cuentas conectadas antes de dar de alta el webhook nunca dispararon el evento.
+ * O webhook `account.connected` faz o mesmo de forma idempotente, mas não basta:
+ * as contas conectadas antes de dar alta ao webhook nunca dispararam o evento.
  */
 export async function syncAccountsFromZernio(): Promise<{
   ok: boolean;
@@ -30,8 +30,8 @@ export async function syncAccountsFromZernio(): Promise<{
   let skipped = 0;
 
   for (const account of result.data.data ?? []) {
-    // Zernio soporta 16 plataformas; el CRM modela tres. El resto se ignora en vez de
-    // crear filas de canales que la UI no sabe renderizar.
+    // O Zernio suporta 16 plataformas; o CRM modela três. O resto se ignora em vez de
+    // criar linhas de canais que a UI não sabe renderizar.
     if (!isChannel(account.platform)) {
       skipped++;
       continue;

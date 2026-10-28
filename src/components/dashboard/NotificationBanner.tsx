@@ -16,7 +16,7 @@ export function NotificationBanner() {
 
   useEffect(() => {
     fetch("/api/followups")
-      // Un usuario fuera del equipo recibe 403 con `{ error }`: no es FollowUpData.
+      // Um usuário fora da equipe recebe 403 com `{ error }`: não é FollowUpData.
       .then((r) => (r.ok ? r.json() : null))
       .then(setData)
       .catch(() => {});

@@ -1,13 +1,13 @@
 /**
- * Helpers puros para plantillas de WhatsApp (sin deps de server: se importan tanto
- * en route handlers como en componentes client).
+ * Helpers puros para templates de WhatsApp (sem deps de server: importam-se tanto
+ * em route handlers como em componentes client).
  *
- * Dos formatos de `components` que NO hay que confundir:
- * - CREAR (Graph `POST /{WABA}/message_templates`): `{ type: "BODY", text, example }`
+ * Dois formatos de `components` que NÃO se deve confundir:
+ * - CRIAR (Graph `POST /{WABA}/message_templates`): `{ type: "BODY", text, example }`
  * - ENVIAR (Graph `POST /{phone}/messages`): `{ type: "body", parameters: [...] }`
  */
 
-/** Indices de variables {{1}}, {{2}}... en orden ascendente, deduplicados. */
+/** Índices de variáveis {{1}}, {{2}}... em ordem ascendente, deduplicados. */
 export function extractVariables(text: string): number[] {
   const found = new Set<number>();
   const re = /\{\{\s*(\d+)\s*\}\}/g;
@@ -18,12 +18,12 @@ export function extractVariables(text: string): number[] {
   return [...found].sort((a, b) => a - b);
 }
 
-/** true si las variables son 1..n sin huecos (lo que exige Meta). */
+/** true se as variáveis são 1..n sem buracos (o que a Meta exige). */
 export function variablesAreSequential(vars: number[]): boolean {
   return vars.every((v, i) => v === i + 1);
 }
 
-/** Componente BODY para CREAR la plantilla (incluye `example` si hay variables). */
+/** Componente BODY para CRIAR o template (inclui `example` se há variáveis). */
 export function buildBodyComponent(
   bodyText: string,
   examples: string[]
@@ -36,7 +36,7 @@ export function buildBodyComponent(
   return comp;
 }
 
-/** Componentes para ENVIAR la plantilla, rellenando las variables del BODY. */
+/** Componentes para ENVIAR o template, preenchendo as variáveis do BODY. */
 export function buildSendComponents(
   bodyText: string,
   values: string[]
@@ -52,12 +52,12 @@ export function buildSendComponents(
 }
 
 /**
- * Aplana los `components` de envio a un array plano de valores.
+ * Achata os `components` de envio num array plano de valores.
  *
- * Zernio, para ABRIR una conversacion (`POST /v1/inbox/conversations`), no toma la
- * estructura de components de Meta sino `templateParams`: un solo array con los valores
- * en el orden en que aparecen las variables (header de texto, body, y despues un valor
- * por cada boton de URL dinamica). Dentro de un hilo ya abierto si acepta components.
+ * O Zernio, para ABRIR uma conversa (`POST /v1/inbox/conversations`), não toma a
+ * estrutura de components da Meta e sim `templateParams`: um único array com os valores
+ * na ordem em que aparecem as variáveis (header de texto, body, e depois um valor
+ * por cada botão de URL dinâmica). Dentro de um fio já aberto sim aceita components.
  */
 export function flattenTemplateParams(components: unknown): string[] {
   if (!Array.isArray(components)) return [];
@@ -80,7 +80,7 @@ export function flattenTemplateParams(components: unknown): string[] {
   return values;
 }
 
-/** Reemplaza {{n}} por su valor; deja el placeholder si falta (para previsualizar). */
+/** Substitui {{n}} pelo seu valor; deixa o placeholder se faltar (para pré-visualizar). */
 export function renderTemplateBody(bodyText: string, values: string[]): string {
   return bodyText.replace(/\{\{\s*(\d+)\s*\}\}/g, (_match, n: string) => {
     const idx = parseInt(n, 10) - 1;
@@ -94,7 +94,7 @@ interface BodyLikeComponent {
   text?: string;
 }
 
-/** Extrae el texto del componente BODY de una plantilla (formato Meta). */
+/** Extrai o texto do componente BODY de um template (formato Meta). */
 export function getBodyText(components: unknown): string {
   if (!Array.isArray(components)) return "";
   const body = (components as BodyLikeComponent[]).find(

@@ -1,12 +1,12 @@
-# Mi Proyecto — Database Schema (EJEMPLO)
+# Meu projeto — Database Schema (EXEMPLO)
 
-> Este es un ejemplo. Reemplaza con las tablas de TU proyecto.
-> Usa el MEGAPROMPT en SKILL.md para generarlo automaticamente.
+> Este é um exemplo. Substitua pelas tabelas do SEU projeto.
+> Use o MEGAPROMPT em SKILL.md para gerá-lo automaticamente.
 
 ## Project: tu_project_ref
 ## URL: https://tu_project_ref.supabase.co
 
-## Tables (ejemplo)
+## Tables (exemplo)
 
 ### users (CRITICAL - Core)
 - id: uuid PK (references auth.users), email: text, full_name: text, avatar_url: text, role: text, status: text, created_at: timestamptz, updated_at: timestamptz

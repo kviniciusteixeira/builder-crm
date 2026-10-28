@@ -10,15 +10,15 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /**
- * Bucket de archivos, por protocolo S3. Hoy apunta a Cloudflare R2; MinIO, Garage o
- * Supabase Storage son las mismas cinco variables y ningun cambio de codigo.
+ * Bucket de arquivos, por protocolo S3. Hoje aponta para Cloudflare R2; MinIO, Garage ou
+ * Supabase Storage são as mesmas cinco variáveis e nenhuma mudança de código.
  *
- * El servidor NUNCA recibe el archivo: firma una URL de subida (PUT) y el navegador
- * la usa directo contra el bucket. Vercel corta los cuerpos a 4,5 MB, y ademas asi
- * un PDF de 20 MB no gasta ni un milisegundo de funcion. Para leer, igual: URL de
- * descarga firmada que vence en un minuto.
+ * O servidor NUNCA recebe o arquivo: assina uma URL de upload (PUT) e o navegador
+ * a usa direto contra o bucket. A Vercel corta os corpos a 4,5 MB, e além disso assim
+ * um PDF de 20 MB não gasta nem um milissegundo de função. Para ler, igual: URL de
+ * download assinada que vence em um minuto.
  *
- * Requiere CORS en el bucket para el origen del CRM (PUT + GET, header content-type).
+ * Requer CORS no bucket para a origem do CRM (PUT + GET, header content-type).
  */
 
 const ENV = {
@@ -45,7 +45,7 @@ function s3(): S3Client {
       endpoint: ENV.endpoint,
       region: ENV.region,
       credentials: { accessKeyId: ENV.accessKeyId!, secretAccessKey: ENV.secretAccessKey! },
-      // MinIO y R2 sin dominio propio van por path (bucket en la ruta, no en el host).
+      // MinIO e R2 sem domínio próprio vão por path (bucket na rota, não no host).
       forcePathStyle: true,
     });
   }
@@ -54,7 +54,7 @@ function s3(): S3Client {
 
 const bucket = () => ENV.bucket!;
 
-/** Lo que se acepta subir. Fuera de esto, el servidor no firma la URL. */
+/** O que se aceita subir. Fora disto, o servidor não assina a URL. */
 export const ALLOWED_MIME: Record<string, string> = {
   "application/pdf": "pdf",
   "image/jpeg": "jpg",
@@ -63,10 +63,10 @@ export const ALLOWED_MIME: Record<string, string> = {
 };
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
-const UPLOAD_URL_TTL = 5 * 60; // segundos: tiempo para empezar el PUT, no para terminarlo
+const UPLOAD_URL_TTL = 5 * 60; // segundos: tempo para começar o PUT, não para terminá-lo
 const DOWNLOAD_URL_TTL = 60;
 
-/** URL firmada para que el navegador haga PUT del archivo con ese content-type. */
+/** URL assinada para que o navegador faça PUT do arquivo com esse content-type. */
 export async function signUpload(key: string, mime: string): Promise<string> {
   return getSignedUrl(
     s3(),
@@ -75,7 +75,7 @@ export async function signUpload(key: string, mime: string): Promise<string> {
   );
 }
 
-/** URL firmada de lectura. `inline` abre en el navegador (PDF/imagen); si no, descarga. */
+/** URL assinada de leitura. `inline` abre no navegador (PDF/imagem); senão, baixa. */
 export async function signDownload(
   key: string,
   opts: { filename: string; mime: string; inline: boolean }
@@ -93,7 +93,7 @@ export async function signDownload(
   );
 }
 
-/** Tamano real del objeto, o null si no existe (la subida se corto o nunca empezo). */
+/** Tamanho real do objeto, ou null se não existe (o upload se cortou ou nunca começou). */
 export async function objectSize(key: string): Promise<number | null> {
   try {
     const head = await s3().send(new HeadObjectCommand({ Bucket: bucket(), Key: key }));
@@ -109,10 +109,10 @@ export async function deleteObject(key: string): Promise<void> {
   await s3().send(new DeleteObjectCommand({ Bucket: bucket(), Key: key }));
 }
 
-/** Borrado en lote (al eliminar un contacto). Best-effort: un fallo no frena el resto. */
+/** Apagamento em lote (ao eliminar um contato). Best-effort: uma falha não freia o resto. */
 export async function deleteObjects(keys: string[]): Promise<void> {
   if (keys.length === 0) return;
-  // S3 acepta hasta 1000 por llamada.
+  // O S3 aceita até 1000 por chamada.
   for (let i = 0; i < keys.length; i += 1000) {
     const chunk = keys.slice(i, i + 1000);
     await s3().send(
@@ -124,7 +124,7 @@ export async function deleteObjects(keys: string[]): Promise<void> {
   }
 }
 
-/** Nombre seguro para la clave del bucket: sin rutas, sin caracteres raros, con extension. */
+/** Nome seguro para a chave do bucket: sem rotas, sem caracteres estranhos, com extensão. */
 export function safeFilename(name: string, mime: string): string {
   const ext = ALLOWED_MIME[mime];
   const base = name

@@ -58,8 +58,8 @@ export function ContactForm({ open, onClose, initialData }: ContactFormProps) {
   const [camposValores, setCamposValores] = useState<ValoresCampos>(
     (initialData?.customFields as ValoresCampos | null) ?? {}
   );
-  // Solo se manda si el admin lo toco: un asesor no puede cambiarlo y el servidor
-  // rechaza el campo aunque venga con el mismo valor.
+  // Só se envia se o admin mexeu: um assessor não pode mudá-lo e o servidor
+  // rejeita o campo mesmo que venha com o mesmo valor.
   const [ownerId, setOwnerId] = useState<string | null>(initialData?.ownerId ?? null);
   const [ownerDirty, setOwnerDirty] = useState(false);
 

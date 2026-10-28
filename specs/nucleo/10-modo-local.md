@@ -1,87 +1,87 @@
-# Modo local: correr el CRM sin crear una cuenta en ningun lado
+# Modo local: rodar o CRM sem criar uma conta em lugar nenhum
 
-Escrita antes del codigo: **no**. Salio de ver el problema en vivo: al mostrar el repo
-en una clase, `npm run dev` sobre un clon recien hecho no abria ninguna pagina y pedia
-crear un proyecto en Supabase.
+Escrita antes do código: **não**. Saiu de ver o problema ao vivo: ao mostrar o repositório
+numa aula, `npm run dev` sobre um clone recém-feito não abria nenhuma página e pedia
+criar um projeto no Supabase.
 
 ## Problema
 
-Quien clona el repo para mirarlo —un miembro nuevo, alguien evaluandolo, el propio
-dueno en una clase— no puede ver el CRM funcionando sin antes crear un proyecto de
-Supabase, copiar cuatro variables y correr las migraciones.
+Quem clona o repositório para olhar — um membro novo, alguém avaliando, o próprio
+dono numa aula — não consegue ver o CRM funcionando sem antes criar um projeto de
+Supabase, copiar quatro variáveis e rodar as migrações.
 
-Y no es que se vea a medias: no se ve nada. `src/lib/supabase/middleware.ts` arma el
-cliente con `process.env.NEXT_PUBLIC_SUPABASE_URL!`, asi que sin esa variable **toda**
-peticion muere antes de renderizar. El sintoma es una pantalla de error, no un aviso
-util.
+E não é que se veja pela metade: não se vê nada. `src/lib/supabase/middleware.ts` monta o
+cliente com `process.env.NEXT_PUBLIC_SUPABASE_URL!`, então sem essa variável **toda**
+requisição morre antes de renderizar. O sintoma é uma tela de erro, não um aviso
+útil.
 
-Ese paso es donde se pierde a la mayoria. El CRM es el corazon del modulo de la
-comunidad: la primera leccion no puede empezar con "crea una cuenta en Supabase".
+Esse passo é onde se perde a maioria. O CRM é o coração do módulo da
+comunidade: a primeira aula não pode começar com "crie uma conta no Supabase".
 
-## Escenarios
+## Cenários
 
-1. Alguien clona el repo, corre `npm install && npm run local` y en menos de dos
-   minutos tiene el CRM abierto con contactos, conversaciones, pipeline y reportes.
-2. Edita `config/cliente.ts` (marca, pipeline, campos), recarga y ve el cambio, sin
-   tocar ninguna base remota.
-3. Abre el simulador, escribe un mensaje y lo ve entrar a la bandeja con su contacto
-   creado, aunque no tenga clave de OpenRouter.
-4. Agrega `OPENROUTER_API_KEY` a `.env.local` y ahora el agente le contesta.
-5. Cuando quiere una instancia de verdad, sigue el camino de siempre (Supabase +
-   Coolify) sin desarmar nada de lo anterior.
+1. Alguém clona o repositório, roda `npm install && npm run local` e em menos de dois
+   minutos tem o CRM aberto com contatos, conversas, pipeline e relatórios.
+2. Edita `config/cliente.ts` (marca, pipeline, campos), recarrega e vê a mudança, sem
+   tocar em nenhuma base remota.
+3. Abre o simulador, escreve uma mensagem e a vê entrar na caixa de entrada com o contato
+   criado, mesmo sem chave do OpenRouter.
+4. Adiciona `OPENROUTER_API_KEY` ao `.env.local` e agora o agente responde.
+5. Quando quer uma instância de verdade, segue o caminho de sempre (Supabase +
+   Coolify) sem desmontar nada do anterior.
 
 ## Requisitos
 
-- **FR-1** `npm run local` no debe exigir ninguna cuenta, servicio ni variable de
-  entorno. Node y npm es todo.
-- **FR-2** La base local aplica **las mismas migraciones** que una instancia
-  desplegada, RLS incluido. Si el esquema local y el real divergieran, el modo local
-  dejaria de servir para probar nada.
-- **FR-3** El administrador de la demo se da de alta por el **mismo camino que en
-  produccion**: insertar en `auth.users` y dejar que el disparador del primer admin
-  cree la fila en `team_members`.
-- **FR-4** Sin servidor de autenticacion no hay sesion: quien abre la URL es
-  administrador. La UI tiene que decirlo en todo momento.
-- **FR-5** El modo local es **imposible** en produccion, aunque la variable este
-  puesta.
-- **FR-6** Las variables que no existen en modo local (`DATABASE_URL` y las dos de
-  Supabase) no cuentan como faltantes: si no, `/api/health` responde 503 y el CRM no
+- **FR-1** `npm run local` não deve exigir nenhuma conta, serviço nem variável de
+  ambiente. Node e npm é tudo.
+- **FR-2** A base local aplica **as mesmas migrações** que uma instância
+  implantada, RLS incluído. Se o esquema local e o real divergissem, o modo local
+  deixaria de servir para testar qualquer coisa.
+- **FR-3** O administrador da demo se cadastra pelo **mesmo caminho que em
+  produção**: inserir em `auth.users` e deixar que o gatilho do primeiro admin
+  crie a linha em `team_members`.
+- **FR-4** Sem servidor de autenticação não há sessão: quem abre a URL é
+  administrador. A UI tem que dizer isso o tempo todo.
+- **FR-5** O modo local é **impossível** em produção, mesmo que a variável esteja
+  definida.
+- **FR-6** As variáveis que não existem no modo local (`DATABASE_URL` e as duas do
+  Supabase) não contam como faltantes: se não, `/api/health` responde 503 e o CRM não
   abre.
-- **FR-7** Lo que el modo local no puede dar se dice en voz alta, no se simula: login,
-  equipo, correos y busqueda semantica de propiedades.
+- **FR-7** O que o modo local não pode dar se diz em voz alta, não se simula: login,
+  equipe, e-mails e busca semântica de imóveis.
 
-## Decisiones
+## Decisões
 
-**Postgres embebido, no Docker.** `@electric-sql/pglite` es Postgres compilado a
-WebAssembly y se instala como un paquete de npm. La alternativa (Docker con Postgres y
-GoTrue) es mas fiel —habria login de verdad— pero exige instalar Docker Desktop, que es
-justo el punto donde se cae la gente en una clase en vivo. La fidelidad se recupera en
-el paso siguiente, cuando se despliega.
+**Postgres embutido, não Docker.** `@electric-sql/pglite` é Postgres compilado para
+WebAssembly e se instala como um pacote de npm. A alternativa (Docker com Postgres e
+GoTrue) é mais fiel — haveria login de verdade — mas exige instalar o Docker Desktop, que é
+justamente o ponto onde as pessoas caem numa aula ao vivo. A fidelidade se recupera no
+passo seguinte, quando se implanta.
 
-**Sin login, no con un login falso.** Un login de mentira seria mas parecido a la foto
-final y mucho peor: daria la sensacion de que hay autorizacion donde no hay ninguna.
-Mejor que se vea que no hay sesion.
+**Sem login, não com um login falso.** Um login de mentira seria mais parecido com a foto
+final e muito pior: daria a sensação de que há autorização onde não há nenhuma.
+Melhor que se veja que não há sessão.
 
-**Dos candados, y el que cuenta es el segundo.** `MODO_LOCAL=true` lo pone solo
-`npm run local`; pero una variable se filtra facil (alguien copia su `.env.local` al
-servidor). Por eso ademas hace falta que `NODE_ENV` no sea `production`, cosa que no
-depende de ninguna configuracion: `next build` + `next start` y la imagen de Docker
-corren en production siempre.
+**Dois cadeados, e o que conta é o segundo.** `MODO_LOCAL=true` só o põe
+`npm run local`; mas uma variável vaza fácil (alguém copia o `.env.local` para o
+servidor). Por isso também faz falta que `NODE_ENV` não seja `production`, coisa que não
+depende de nenhuma configuração: `next build` + `next start` e a imagem de Docker
+rodam em production sempre.
 
-**pgvector queda afuera.** El Postgres embebido no lo trae. Solo lo usa el modulo
-`propiedades` para la busqueda por significado: la migracion se saltea con un aviso y
-el resto del modulo anda.
+**pgvector fica de fora.** O Postgres embutido não o traz. Só o usa o módulo
+`propiedades` para a busca por significado: a migração é pulada com um aviso e
+o resto do módulo funciona.
 
-## Fuera de alcance
+## Fora de escopo
 
-- Login, equipo e invitaciones en modo local.
-- Webhooks reales (Zernio necesita una URL publica).
-- Usar la base local para algo que no sea probar y adaptar.
+- Login, equipe e convites no modo local.
+- Webhooks reais (o Zernio precisa de uma URL pública).
+- Usar a base local para algo que não seja testar e adaptar.
 
 ## Como se verifica
 
-Clonar el repo en una carpeta limpia **sin `.env.local`**, `npm install`,
-`npm run local`, y comprobar: las cinco migraciones aplicadas, `/api/health` en 200 con
-`modoLocal: true`, las paginas principales en 200, los reportes con numeros reales (no
-en cero, que es como se veria si `db.execute` no estuviera normalizado) y un mensaje
-por el simulador que entra a la bandeja sin clave de OpenRouter.
+Clonar o repositório numa pasta limpa **sem `.env.local`**, `npm install`,
+`npm run local`, e conferir: as cinco migrações aplicadas, `/api/health` em 200 com
+`modoLocal: true`, as páginas principais em 200, os relatórios com números reais (não
+em zero, que é como se veria se `db.execute` não estivesse normalizado) e uma mensagem
+pelo simulador que entra na caixa de entrada sem chave do OpenRouter.

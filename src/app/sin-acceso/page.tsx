@@ -3,8 +3,8 @@ import { ShieldOff } from "lucide-react";
 import { signOut } from "@/app/login/actions";
 
 /**
- * Usuario autenticado pero fuera del equipo: se desactivo, o entro por un signup que
- * ya no deberia estar abierto. No se le muestra nada del CRM.
+ * Usuário autenticado mas fora da equipe: foi desativado, ou entrou por um signup que
+ * já não deveria estar aberto. Não se mostra nada do CRM.
  */
 export default function SinAccesoPage() {
   return (

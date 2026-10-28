@@ -29,10 +29,10 @@ export interface Contact {
   tags: string[];
   /** Campos personalizados (config/cliente.ts -> contacto.campos). */
   customFields?: Record<string, unknown> | null;
-  /** Resumen del lead escrito por el agente. */
+  /** Resumo do lead escrito pelo agente. */
   aiSummary?: string | null;
   aiSummaryAt?: Date | string | null;
-  /** Asesor a cargo (team_members.id). null = sin asignar. */
+  /** Assessor responsável (team_members.id). null = sem atribuir. */
   ownerId?: string | null;
   ownerName?: string | null;
   ownerEmail?: string | null;
@@ -56,7 +56,7 @@ export interface Deal {
 export interface PipelineStage {
   id: string;
   pipelineId: string;
-  /** Clave de config/cliente.ts; null si se creo desde la UI. */
+  /** Chave de config/cliente.ts; null se foi criada a partir da UI. */
   key?: string | null;
   name: string;
   order: number;
@@ -89,7 +89,7 @@ export interface DealWithContact extends Deal {
   contact?: Contact;
   stage?: PipelineStage;
   contactName?: string | null;
-  /** Documentos listos en la ficha del contacto (contador del kanban). */
+  /** Documentos prontos na ficha do contato (contador do kanban). */
   docCount?: number;
 }
 

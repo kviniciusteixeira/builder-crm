@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 // ============================================================================
-// Builder CRM - preparar una base propia para Supabase Auth autoalojado
+// Builder CRM - preparar uma base própria para Supabase Auth auto-hospedado
 // ============================================================================
-// Supabase cloud trae de fabrica cosas que un Postgres normal no tiene y que las
-// migraciones del CRM dan por sentadas:
+// O Supabase cloud traz de fábrica coisas que um Postgres normal não tem e que as
+// migrações do CRM dão por certas:
 //
-//   - los roles  anon, authenticated, service_role  (las politicas de RLS les hablan),
-//   - el esquema auth con su dueno supabase_auth_admin (donde GoTrue crea auth.users),
-//   - las funciones auth.uid(), auth.role(), auth.email() y auth.jwt().
+//   - os papéis  anon, authenticated, service_role  (as políticas de RLS falam com eles),
+//   - o esquema auth com seu dono supabase_auth_admin (onde o GoTrue cria auth.users),
+//   - as funções auth.uid(), auth.role(), auth.email() e auth.jwt().
 //
-// Este script las crea si faltan. Es idempotente y NO toca nada que ya exista, asi
-// que correrlo contra Supabase cloud no hace dano: informa que no hay nada que hacer.
+// Este script as cria se faltarem. É idempotente e NÃO toca em nada que já exista, então
+// rodá-lo contra o Supabase cloud não faz mal: informa que não há nada a fazer.
 //
-// ORDEN IMPORTANTE. Hay que correrlo ANTES de arrancar GoTrue, porque GoTrue espera
-// encontrar el rol supabase_auth_admin, y GoTrue tiene que arrancar antes de aplicar
-// las migraciones del CRM, porque la ultima pone un disparador sobre auth.users:
+// ORDEM IMPORTANTE. Há que rodá-lo ANTES de iniciar o GoTrue, porque o GoTrue espera
+// encontrar o papel supabase_auth_admin, e o GoTrue tem que iniciar antes de aplicar
+// as migrações do CRM, porque a última põe um gatilho sobre auth.users:
 //
-//   1. base de datos arriba
+//   1. base de dados no ar
 //   2. node scripts/preparar-auth-autoalojado.mjs
-//   3. arrancar GoTrue  (crea auth.users con sus propias migraciones)
+//   3. iniciar o GoTrue  (cria auth.users com suas próprias migrações)
 //   4. npm run db:migrar
 //
 //   node scripts/preparar-auth-autoalojado.mjs
 //   node scripts/preparar-auth-autoalojado.mjs --dry-run
 //   node scripts/preparar-auth-autoalojado.mjs --auth-password 'otra'
 //
-// Sin --auth-password, supabase_auth_admin queda con la misma contrasena que trae
-// DATABASE_URL, que es lo que hace el stack oficial de Supabase.
+// Sem --auth-password, supabase_auth_admin fica com a mesma senha que traz
+// DATABASE_URL, que é o que faz o stack oficial do Supabase.
 // ============================================================================
 
 import { existsSync } from "node:fs";
@@ -41,7 +41,7 @@ if (!process.env.DATABASE_URL && existsSync(join(raiz, ".env.local"))) {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
   } catch {
-    /* sin dotenv: el entorno ya tiene que traer DATABASE_URL */
+    /* sem dotenv: o ambiente já tem que trazer DATABASE_URL */
   }
 }
 
@@ -104,10 +104,10 @@ async function existeEsquema(nombre) {
 try {
   await sql`select 1`;
 
-  // 1. Roles -----------------------------------------------------------------
-  // anon, authenticated y service_role no inician sesion: son los roles a los que
-  // las politicas de RLS les dan permiso. supabase_auth_admin si, porque es el
-  // usuario con el que GoTrue entra y el dueno del esquema auth.
+  // 1. Papéis ----------------------------------------------------------------
+  // anon, authenticated e service_role não iniciam sessão: são os papéis aos quais
+  // as políticas de RLS dão permissão. supabase_auth_admin sim, porque é o
+  // usuário com o qual o GoTrue entra e o dono do esquema auth.
   for (const rol of ["anon", "authenticated", "service_role"]) {
     if (await existeRol(rol)) {
       omitidos.push(`rol ${rol}`);
@@ -138,17 +138,17 @@ try {
   }
 
   if (!simulacion) {
-    // Permisos minimos. GoTrue necesita poder crear sus tablas; los otros roles solo
-    // necesitan ver el esquema para que auth.uid() se resuelva en las politicas.
+    // Permissões mínimas. O GoTrue precisa poder criar suas tabelas; os outros papéis só
+    // precisam ver o esquema para que auth.uid() se resolva nas políticas.
     await sql.unsafe(`grant usage on schema auth to anon, authenticated, service_role`);
     await sql.unsafe(`grant all on schema auth to supabase_auth_admin`);
     await sql.unsafe(`alter role supabase_auth_admin set search_path = auth`);
   }
 
-  // 3. Funciones auth.* ------------------------------------------------------
-  // Leen los claims que el portador del token deja en la sesion. Sin PostgREST nadie
-  // los setea, asi que devuelven null y las politicas niegan todo: es lo correcto,
-  // porque la aplicacion entra con el usuario dueno de las tablas y no pasa por RLS.
+  // 3. Funções auth.* --------------------------------------------------------
+  // Leem os claims que o portador do token deixa na sessão. Sem PostgREST ninguém
+  // os define, então devolvem null e as políticas negam tudo: é o correto,
+  // porque a aplicação entra com o usuário dono das tabelas e não passa por RLS.
   const funciones = [
     [
       "auth.uid()",
@@ -188,10 +188,10 @@ try {
     ],
   ];
 
-  // El dueno TIENE que ser supabase_auth_admin. GoTrue vuelve a declarar auth.uid() y
-  // auth.role() en su primera migracion con "create or replace", y si las funciones
-  // son de otro dueno Postgres lo rechaza ("must be owner of function uid") y GoTrue
-  // entra en bucle de reinicio sin crear auth.users.
+  // O dono TEM que ser supabase_auth_admin. O GoTrue volta a declarar auth.uid() e
+  // auth.role() na primeira migração com "create or replace", e se as funções
+  // são de outro dono o Postgres rejeita ("must be owner of function uid") e o GoTrue
+  // entra em ciclo de reinício sem criar auth.users.
   for (const [firma, ddl] of funciones) {
     if (await existeFuncion(firma)) {
       const dueno = await duenoDeFuncion(firma);
@@ -211,7 +211,7 @@ try {
     hechos.push(`funcion ${firma}`);
   }
 
-  // 4. Informe ---------------------------------------------------------------
+  // 4. Relatório -------------------------------------------------------------
   const prefijo = simulacion ? "[auth] (simulacion) " : "[auth] ";
   if (hechos.length === 0) {
     console.log(`${prefijo}nada que hacer: la base ya tiene los roles, el esquema y las funciones.`);

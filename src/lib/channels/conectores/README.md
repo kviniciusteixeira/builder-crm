@@ -1,60 +1,60 @@
 # Conectores de canal
 
-Un **conector** es por donde viaja un mensaje. La bandeja, el agente y Ajustes solo
-conocen la interfaz `Conector` (`../conector.ts`): `enviar`, `webhook` y `estado`.
+Um **conector** é por onde uma mensagem viaja. A caixa de entrada, o agente e Ajustes só
+conhecem a interface `Conector` (`../conector.ts`): `enviar`, `webhook` e `estado`.
 
-| Conector | Archivo | Canales | Estado |
+| Conector | Arquivo | Canais | Estado |
 |---|---|---|---|
-| Zernio | `zernio.ts` | WhatsApp, Instagram, Messenger | Completo. Camino normal. |
-| Meta Cloud API (directo) | `meta-cloud.ts` | WhatsApp | Parcial: `enviar` + `estado`. La ingesta vive en la ruta legacy `/api/webhooks/whatsapp`. |
-| Simulador | `simulador.ts` | todos (de prueba) | Guarda en vez de enviar; para demos y autoverificacion. |
+| Zernio | `zernio.ts` | WhatsApp, Instagram, Messenger | Completo. Caminho normal. |
+| Meta Cloud API (direto) | `meta-cloud.ts` | WhatsApp | Parcial: `enviar` + `estado`. A ingestão vive na rota legada `/api/webhooks/whatsapp`. |
+| Simulador | `simulador.ts` | todos (de teste) | Grava em vez de enviar; para demos e autoverificação. |
 
-## Como fluye un mensaje
+## Como uma mensagem flui
 
-- **Sale**: `deliverMessage` (`../deliver.ts`) resuelve el conector por
-  `conversations.provider`, inserta la fila `pending`, llama a `enviar` y marca
-  `sent`/`failed`. Nadie mas sale a la red.
-- **Entra**: `POST /api/webhooks/<conector>` llama a `manejarWebhook(conector, req)`
-  (`../webhook.ts`): verifica la firma con `webhook.verificar`, reclama el evento en
-  `webhook_events` con `webhook.idEvento` (o el hash del cuerpo), responde 2xx y en
-  `after()` corre `webhook.procesar`, que normaliza y persiste con `../ingest.ts`
+- **Sai**: `deliverMessage` (`../deliver.ts`) resolve o conector por
+  `conversations.provider`, insere a linha `pending`, chama `enviar` e marca
+  `sent`/`failed`. Ninguém mais sai para a rede.
+- **Entra**: `POST /api/webhooks/<conector>` chama `manejarWebhook(conector, req)`
+  (`../webhook.ts`): verifica a assinatura com `webhook.verificar`, reivindica o evento em
+  `webhook_events` com `webhook.idEvento` (ou o hash do corpo), responde 2xx e em
+  `after()` roda `webhook.procesar`, que normaliza e persiste com `../ingest.ts`
   (`findOrCreateContactByIdentity`, `upsertConversation`, `ingestMessage`,
-  `updateMessageStatus`). `GET` con `AGENT_WORKER_SECRET` barre lo que quedo colgado.
-- **Estado**: `GET /api/channels` devuelve `estado()` de cada conector.
+  `updateMessageStatus`). `GET` com `AGENT_WORKER_SECRET` varre o que ficou pendente.
+- **Estado**: `GET /api/channels` devolve `estado()` de cada conector.
 
-## Agregar el conector de la API oficial de WhatsApp (Cloud API / Tech Provider)
+## Adicionar o conector da API oficial do WhatsApp (Cloud API / Tech Provider)
 
-No esta implementado a proposito (brief, requisito 3). Cuando toque:
+Não está implementado de propósito (brief, requisito 3). Quando chegar a hora:
 
-1. **Completar `meta-cloud.ts`** (o crear `cloud-api.ts` con `id: "meta"`):
-   - `webhook.verificar`: `X-Hub-Signature-256` con `WHATSAPP_APP_SECRET`
-     (`verifyWebhookSignature` de `src/lib/meta-whatsapp.ts` ya lo hace).
-   - `webhook.idEvento`: el `wamid` del mensaje o el `id` del status; `null` si no hay
-     (el nucleo usa el hash del cuerpo).
-   - `webhook.procesar`: recorrer `entry[].changes[].value.messages[]` y `statuses[]`,
-     resolver la cuenta por `metadata.phone_number_id` (`whatsapp_accounts`), y llamar
-     a las funciones de `../ingest.ts`. La logica de referencia esta en
+1. **Completar `meta-cloud.ts`** (ou criar `cloud-api.ts` com `id: "meta"`):
+   - `webhook.verificar`: `X-Hub-Signature-256` com `WHATSAPP_APP_SECRET`
+     (`verifyWebhookSignature` de `src/lib/meta-whatsapp.ts` já faz isso).
+   - `webhook.idEvento`: o `wamid` da mensagem ou o `id` do status; `null` se não houver
+     (o núcleo usa o hash do corpo).
+   - `webhook.procesar`: percorrer `entry[].changes[].value.messages[]` e `statuses[]`,
+     resolver a conta por `metadata.phone_number_id` (`whatsapp_accounts`) e chamar
+     as funções de `../ingest.ts`. A lógica de referência está em
      `src/app/api/webhooks/whatsapp/route.ts` (`handleInboundMessage`,
-     `handleStatusUpdate`): migrarla aqui y dejar esa ruta como
-     `manejarWebhook(metaCloud, req)` mas el `GET` de verificacion del hub
+     `handleStatusUpdate`): migrá-la para cá e deixar essa rota como
+     `manejarWebhook(metaCloud, req)` mais o `GET` de verificação do hub
      (`hub.challenge`).
-2. **Conexion desde la UI**: Embedded Signup de Meta (o pegar token + ids) que escriba
-   en `whatsapp_accounts`; hoy existe solo `scripts/connect-whatsapp-account.ts`.
-3. **Registrar**: ya esta en `index.ts`. Si se crea otro id, agregar el valor a
-   `PROVIDERS` en `../types.ts`.
-4. **Tech Provider**: la instancia del cliente recibe su token desde la plataforma de la
-   agencia; el webhook se enruta con `override_callback_uri` por WABA hacia
-   `https://<instancia>/api/webhooks/whatsapp`. Mismo conector, otra forma de obtener
-   credenciales.
-5. **Probar**: `probar-instancia` ya cubre bandeja, agente y pipeline con el simulador;
-   para Cloud API, mandar un mensaje real al numero de prueba y ver que entra.
+2. **Conexão a partir da UI**: Embedded Signup da Meta (ou colar token + ids) que escreva
+   em `whatsapp_accounts`; hoje existe só `scripts/connect-whatsapp-account.ts`.
+3. **Registrar**: já está em `index.ts`. Se for criado outro id, adicionar o valor a
+   `PROVIDERS` em `../types.ts`.
+4. **Tech Provider**: a instância do cliente recebe o token da plataforma da
+   agência; o webhook é roteado com `override_callback_uri` por WABA para
+   `https://<instancia>/api/webhooks/whatsapp`. Mesmo conector, outra forma de obter
+   credenciais.
+5. **Testar**: `probar-instancia` já cobre caixa de entrada, agente e pipeline com o simulador;
+   para Cloud API, mandar uma mensagem real para o número de teste e ver se entra.
 
-Nada de esto toca la bandeja ni el agente: hablan con `Conector`, no con Meta.
+Nada disso toca na caixa de entrada nem no agente: eles falam com `Conector`, não com a Meta.
 
-## Reglas
+## Regras
 
-- Credenciales por entorno (`ZERNIO_*`, `WHATSAPP_*`), nunca en codigo.
-- El modulo del conector importa solo lo liviano a nivel de modulo; la ingesta y el
-  cliente HTTP se importan dinamicamente (Zernio exige 2xx en 5 s).
-- Un conector nunca escribe en `messages` directo: devuelve `SendOutcome` y deja que
+- Credenciais por ambiente (`ZERNIO_*`, `WHATSAPP_*`), nunca no código.
+- O módulo do conector importa só o leve no nível de módulo; a ingestão e o
+  cliente HTTP são importados dinamicamente (o Zernio exige 2xx em 5 s).
+- Um conector nunca escreve em `messages` direto: devolve `SendOutcome` e deixa que
   `deliverMessage` persista.

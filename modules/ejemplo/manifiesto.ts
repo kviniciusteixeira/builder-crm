@@ -2,8 +2,8 @@ import { ListChecks } from "lucide-react";
 import type { ManifiestoModulo } from "@/lib/modules/types";
 
 /**
- * Manifiesto del modulo de ejemplo. Seguro para el navegador: lo importa el sidebar.
- * Nada de base de datos, nada de secretos.
+ * Manifesto do módulo de exemplo. Seguro para o navegador: o sidebar o importa.
+ * Nada de base de dados, nada de segredos.
  */
 const manifiesto: ManifiestoModulo = {
   nombre: "ejemplo",

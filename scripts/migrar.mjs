@@ -1,24 +1,24 @@
 #!/usr/bin/env node
-// Aplica las migraciones SQL pendientes sobre la base (Supabase Postgres).
+// Aplica as migrações SQL pendentes sobre a base (Supabase Postgres).
 //
-//   node scripts/migrar.mjs            aplica lo pendiente
-//   node scripts/migrar.mjs --status   lista aplicadas y pendientes, no toca nada
-//   node scripts/migrar.mjs --dry-run  muestra lo que aplicaria
+//   node scripts/migrar.mjs            aplica o pendente
+//   node scripts/migrar.mjs --status   lista aplicadas e pendentes, não toca em nada
+//   node scripts/migrar.mjs --dry-run  mostra o que aplicaria
 //
-// Fuentes, en este orden:
-//   1. supabase/migrations/*.sql           (nucleo)
-//   2. modules/<modulo>/migrations/*.sql   (solo modulos activos; ver src/lib/modules)
+// Fontes, nesta ordem:
+//   1. supabase/migrations/*.sql           (núcleo)
+//   2. modules/<modulo>/migrations/*.sql   (só módulos ativos; ver src/lib/modules)
 //
-// Cada archivo se aplica entero dentro de una transaccion y se registra en
-// public._migraciones por nombre: o entra todo, o no entra nada, y una segunda corrida
-// no lo vuelve a aplicar. Al final habilita RLS en cualquier tabla de `public` que no
-// lo tenga (red de seguridad para tablas de modulos).
+// Cada arquivo se aplica inteiro dentro de uma transação e se registra em
+// public._migraciones por nome: ou entra tudo, ou não entra nada, e uma segunda execução
+// não o aplica de novo. No final habilita RLS em qualquer tabela de `public` que não
+// o tenha (rede de segurança para tabelas de módulos).
 //
-// Corre al arrancar el contenedor (docker/entrypoint.sh): si la base todavia no
-// responde reintenta 15 veces cada 2 s antes de rendirse.
+// Roda ao iniciar o contêiner (docker/entrypoint.sh): se a base ainda não
+// responde, tenta de novo 15 vezes a cada 2 s antes de desistir.
 //
-// Conexion: DIRECT_URL si existe (conexion directa, puerto 5432), si no DATABASE_URL.
-// El pooler en modo transaccion tambien sirve: no se usan prepared statements.
+// Conexão: DIRECT_URL se existir (conexão direta, porta 5432), senão DATABASE_URL.
+// O pooler em modo transação também serve: não se usam prepared statements.
 
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -28,14 +28,14 @@ import { listarMigraciones } from "./lib/migraciones.mjs";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// En desarrollo las variables estan en .env.local; en el contenedor vienen del entorno.
-// dotenv es devDependency: se carga solo si esta disponible.
+// Em desenvolvimento as variáveis estão em .env.local; no contêiner vêm do ambiente.
+// dotenv é devDependency: carrega-se só se estiver disponível.
 if (!process.env.DATABASE_URL && existsSync(join(raiz, ".env.local"))) {
   try {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
   } catch {
-    /* sin dotenv: el entorno ya tiene que traer DATABASE_URL */
+    /* sem dotenv: o ambiente já tem que trazer DATABASE_URL */
   }
 }
 
@@ -58,8 +58,8 @@ async function conectar() {
       prepare: false,
       max: 1,
       connect_timeout: 10,
-      // Las migraciones usan RAISE NOTICE para contar lo que hicieron. Sin esto, el
-      // driver imprime el objeto entero del aviso y parece que algo se rompio.
+      // As migrações usam RAISE NOTICE para contar o que fizeram. Sem isto, o
+      // driver imprime o objeto inteiro do aviso e parece que algo quebrou.
       onnotice: (aviso) => console.log(`[migrar] aviso: ${aviso.message}`),
     });
     try {
@@ -110,7 +110,7 @@ try {
     }
     if (pendientes.length === 0) console.log("[migrar] nada pendiente");
 
-    // Red de seguridad: ninguna tabla de public sin RLS (cubre tablas de modulos).
+    // Rede de segurança: nenhuma tabela de public sem RLS (cobre tabelas de módulos).
     const sinRls = await sql`
       select c.relname as tabla
       from pg_class c join pg_namespace n on n.oid = c.relnamespace
@@ -124,17 +124,17 @@ try {
 } catch (err) {
   const mensaje = err instanceof Error ? err.message : String(err);
   console.error("[migrar] fallo:", mensaje);
-  // Los dos tropiezos de quien aloja su propio Postgres. En Supabase cloud no pasan
-  // porque el esquema auth y auth.users ya vienen hechos.
+  // Os dois tropeços de quem hospeda o próprio Postgres. No Supabase cloud não acontecem
+  // porque o esquema auth e auth.users já vêm prontos.
   if (/schema "auth" does not exist/i.test(mensaje)) {
     console.error("[migrar] La base no tiene el esquema auth.");
     console.error("[migrar] Si es Supabase cloud, la URL no apunta a ese proyecto.");
-    console.error("[migrar] Si es tu propio Postgres: npm run auth:preparar (docs/SUPABASE-EN-VPS.md).");
+    console.error("[migrar] Si es tu propio Postgres: npm run auth:preparar (docs/SUPABASE-NO-VPS.md).");
   } else if (/relation "auth\.users" does not exist/i.test(mensaje)) {
     console.error("[migrar] El esquema auth existe pero todavia no hay auth.users.");
     console.error("[migrar] Eso lo crea GoTrue la primera vez que arranca: levanta el");
     console.error("[migrar] contenedor de autenticacion y volve a correr esto");
-    console.error("[migrar] (docs/SUPABASE-EN-VPS.md: el paso 3 va antes del 4).");
+    console.error("[migrar] (docs/SUPABASE-NO-VPS.md: el paso 3 va antes del 4).");
   }
   process.exitCode = 1;
 } finally {

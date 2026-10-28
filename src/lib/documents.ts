@@ -14,16 +14,16 @@ import {
 } from "@/lib/storage";
 
 /**
- * Documentos de la ficha. Subida en dos pasos:
+ * Documentos da ficha. Upload em dois passos:
  *
- *   1. `beginUpload`  -> fila `pending` + URL firmada. El navegador hace PUT al bucket.
- *   2. `confirmUpload` -> el servidor verifica que el objeto existe (HEAD) y marca `ready`.
+ *   1. `beginUpload`  -> linha `pending` + URL assinada. O navegador faz PUT no bucket.
+ *   2. `confirmUpload` -> o servidor verifica que o objeto existe (HEAD) e marca `ready`.
  *
- * Solo se listan los `ready`. Un `pending` es una subida que se corto; no molesta a
- * nadie y se puede limpiar cuando se quiera.
+ * Só se listam os `ready`. Um `pending` é um upload que se cortou; não incomoda
+ * ninguém e pode-se limpar quando se quiser.
  *
- * Quien puede ver un documento es quien puede ver el contacto: la visibilidad la
- * decide `canAccessContact` en la ruta, no aca.
+ * Quem pode ver um documento é quem pode ver o contato: a visibilidade a
+ * decide `canAccessContact` na rota, não aqui.
  */
 
 export interface DocumentItem {
@@ -62,7 +62,7 @@ export async function listDocuments(contactId: string): Promise<DocumentItem[]> 
   return rows;
 }
 
-/** Cuantos documentos listos tiene cada contacto (para el contador del kanban). */
+/** Quantos documentos prontos tem cada contato (para o contador do kanban). */
 export async function countDocumentsByContact(
   contactIds: string[]
 ): Promise<Record<string, number>> {
@@ -80,7 +80,7 @@ export interface BeginUploadInput {
   name: string;
   mime: string;
   size: number;
-  /** Operacion a la que se asocia; si no viene y el contacto tiene una sola, se usa esa. */
+  /** Operação à qual se associa; se não vem e o contato tem uma só, usa-se essa. */
   dealId?: string | null;
   memberId: string;
 }
@@ -100,7 +100,7 @@ export async function beginUpload(input: BeginUploadInput): Promise<BeginUploadR
     return { ok: false, error: `El archivo supera los ${MAX_FILE_BYTES / 1024 / 1024} MB.` };
   }
 
-  // Foto de operacion + etapa en el momento de la subida.
+  // Foto da operação + etapa no momento do upload.
   let dealId = input.dealId ?? null;
   let stageId: string | null = null;
   const contactDeals = await db
@@ -134,7 +134,7 @@ export async function beginUpload(input: BeginUploadInput): Promise<BeginUploadR
 
 export type ConfirmResult = { ok: true } | { ok: false; error: string };
 
-/** Marca `ready` si el objeto esta en el bucket. Si no, borra la fila: la subida fallo. */
+/** Marca `ready` se o objeto está no bucket. Senão, apaga a linha: o upload falhou. */
 export async function confirmUpload(id: string): Promise<ConfirmResult> {
   const [doc] = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
   if (!doc) return { ok: false, error: "Documento no encontrado" };
@@ -146,7 +146,7 @@ export async function confirmUpload(id: string): Promise<ConfirmResult> {
     return { ok: false, error: "El archivo no llego al bucket. Intenta de nuevo." };
   }
   if (size > MAX_FILE_BYTES) {
-    // Alguien firmo con un tamano y subio otro: fuera.
+    // Alguém assinou com um tamanho e subiu outro: fora.
     await deleteObject(doc.storageKey).catch(() => {});
     await db.delete(documents).where(eq(documents.id, id));
     return { ok: false, error: "El archivo supera el tamano permitido." };
@@ -171,16 +171,16 @@ export async function documentDownloadUrl(
 export async function deleteDocument(id: string): Promise<void> {
   const doc = await getDocument(id);
   if (!doc) return;
-  // Primero el objeto: si falla, la fila queda y se puede reintentar. Al reves, el
-  // archivo quedaria huerfano en el bucket sin nadie que lo referencie.
+  // Primeiro o objeto: se falha, a linha fica e pode-se tentar de novo. Ao contrário, o
+  // arquivo ficaria órfão no bucket sem ninguém que o referencie.
   await deleteObject(doc.storageKey);
   await db.delete(documents).where(eq(documents.id, id));
 }
 
 /**
- * Borra del bucket todo lo del contacto. Llamar ANTES de borrar el contacto: la fila
- * se va por cascade, el objeto no. Best-effort: si el bucket no responde, el contacto
- * se borra igual y quedan objetos huerfanos, que es preferible a no poder borrar.
+ * Apaga do bucket tudo o do contato. Chamar ANTES de apagar o contato: a linha
+ * vai por cascade, o objeto não. Best-effort: se o bucket não responde, o contato
+ * se apaga igual e ficam objetos órfãos, que é preferível a não poder apagar.
  */
 export async function purgeContactDocuments(contactId: string): Promise<void> {
   const rows = await db
@@ -195,7 +195,7 @@ export async function purgeContactDocuments(contactId: string): Promise<void> {
   }
 }
 
-/** Contacto del documento, para la guarda de acceso en las rutas. */
+/** Contato do documento, para a guarda de acesso nas rotas. */
 export async function documentContact(doc: { contactId: string }) {
   const [c] = await db
     .select({ id: contacts.id, ownerId: contacts.ownerId })

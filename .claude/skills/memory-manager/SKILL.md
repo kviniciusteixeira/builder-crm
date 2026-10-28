@@ -1,30 +1,30 @@
 ---
 name: memory-manager
 description: |
-  Sistema de memoria persistente POR PROYECTO. Guarda conocimiento en .claude/memory/ dentro del repo,
-  versionado con git, compartido con el equipo. Reemplaza la auto-memory de Claude Code que es local
-  y no viaja con el proyecto. Usar PROACTIVAMENTE al inicio de sesion para cargar contexto,
-  cuando el usuario corrige algo, cuando se descubre un patron nuevo, cuando se resuelve un bug,
-  o cuando el usuario dice recordar/recuerda/guarda esto/no olvides.
-  Triggers: recuerda, remember, guarda esto, no olvides, te acuerdas, recuerdas, memoria,
-  en que quedamos, contexto anterior, que sabes de, conversacion pasada, sesion anterior.
+  Sistema de memória persistente POR PROJETO. Guarda conhecimento em .claude/memory/ dentro do repositório,
+  versionado com git, compartilhado com a equipe. Substitui a auto-memory do Claude Code, que é local
+  e não viaja com o projeto. Usar de forma PROATIVA no início da sessão para carregar contexto,
+  quando o usuário corrige algo, quando se descobre um padrão novo, quando se resolve um bug,
+  ou quando o usuário diz lembrar/lembra/guarda isto/não esqueça.
+  Gatilhos: lembra, remember, guarda isto, não esqueça, você se lembra, memória,
+  em que ficamos, contexto anterior, o que você sabe de, conversa passada, sessão anterior.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-# Memory Manager — Memoria Persistente por Proyecto
+# Memory Manager — Memória persistente por projeto
 
-> La memoria vive en `.claude/memory/` DENTRO del repo. Versionada en git. El usuario tiene control total.
-> Auto-memory de Claude Code esta DESACTIVADO. Esta skill es el unico mecanismo de memoria.
+> A memória vive em `.claude/memory/` DENTRO do repositório. Versionada no git. O usuário tem controle total.
+> A auto-memory do Claude Code está DESATIVADA. Esta skill é o único mecanismo de memória.
 
 ---
 
-## Activacion (Primera Vez)
+## Ativação (primeira vez)
 
-**IMPORTANTE:** Cuando este skill se activa por primera vez en un proyecto, ejecutar automaticamente estos pasos de setup:
+**IMPORTANTE:** Quando esta skill se ativa pela primeira vez num projeto, executar automaticamente estes passos de setup:
 
-### Paso 1: Deshabilitar auto-memory de Claude Code
+### Passo 1: Desabilitar a auto-memory do Claude Code
 
-Crear o actualizar `.claude/settings.json` en la raiz del proyecto:
+Criar ou atualizar `.claude/settings.json` na raiz do projeto:
 
 ```json
 {
@@ -32,147 +32,147 @@ Crear o actualizar `.claude/settings.json` en la raiz del proyecto:
 }
 ```
 
-Si el archivo ya existe, agregar `"autoMemoryEnabled": false` sin borrar lo que ya tenga.
+Se o arquivo já existir, adicionar `"autoMemoryEnabled": false` sem apagar o que já tiver.
 
-**Por que?** La auto-memory de Claude Code guarda notas en `~/.claude/projects/` (local a la maquina).
-Eso significa que:
-- NO viaja con el repo (si cambias de laptop, se pierde)
-- NO es versionado (sin git history, sin poder revertir)
-- NO es compartido (otros colaboradores no lo ven)
-- Claude decide que guardar (sin control del usuario)
+**Por quê?** A auto-memory do Claude Code guarda notas em `~/.claude/projects/` (local à máquina).
+Isso significa que:
+- NÃO viaja com o repositório (se você mudar de laptop, se perde)
+- NÃO é versionada (sem git history, sem poder reverter)
+- NÃO é compartilhada (outros colaboradores não a veem)
+- O Claude decide o que guardar (sem controle do usuário)
 
-Este skill reemplaza todo eso con memoria DENTRO del repo.
+Esta skill substitui tudo isso com memória DENTRO do repositório.
 
-### Paso 2: Crear estructura de carpetas
+### Passo 2: Criar a estrutura de pastas
 
 ```bash
 mkdir -p .claude/memory/{user,feedback,project,reference}
 ```
 
-### Paso 3: Crear indice MEMORY.md
+### Passo 3: Criar o índice MEMORY.md
 
-Crear `.claude/memory/MEMORY.md` con el template base si no existe:
+Criar `.claude/memory/MEMORY.md` com o template base se não existir:
 
 ```markdown
-# Memoria del Proyecto — Indice
+# Memória do projeto — Índice
 
-> Archivos organizados por carpeta (tipo). Max 200 lineas.
-> Gestionado por skill memory-manager. Auto-memory de Claude Code DESACTIVADO.
+> Arquivos organizados por pasta (tipo). Máx. 200 linhas.
+> Gerenciado pela skill memory-manager. Auto-memory do Claude Code DESATIVADA.
 
-## user/ — Sobre el usuario/equipo
-(vacio)
+## user/ — Sobre o usuário/equipe
+(vazio)
 
-## project/ — Proyectos y decisiones activas
-(vacio)
+## project/ — Projetos e decisões ativas
+(vazio)
 
-## feedback/ — Correcciones y preferencias
-(vacio)
+## feedback/ — Correções e preferências
+(vazio)
 
-## reference/ — Donde encontrar cosas
-(vacio)
+## reference/ — Onde encontrar as coisas
+(vazio)
 ```
 
-### Paso 4: Confirmar al usuario
+### Passo 4: Confirmar ao usuário
 
-Informar: "Memoria persistente activada. Auto-memory de Claude Code deshabilitada. Tu proyecto ahora guarda conocimiento en `.claude/memory/`, versionado con git."
+Informar: "Memória persistente ativada. Auto-memory do Claude Code desabilitada. O seu projeto agora guarda conhecimento em `.claude/memory/`, versionado com git."
 
 ---
 
-## Arquitectura
+## Arquitetura
 
 ```
 .claude/memory/
-├── MEMORY.md              <- Indice (max 200 lineas, se carga al inicio)
-├── user/                  <- Sobre el usuario/equipo (preferencias, como trabajan)
-├── feedback/              <- Correcciones del usuario (que hacer/no hacer y POR QUE)
-├── project/               <- Estado de iniciativas en curso (fechas absolutas)
-└── reference/             <- Donde encontrar cosas, patrones descubiertos, soluciones
+├── MEMORY.md              <- Índice (máx. 200 linhas, carrega-se no início)
+├── user/                  <- Sobre o usuário/equipe (preferências, como trabalham)
+├── feedback/              <- Correções do usuário (o que fazer/não fazer e POR QUÊ)
+├── project/               <- Estado de iniciativas em curso (datas absolutas)
+└── reference/             <- Onde encontrar as coisas, padrões descobertos, soluções
 ```
 
-La carpeta ES el tipo. No se usa frontmatter en los archivos de memoria.
+A pasta É o tipo. Não se usa frontmatter nos arquivos de memória.
 
 ---
 
-## Cuando CONSULTAR Memoria
+## Quando CONSULTAR a memória
 
-### Automatico (sin que el usuario lo pida)
-- **Inicio de sesion**: Leer MEMORY.md para orientarte. Si un tema del indice es relevante al trabajo actual, leer el archivo de detalle.
-- **Tema recurrente**: Si el usuario menciona algo que suena a una correccion o decision pasada, buscar en memoria antes de responder.
-- **Antes de proponer algo**: Si vas a sugerir una arquitectura, flujo, o decision, verificar que no contradiga una decision guardada.
+### Automático (sem o usuário pedir)
+- **Início de sessão**: Ler MEMORY.md para se orientar. Se um tema do índice for relevante ao trabalho atual, ler o arquivo de detalhe.
+- **Tema recorrente**: Se o usuário mencionar algo que soe a uma correção ou decisão passada, buscar na memória antes de responder.
+- **Antes de propor algo**: Se você for sugerir uma arquitetura, fluxo ou decisão, verificar que não contradiga uma decisão guardada.
 
-### Cuando el usuario lo pide
-- "Te acuerdas de...?" / "En que quedamos con...?" / "Que sabes de...?"
-- Buscar en MEMORY.md primero, luego en archivos de detalle si hay match.
+### Quando o usuário pede
+- "Você se lembra de...?" / "Em que ficamos com...?" / "O que você sabe de...?"
+- Buscar em MEMORY.md primeiro, depois nos arquivos de detalhe se houver match.
 
 ### Como consultar
-1. Leer `.claude/memory/MEMORY.md` (el indice)
-2. Si hay un archivo de detalle relevante, leerlo
-3. Si no encuentras nada, decirlo honestamente: "No tengo eso en memoria"
+1. Ler `.claude/memory/MEMORY.md` (o índice)
+2. Se houver um arquivo de detalhe relevante, lê-lo
+3. Se não encontrar nada, dizer com honestidade: "Não tenho isso na memória"
 
 ---
 
-## Cuando GUARDAR Memoria
+## Quando GUARDAR memória
 
-### Triggers de guardado (proactivo)
+### Gatilhos de gravação (proativo)
 
-| Trigger | Tipo | Ejemplo |
+| Gatilho | Tipo | Exemplo |
 |---------|------|---------|
-| El usuario te corrige | `feedback` | "No hagas eso, mejor asi..." |
-| El usuario dice "recuerda" | cualquiera | "Recuerda que el deploy es manual" |
-| Se resuelve un bug no obvio | `reference` | "El error era por X, la solucion es Y" |
-| Decision de arquitectura importante | `project` | "Vamos a usar Stripe en vez de Polar" |
-| Descubres un patron util | `reference` | "Este endpoint necesita el header X" |
-| Preferencias del usuario/equipo | `user` | "Prefiero componentes funcionales" |
-| Algo se rompio y se arreglo | `feedback` | "Nunca uses --force en ese repo" |
+| O usuário te corrige | `feedback` | "Não faça isso, melhor assim..." |
+| O usuário diz "lembra" | qualquer um | "Lembra que o deploy é manual" |
+| Resolve-se um bug não óbvio | `reference` | "O erro era por X, a solução é Y" |
+| Decisão de arquitetura importante | `project` | "Vamos usar Stripe em vez de Polar" |
+| Você descobre um padrão útil | `reference` | "Este endpoint precisa do header X" |
+| Preferências do usuário/equipe | `user` | "Prefiro componentes funcionais" |
+| Algo quebrou e se arrumou | `feedback` | "Nunca use --force nesse repositório" |
 
-### Triggers de guardado (cuando el usuario lo pide)
-- "Guarda esto" / "No olvides" / "Recuerda que" / "Anotalo"
+### Gatilhos de gravação (quando o usuário pede)
+- "Guarda isto" / "Não esqueça" / "Lembra que" / "Anota"
 
-### Que NO guardar (NUNCA)
-- Cosas derivables del codigo actual (leer el repo es mejor)
-- Git history (git log/blame es la fuente de verdad)
-- Lo que ya esta en CLAUDE.md (no duplicar)
-- Estado temporal de la conversacion actual (efimero)
-- Soluciones de debugging triviales (el fix esta en el codigo)
+### O que NÃO guardar (NUNCA)
+- Coisas deriváveis do código atual (ler o repositório é melhor)
+- Git history (git log/blame é a fonte da verdade)
+- O que já está em CLAUDE.md (não duplicar)
+- Estado temporário da conversa atual (efêmero)
+- Soluções de debugging triviais (o fix está no código)
 
 ---
 
 ## Como GUARDAR
 
-### Paso 1: Verificar que no existe
-Leer MEMORY.md. Si ya hay un archivo sobre ese tema, ACTUALIZAR en vez de crear uno nuevo.
+### Passo 1: Verificar que não existe
+Ler MEMORY.md. Se já houver um arquivo sobre esse tema, ATUALIZAR em vez de criar um novo.
 
-### Paso 2: Escribir/actualizar el archivo de detalle
+### Passo 2: Escrever/atualizar o arquivo de detalhe
 
-Crear el archivo en la carpeta correcta segun el tipo:
+Criar o arquivo na pasta correta conforme o tipo:
 
-| Carpeta | Contenido |
+| Pasta | Conteúdo |
 |---------|-----------|
-| `user/` | Sobre el usuario/equipo (preferencias, como trabajan) |
-| `feedback/` | Correcciones del usuario (que hacer/no hacer y POR QUE) |
-| `project/` | Estado de iniciativas en curso (con fechas absolutas, no relativas) |
-| `reference/` | Donde encontrar cosas, patrones, soluciones a problemas recurrentes |
+| `user/` | Sobre o usuário/equipe (preferências, como trabalham) |
+| `feedback/` | Correções do usuário (o que fazer/não fazer e POR QUÊ) |
+| `project/` | Estado de iniciativas em curso (com datas absolutas, não relativas) |
+| `reference/` | Onde encontrar as coisas, padrões, soluções a problemas recorrentes |
 
-Formato: Markdown plano. Sin frontmatter. Empieza con `# Titulo`.
+Formato: Markdown plano. Sem frontmatter. Começa com `# Título`.
 
-### Paso 3: Actualizar el indice MEMORY.md
+### Passo 3: Atualizar o índice MEMORY.md
 
-Agregar una linea al indice con link al archivo y descripcion de 1 linea.
-Mantener MEMORY.md bajo 200 lineas.
-Organizar por tema, no cronologicamente.
+Adicionar uma linha ao índice com link ao arquivo e descrição de 1 linha.
+Manter MEMORY.md abaixo de 200 linhas.
+Organizar por tema, não cronologicamente.
 
-### Paso 4: Informar al usuario
+### Passo 4: Informar ao usuário
 
-Decir que guardaste y en que archivo. No pedir permiso (el lo vera en el diff de git).
-Si el usuario revierte el cambio, respetar sin discutir.
+Dizer que você guardou e em que arquivo. Não pedir permissão (ele verá no diff do git).
+Se o usuário reverter a mudança, respeitar sem discutir.
 
 ---
 
-## Reglas de Oro
+## Regras de ouro
 
-1. **Consultar es gratis, guardar es caro.** Lee memoria seguido. Escribe solo cuando el conocimiento sobrevive a la sesion actual.
-2. **Fechas absolutas siempre.** "Jueves" -> "2026-03-12". Las memorias se leen semanas despues.
-3. **Un archivo por tema.** No mezclar. Si crece mucho, dividir.
-4. **El usuario es el dueno.** El puede borrar, editar, revertir cualquier memoria. Tu no borras sin que lo pida.
-5. **Sin duplicados con CLAUDE.md.** Si algo ya esta en el CLAUDE.md principal, no repetirlo en memoria.
-6. **Honestidad sobre limites.** Si no tienes algo en memoria, dilo. No inventes.
+1. **Consultar é de graça, guardar é caro.** Leia a memória com frequência. Escreva só quando o conhecimento sobrevive à sessão atual.
+2. **Datas absolutas sempre.** "Quinta" -> "2026-03-12". As memórias se leem semanas depois.
+3. **Um arquivo por tema.** Não misturar. Se crescer demais, dividir.
+4. **O usuário é o dono.** Ele pode apagar, editar, reverter qualquer memória. Você não apaga sem que ele peça.
+5. **Sem duplicatas com CLAUDE.md.** Se algo já está no CLAUDE.md principal, não repetir na memória.
+6. **Honestidade sobre limites.** Se você não tem algo na memória, diga. Não invente.

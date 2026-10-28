@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   const member = await getCurrentMember();
   if (!member) redirect("/sin-acceso");
 
-  // Un asesor ve solo sus contactos y lo que cuelga de ellos; el admin ve todo.
+  // Um assessor vê só os seus contatos e o que depende deles; o admin vê tudo.
   const soloMios = ownerFilter(member);
 
   const allContacts = await db.select().from(contacts).where(soloMios);

@@ -1,11 +1,11 @@
 -- ============================================================================
--- Builder CRM - alta automatica en team_members y primer administrador
+-- Builder CRM - cadastro automático em team_members e primeiro administrador
 -- ============================================================================
--- Supabase Auth dice QUIEN entro; `team_members` dice QUE ES (admin o asesor).
--- Este trigger crea la fila espejo al nacer el usuario de Auth:
---   - la PRIMERA cuenta de la instancia queda como admin (bootstrap sin SQL a mano),
---   - las siguientes como asesor (Ajustes -> Equipo las crea y les fija el rol con un
---     upsert, asi que el valor de aca es solo el default).
+-- O Supabase Auth diz QUEM entrou; `team_members` diz O QUE É (admin ou assessor).
+-- Este trigger cria a linha espelho ao nascer o usuário de Auth:
+--   - a PRIMEIRA conta da instância fica como admin (bootstrap sem SQL à mão),
+--   - as seguintes como assessor (Ajustes -> Equipo as cria e lhes fixa o papel com um
+--     upsert, então o valor daqui é só o default).
 -- ============================================================================
 
 create or replace function public.alta_miembro_desde_auth() returns trigger

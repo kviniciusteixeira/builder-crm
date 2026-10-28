@@ -7,14 +7,14 @@ import { CHANNEL_LABELS } from "@/lib/channels/types";
 import { displayName, listMembers } from "@/lib/team";
 
 /**
- * Catalogo de disparadores: QUE puede iniciar una regla y con que datos.
+ * Catálogo de gatilhos: O QUE pode iniciar uma regra e com que dados.
  *
- * Cada disparador declara los campos por los que se puede filtrar y de donde salen
- * las opciones (pipelines, etapas, asesores, fuentes). La UI del constructor lee esto
- * por `GET /api/automations/catalog`; el motor lo usa para evaluar filtros.
+ * Cada gatilho declara os campos pelos quais se pode filtrar e de onde saem
+ * as opções (pipelines, etapas, assessores, fontes). A UI do construtor lê isto
+ * por `GET /api/automations/catalog`; o motor o usa para avaliar filtros.
  *
- * Para agregar uno: una entrada aca + un `emitAutomationEvent` en el lugar del codigo
- * donde pasa la cosa (ver `src/lib/deals/stage.ts` y `src/lib/contacts/events.ts`).
+ * Para adicionar um: uma entrada aqui + um `emitAutomationEvent` no lugar do código
+ * onde a coisa acontece (ver `src/lib/deals/stage.ts` e `src/lib/contacts/events.ts`).
  */
 
 export type TriggerKey = "contact.created" | "contact.assigned" | "deal.stage_changed";
@@ -35,7 +35,7 @@ export interface TriggerDef {
   label: string;
   description: string;
   filterFields: FilterField[];
-  /** Placeholders que las acciones pueden usar en sus textos con este disparador. */
+  /** Placeholders que as ações podem usar nos seus textos com este gatilho. */
   placeholders: string[];
 }
 
@@ -47,15 +47,15 @@ export interface AutomationFilter {
   value: string | string[];
 }
 
-/** Lo que viaja con cada evento. `payload` es especifico del disparador. */
+/** O que viaja com cada evento. `payload` é específico do gatilho. */
 export interface AutomationEvent {
   trigger: TriggerKey;
   contactId: string | null;
   payload: Record<string, unknown>;
   /**
-   * Profundidad de encadenamiento. Una accion que a su vez emite (asignar asesor ->
-   * contact.assigned) suma 1. Pasado el tope, el motor ignora el evento: es la guardia
-   * contra reglas que se disparan entre si para siempre.
+   * Profundidade de encadeamento. Uma ação que por sua vez emite (atribuir assessor ->
+   * contact.assigned) soma 1. Passado o teto, o motor ignora o evento: é a guarda
+   * contra regras que se disparam entre si para sempre.
    */
   depth?: number;
 }
@@ -63,13 +63,13 @@ export interface AutomationEvent {
 export const MAX_EVENT_DEPTH = 3;
 
 // ---------------------------------------------------------------------------
-// Payloads por disparador
+// Payloads por gatilho
 // ---------------------------------------------------------------------------
 
 export interface ContactCreatedPayload {
   contactName: string;
   source: string;
-  /** whatsapp | instagram | facebook cuando el contacto nacio de un mensaje. */
+  /** whatsapp | instagram | facebook quando o contato nasceu de uma mensagem. */
   channel?: string | null;
 }
 
@@ -88,13 +88,13 @@ export interface DealStageChangedPayload {
   pipelineName: string;
   stageId: string;
   stageName: string;
-  /** null cuando la operacion recien se crea: "lead colocado en el pipeline". */
+  /** null quando a operação acaba de se criar: "lead colocado no pipeline". */
   previousStageId: string | null;
   previousStageName: string | null;
 }
 
 // ---------------------------------------------------------------------------
-// Opciones
+// Opções
 // ---------------------------------------------------------------------------
 
 async function memberOptions(): Promise<SelectOption[]> {
@@ -107,7 +107,7 @@ async function pipelineOptions(): Promise<SelectOption[]> {
   return rows.map((p) => ({ value: p.id, label: p.name }));
 }
 
-/** Etapas de todos los pipelines, etiquetadas "Pipeline › Etapa" para que no se confundan. */
+/** Etapas de todos os pipelines, etiquetadas "Pipeline › Etapa" para que não se confundam. */
 async function stageOptions(): Promise<SelectOption[]> {
   const [ps, stages] = await Promise.all([
     db.select().from(pipelines).orderBy(asc(pipelines.order)),
@@ -130,7 +130,7 @@ async function channelOptions(): Promise<SelectOption[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Catalogo
+// Catálogo
 // ---------------------------------------------------------------------------
 
 export const TRIGGERS: TriggerDef[] = [
@@ -172,8 +172,8 @@ export function triggerFor(key: string): TriggerDef | undefined {
 }
 
 /**
- * Evalua los filtros de una regla contra el payload del evento. Sin filtros = pasa.
- * Puro: sin DB, para poder testearlo suelto.
+ * Avalia os filtros de uma regra contra o payload do evento. Sem filtros = passa.
+ * Puro: sem DB, para poder testá-lo solto.
  */
 export function evaluateFilters(
   filters: AutomationFilter[] | null | undefined,
@@ -199,7 +199,7 @@ export function evaluateFilters(
   });
 }
 
-/** Normaliza lo que llega del cliente a filtros validos para ese disparador. */
+/** Normaliza o que chega do cliente a filtros válidos para esse gatilho. */
 export function sanitizeFilters(trigger: TriggerDef, raw: unknown): AutomationFilter[] {
   if (!Array.isArray(raw)) return [];
   const fields = new Set(trigger.filterFields.map((f) => f.key));

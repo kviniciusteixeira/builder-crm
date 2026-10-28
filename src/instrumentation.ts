@@ -1,8 +1,8 @@
 /**
- * Arranque del servidor (Next.js lo llama una vez por proceso).
+ * Inicialização do servidor (o Next.js o chama uma vez por processo).
  *
- * - Avisa en el log que variables obligatorias faltan (sin valores).
- * - Fuera de Vercel, enciende los barridos de recuperacion en el proceso.
+ * - Avisa no log que variáveis obrigatórias faltam (sem valores).
+ * - Fora da Vercel, liga as varreduras de recuperação no processo.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
@@ -18,8 +18,8 @@ export async function register() {
   if (problemas.length > 0) {
     console.error(`[boot] config/cliente.ts invalido:\n${problemas.map((p) => `  - ${p}`).join("\n")}`);
   } else if (faltan.length === 0) {
-    // El pipeline de config/cliente.ts existe en la base antes de atender la primera
-    // request. Si la base no esta, se avisa y la app arranca igual.
+    // O pipeline de config/cliente.ts existe na base antes de atender a primeira
+    // request. Se a base não está, avisa-se e o app sobe mesmo assim.
     try {
       const { sincronizarPipeline } = await import("./lib/pipeline/sincronizar");
       const r = await sincronizarPipeline();

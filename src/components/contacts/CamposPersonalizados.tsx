@@ -14,11 +14,11 @@ import { formatearValorCampo, type ValoresCampos } from "@/lib/config/campos";
 import type { CampoConfig } from "@/lib/config/schema";
 
 /**
- * Campos personalizados del contacto, definidos en config/cliente.ts
- * (`contacto.campos`). Dos piezas:
- *  - `CamposPersonalizadosInputs`: los inputs para el formulario de alta/edicion.
- *  - `CamposPersonalizadosLista`: la lectura en la ficha y en el panel del chat.
- * Si no hay campos configurados, no renderizan nada.
+ * Campos personalizados do contato, definidos em config/cliente.ts
+ * (`contacto.campos`). Duas peças:
+ *  - `CamposPersonalizadosInputs`: os inputs para o formulário de cadastro/edição.
+ *  - `CamposPersonalizadosLista`: a leitura na ficha e no painel do chat.
+ * Se não há campos configurados, não renderizam nada.
  */
 
 const NINGUNO = "__ninguno__";
@@ -137,9 +137,9 @@ function CampoInput({
 
 interface ListaProps {
   valores: Record<string, unknown> | null | undefined;
-  /** Compacto: una linea por campo, sin borde; para el panel lateral del chat. */
+  /** Compacto: uma linha por campo, sem borda; para o painel lateral do chat. */
   compacto?: boolean;
-  /** Mostrar tambien los campos vacios. */
+  /** Mostrar também os campos vazios. */
   mostrarVacios?: boolean;
 }
 

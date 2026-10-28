@@ -6,17 +6,17 @@ import { emitAutomationEvent } from "@/lib/automations";
 import type { DealStageChangedPayload } from "@/lib/automations/triggers";
 
 /**
- * Mueve una operacion de etapa y emite `deal.stage_changed`.
+ * Move uma operação de etapa e emite `deal.stage_changed`.
  *
- * Es el UNICO camino: el drag del kanban (`PUT /api/pipeline`), la edicion de la
- * operacion (`PUT /api/deals/:id`) y la creacion (`POST /api/deals`, con
- * `previousStageId = null`: "lead colocado en el pipeline") pasan todos por aca. Si se
- * escribe `stageId` por otro lado, las automatizaciones no se enteran.
+ * É o ÚNICO caminho: o drag do kanban (`PUT /api/pipeline`), a edição da
+ * operação (`PUT /api/deals/:id`) e a criação (`POST /api/deals`, com
+ * `previousStageId = null`: "lead colocado no pipeline") passam todos por aqui. Se se
+ * escreve `stageId` por outro lado, as automações não ficam sabendo.
  */
 export async function setDealStage(input: {
   dealId: string;
   stageId: string;
-  /** Solo para la creacion: la fila ya tiene la etapa, no hay que actualizarla. */
+  /** Só para a criação: a linha já tem a etapa, não há que atualizá-la. */
   justCreated?: boolean;
 }): Promise<{ ok: boolean; error?: string; changed: boolean }> {
   const [deal] = await db

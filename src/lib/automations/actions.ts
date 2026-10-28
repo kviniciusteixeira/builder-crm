@@ -15,10 +15,10 @@ import type {
 } from "./triggers";
 
 /**
- * Catalogo de acciones: QUE puede hacer una regla. Cada accion declara sus parametros
- * (para que el constructor dibuje el formulario) y como se ejecuta.
+ * Catálogo de ações: O QUE uma regra pode fazer. Cada ação declara os seus parâmetros
+ * (para que o construtor desenhe o formulário) e como se executa.
  *
- * Para agregar una: una entrada en `ACTIONS`. Nada mas.
+ * Para adicionar uma: uma entrada em `ACTIONS`. Nada mais.
  */
 
 export type ActionKey = "push" | "add_tag" | "remove_tag" | "assign_owner" | "create_activity";
@@ -29,9 +29,9 @@ export interface ActionParam {
   type: "select" | "text" | "textarea";
   required?: boolean;
   placeholder?: string;
-  /** Solo `select`. */
+  /** Só `select`. */
   options?: () => Promise<SelectOption[]>;
-  /** Solo texto: acepta {{placeholders}} del disparador. */
+  /** Só texto: aceita {{placeholders}} do gatilho. */
   templated?: boolean;
 }
 
@@ -45,7 +45,7 @@ export type ActionOutcome = { status: "done" | "skipped"; detail: string };
 export interface ActionContext {
   event: AutomationEvent;
   contactId: string;
-  /** Reemplaza {{contacto}}, {{asesor}}, {{etapa}}... segun el disparador. */
+  /** Substitui {{contacto}}, {{asesor}}, {{etapa}}... conforme o gatilho. */
   render: (template: string) => Promise<string>;
 }
 
@@ -62,8 +62,8 @@ export interface ActionDef {
 // ---------------------------------------------------------------------------
 
 /**
- * Construye el `render` de un run: resuelve cada placeholder una sola vez, y solo si
- * alguna accion lo usa (lazy).
+ * Constrói o `render` de um run: resolve cada placeholder uma única vez, e só se
+ * alguma ação o usa (lazy).
  */
 export function buildRenderer(event: AutomationEvent, contactId: string) {
   const cache = new Map<string, Promise<string>>();
@@ -131,7 +131,7 @@ export function buildRenderer(event: AutomationEvent, contactId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Opciones compartidas
+// Opções compartilhadas
 // ---------------------------------------------------------------------------
 
 async function recipientOptions(): Promise<SelectOption[]> {
@@ -159,7 +159,7 @@ async function activityTypeOptions(): Promise<SelectOption[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Acciones
+// Ações
 // ---------------------------------------------------------------------------
 
 const push: ActionDef = {
@@ -192,15 +192,15 @@ const push: ActionDef = {
 
     const title = await ctx.render(params.title ?? "");
     const body = await ctx.render(params.body ?? "");
-    // Al tocar el aviso se abre la conversacion (el hilo mas reciente del contacto):
-    // el aviso es para atender al cliente. Sin hilo todavia, la ficha.
+    // Ao tocar o aviso abre-se a conversa (o fio mais recente do contato):
+    // o aviso é para atender o cliente. Sem fio ainda, a ficha.
     const conversationId = await resolveConversationId(ctx.contactId);
     const url = conversationId
       ? `/conversations/${conversationId}`
       : `/contacts/${ctx.contactId}`;
 
-    // Siempre queda la notificacion interna (campanita); el push llega si el asesor
-    // activo un dispositivo. El detalle dice exactamente que paso con cada uno.
+    // Sempre fica a notificação interna (sininho); o push chega se o assessor
+    // ativou um dispositivo. O detalhe diz exatamente o que aconteceu com cada um.
     const parts: string[] = [];
     let delivered = 0;
     for (const id of [...new Set(recipients)]) {
@@ -317,7 +317,7 @@ export function actionFor(key: string): ActionDef | undefined {
   return ACTIONS.find((a) => a.key === key);
 }
 
-/** Normaliza lo que llega del cliente a acciones validas (tipo conocido, params string). */
+/** Normaliza o que chega do cliente a ações válidas (tipo conhecido, params string). */
 export function sanitizeActions(raw: unknown): { actions: ActionSpec[]; errors: string[] } {
   const actions: ActionSpec[] = [];
   const errors: string[] = [];
@@ -346,7 +346,7 @@ export function sanitizeActions(raw: unknown): { actions: ActionSpec[]; errors: 
   return { actions, errors };
 }
 
-/** Texto corto para la lista: "Push al asesor asignado, Etiqueta \"urgente\"". */
+/** Texto curto para a lista: "Push al asesor asignado, Etiqueta \"urgente\"". */
 export async function describeActions(actions: ActionSpec[]): Promise<string> {
   const parts: string[] = [];
   for (const a of actions) {
@@ -383,7 +383,7 @@ export async function describeActions(actions: ActionSpec[]): Promise<string> {
   return parts.join(" · ");
 }
 
-/** Nombre legible de una etapa, para el resumen de filtros. */
+/** Nome legível de uma etapa, para o resumo de filtros. */
 export async function stageLabel(stageId: string): Promise<string> {
   const [s] = await db
     .select({ name: pipelineStages.name, pipelineId: pipelineStages.pipelineId })

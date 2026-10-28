@@ -43,9 +43,9 @@ interface Etapa {
 }
 
 /**
- * Chat de prueba contra el agente real, sin ningun canal conectado. El operador
- * escribe como cliente; la respuesta vuelve en la misma llamada. Al lado se ve lo que
- * el agente fue cambiando en el CRM (etapa, campos, resumen, actividades).
+ * Chat de teste contra o agente real, sem nenhum canal conectado. O operador
+ * escreve como cliente; a resposta volta na mesma chamada. Ao lado se vê o que
+ * o agente foi mudando no CRM (etapa, campos, resumo, atividades).
  */
 export function Simulador() {
   const [canal, setCanal] = useState<Channel>("whatsapp");
@@ -76,7 +76,7 @@ export function Simulador() {
       const res = await fetch(`/api/contacts/${id}`, { cache: "no-store" });
       if (res.ok) setEstado((await res.json()) as EstadoCrm);
     } catch {
-      /* el panel es informativo */
+      /* o painel é informativo */
     }
   };
 

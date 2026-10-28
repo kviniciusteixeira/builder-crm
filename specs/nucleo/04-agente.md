@@ -1,101 +1,101 @@
-# Spec: Agente de IA (requisito 4 del brief)
+# Spec: Agente de IA (requisito 4 do brief)
 
-**Carril**: completo (toca modelo de datos, el loop del agente y la configuracion)
-**Estado**: aprobada (plan de Fase 0, 2026-10-01)
-**Fecha**: 2026-10-01
-**Escrita antes del codigo**: si
+**Trilho**: completo (mexe no modelo de dados, no loop do agente e na configuração)
+**Estado**: aprovada (plano da Fase 0, 2026-10-01)
+**Data**: 2026-10-01
+**Escrita antes do código**: sim
 
 ## Problema
 
-El agente existe y funciona (OpenRouter, historial por hilo, tools, config por canal),
-pero (1) no puede actuar sobre el CRM generico: no mueve etapas, no actualiza la ficha,
-no deja un resumen; (2) su prompt default es el de una inmobiliaria concreta y sus
-tools de nicho viven en el nucleo; (3) la pausa (handoff) esta desacoplada: la tool
-apaga la conversacion pero la UI solo enciende/apaga el contacto, asi que un hilo
-derivado se ve "ON" y nadie lo puede reactivar; (4) envia por un camino propio en vez
+O agente existe e funciona (OpenRouter, histórico por fio, tools, config por canal),
+mas (1) não consegue agir sobre o CRM genérico: não move etapas, não atualiza a ficha,
+não deixa um resumo; (2) o prompt default é o de uma imobiliária concreta e as
+tools de nicho vivem no núcleo; (3) a pausa (handoff) está desacoplada: a tool
+desliga a conversa mas a UI só liga/desliga o contato, então um fio
+encaminhado aparece "ON" e ninguém consegue reativá-lo; (4) envia por um caminho próprio em vez
 de `deliverMessage`.
 
-## Decisiones del dueno
+## Decisões do dono
 
-- D1 (Fase 0) Si el repo ya tiene agente, se adapta; no se define un microservicio
-  externo ahora.
-- D2 (Fase 0) Visitas y propiedades pasan a modulos en la Fase 9; hasta entonces sus
-  tools quedan en el nucleo pero fuera del prompt generico.
+- D1 (Fase 0) Se o repositório já tem agente, adapta-se; não se define um microsserviço
+  externo agora.
+- D2 (Fase 0) Visitas e imóveis passam a módulos na Fase 9; até lá as
+  tools ficam no núcleo mas fora do prompt genérico.
 
-## Escenarios
+## Cenários
 
-1. **Calificar** — El cliente escribe; el agente responde por el mismo canal y, con lo
-   que averigua, llama a `actualizar_contacto` (campos de `config/cliente.ts` marcados
-   `agente`) y a `mover_etapa` cuando corresponde segun el prompt.
-2. **Resumir** — Al terminar una conversacion util, el agente llama a `resumen_lead`;
-   la ficha muestra "Resumen del agente" con fecha, y el panel del chat tambien.
-3. **Derivar** — `derivar_asesor` pausa SOLO esa conversacion; el panel del chat lo
-   muestra como pausado con el motivo y ofrece "Reactivar"; el contacto sigue con IA
-   en sus otros hilos. El admin tambien puede pausar o reactivar a mano.
-4. **Configurar** — El miembro define en `config/cliente.ts` el nombre del agente, el
-   prompt base, el modelo y el mensaje de derivacion; `AGENT_MODEL` (env) manda sobre
-   el modelo de la config; Ajustes -> Agente sigue pudiendo pisar prompt y tools por
-   canal (cascada: canal -> global -> config -> default del nucleo).
-5. **Extender** — Un modulo activo aporta tools (`servidor.tools`); aparecen en
-   Ajustes -> Agente junto a las del nucleo y el modelo las puede usar.
+1. **Qualificar** — O cliente escreve; o agente responde pelo mesmo canal e, com o que
+   descobre, chama `actualizar_contacto` (campos de `config/cliente.ts` marcados
+   `agente`) e `mover_etapa` quando couber segundo o prompt.
+2. **Resumir** — Ao terminar uma conversa útil, o agente chama `resumen_lead`;
+   a ficha mostra "Resumo do agente" com data, e o painel do chat também.
+3. **Encaminhar** — `derivar_asesor` pausa SÓ essa conversa; o painel do chat a
+   mostra como pausada com o motivo e oferece "Reativar"; o contato continua com IA
+   nos outros fios. O admin também pode pausar ou reativar à mão.
+4. **Configurar** — O membro define em `config/cliente.ts` o nome do agente, o
+   prompt base, o modelo e a mensagem de encaminhamento; `AGENT_MODEL` (env) manda sobre
+   o modelo da config; Ajustes -> Agente continua podendo sobrepor prompt e tools por
+   canal (cascata: canal -> global -> config -> default do núcleo).
+5. **Estender** — Um módulo ativo contribui tools (`servidor.tools`); aparecem em
+   Ajustes -> Agente junto com as do núcleo e o modelo pode usá-las.
 
 ## Requisitos
 
-- FR-001 Tools genericas del nucleo: `mover_etapa` (por clave o nombre de etapa del
-  pipeline por defecto; crea la operacion si el contacto no tiene una abierta; usa
-  `setDealStage`), `actualizar_contacto` (nombre, email, telefono, notas y campos
-  personalizados validados), `registrar_actividad` (nota o tarea con fecha),
+- FR-001 Tools genéricas do núcleo: `mover_etapa` (por chave ou nome de etapa do
+  pipeline padrão; cria a operação se o contato não tiver uma aberta; usa
+  `setDealStage`), `actualizar_contacto` (nome, e-mail, telefone, notas e campos
+  personalizados validados), `registrar_actividad` (nota ou tarefa com data),
   `resumen_lead` (texto + campos), `derivar_asesor`, `asignar_asesor`.
-- FR-002 Registro de tools como mapa `{ definicion, descripcionUI, ejecutar }`; los
-  nombres validos se calculan (nucleo + modulos activos); Ajustes -> Agente los lista.
-- FR-003 `contacts.ai_summary text` + `ai_summary_at`; visibles en ficha y chat.
-- FR-004 El prompt default del nucleo es generico y se arma con: marca y nombre del
-  agente, reglas de estilo, catalogo de tools genericas, y un bloque CONTEXTO con el
-  contacto (nombre, campos conocidos, etapa actual), las etapas disponibles (clave y
-  nombre) y los campos a calificar (`agente.descripcion`). `config/agente.prompt` lo
-  reemplaza como base.
+- FR-002 Registro de tools como mapa `{ definicion, descripcionUI, ejecutar }`; os
+  nomes válidos se calculam (núcleo + módulos ativos); Ajustes -> Agente os lista.
+- FR-003 `contacts.ai_summary text` + `ai_summary_at`; visíveis na ficha e no chat.
+- FR-004 O prompt default do núcleo é genérico e se monta com: marca e nome do
+  agente, regras de estilo, catálogo de tools genéricas, e um bloco CONTEXTO com o
+  contato (nome, campos conhecidos, etapa atual), as etapas disponíveis (chave e
+  nome) e os campos a qualificar (`agente.descripcion`). `config.agente.prompt` o
+  substitui como base.
 - FR-005 Modelo: `agent_configs.model` -> `AGENT_MODEL` -> `config.agente.modelo` ->
-  default del nucleo.
-- FR-006 `PATCH /api/conversations/:id/agente` `{ enabled?, clearNeedsHuman? }` con
-  acceso al contacto; el panel del chat muestra y cambia el estado de la CONVERSACION.
-- FR-007 El agente responde SOLO por `deliverMessage(conversationId, { text }, "agent")`.
-  Se elimina el transporte inyectable (`AgentSender`) y `adapters.ts`.
-- FR-008 Mensaje de derivacion desde `config.agente.mensajeDerivacion`.
-- FR-009 Se elimina `/api/agent/debug` (lo reemplaza el simulador de la Fase 7).
+  default do núcleo.
+- FR-006 `PATCH /api/conversations/:id/agente` `{ enabled?, clearNeedsHuman? }` com
+  acesso ao contato; o painel do chat mostra e muda o estado da CONVERSA.
+- FR-007 O agente responde SÓ por `deliverMessage(conversationId, { text }, "agent")`.
+  Elimina-se o transporte injetável (`AgentSender`) e `adapters.ts`.
+- FR-008 Mensagem de encaminhamento a partir de `config.agente.mensajeDerivacion`.
+- FR-009 Elimina-se `/api/agent/debug` (o simulador da Fase 7 o substitui).
 
-## Configuracion y modulos
+## Configuração e módulos
 
-`agente: { nombre, prompt?, modelo?, mensajeDerivacion? }` en `config/cliente.ts`.
-Tools de modulos por `servidor.tools`.
+`agente: { nombre, prompt?, modelo?, mensajeDerivacion? }` em `config/cliente.ts`.
+Tools de módulos por `servidor.tools`.
 
-## Modelo de datos
+## Modelo de dados
 
-`contacts.ai_summary`, `contacts.ai_summary_at`. Base regenerada (pre-1.0.0).
+`contacts.ai_summary`, `contacts.ai_summary_at`. Base regenerada (pré-1.0.0).
 
 ## Agente de IA
 
-Es esta spec.
+É esta spec.
 
-## Criterios de aceptacion
+## Critérios de aceitação
 
-- CA-001 Con el simulador (Fase 7): un mensaje "quiero un depto de 2 ambientes, tengo
-  150 mil" termina con campos actualizados y la operacion en la etapa que indique el
-  prompt.
-- CA-002 `derivar_asesor` deja la conversacion en pausa y el panel muestra el motivo;
-  "Reactivar" la vuelve a encender; otro hilo del mismo contacto sigue respondiendo.
-- CA-003 `resumen_lead` aparece en la ficha con fecha.
-- CA-004 Ajustes -> Agente lista las tools de un modulo activo.
-- CA-005 `typecheck + lint + build` en verde.
+- CA-001 Com o simulador (Fase 7): uma mensagem "quero um apto de 2 cômodos, tenho
+  150 mil" termina com campos atualizados e a operação na etapa que o
+  prompt indicar.
+- CA-002 `derivar_asesor` deixa a conversa em pausa e o painel mostra o motivo;
+  "Reativar" a liga de novo; outro fio do mesmo contato continua respondendo.
+- CA-003 `resumen_lead` aparece na ficha com data.
+- CA-004 Ajustes -> Agente lista as tools de um módulo ativo.
+- CA-005 `typecheck + lint + build` em verde.
 
 ## Constitution Check
 
-- I. Nucleo intocable: prompt y tools de nicho salen a config y modulos.
-- II. Spec antes que codigo: esta spec.
-- III. Autoverificacion: CA-001..004 los ejercita `probar-instancia` con el simulador.
-- IV. Cero secretos: OPENROUTER_API_KEY solo en env.
+- I. Núcleo intocável: prompt e tools de nicho saem para config e módulos.
+- II. Spec antes do código: esta spec.
+- III. Autoverificação: CA-001..004 são exercitados por `probar-instancia` com o simulador.
+- IV. Zero segredos: OPENROUTER_API_KEY só no env.
 
-## Fuera de alcance
+## Fora de escopo
 
-- API para un cerebro externo (microservicio): queda documentada como extension
-  posible en CLAUDE.md, no se implementa.
-- Agendar generico: el agendamiento es del modulo `visitas` (Fase 9).
+- API para um cérebro externo (microsserviço): fica documentada como extensão
+  possível em CLAUDE.md, não se implementa.
+- Agendamento genérico: o agendamento é do módulo `visitas` (Fase 9).

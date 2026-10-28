@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Sweeper de automatizaciones. El camino normal es `after()` justo despues del
- * evento; esto retoma lo que quedo `pending` si esa funcion murio. Lo llama el
- * cron de GitHub Actions con el mismo secreto que el worker del agente.
+ * Sweeper de automações. O caminho normal é `after()` logo depois do
+ * evento; isto retoma o que ficou `pending` se essa função morreu. O cron do
+ * GitHub Actions o chama, com o mesmo segredo que o worker do agente.
  */
 export async function GET(request: NextRequest) {
   if (!autorizadoPorSecreto(request)) {

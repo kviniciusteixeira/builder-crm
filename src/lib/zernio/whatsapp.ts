@@ -2,12 +2,12 @@ import { zernioFetch } from "./client";
 import type { ZernioResult } from "./types";
 
 /**
- * Plantillas de WhatsApp via Zernio (`/v1/whatsapp/templates`).
+ * Templates de WhatsApp via Zernio (`/v1/whatsapp/templates`).
  *
- * La forma es practicamente la misma que la de Graph API (`name`, `language`,
- * `category`, `components`, `status`), asi que los helpers de
- * `src/lib/whatsapp-templates.ts` y la tabla `whatsapp_templates` se reusan tal cual;
- * lo unico que cambia es quien es el destinatario de la llamada.
+ * A forma é praticamente a mesma que a da Graph API (`name`, `language`,
+ * `category`, `components`, `status`), então os helpers de
+ * `src/lib/whatsapp-templates.ts` e a tabela `whatsapp_templates` se reutilizam tal qual;
+ * a única coisa que muda é quem é o destinatário da chamada.
  */
 
 export interface ZernioTemplate {
@@ -30,7 +30,7 @@ export async function listTemplates(
 
 export interface CreateTemplateInput {
   accountId: string;
-  /** Meta exige minusculas, digitos y guion bajo: `^[a-z][a-z0-9_]*$`. */
+  /** A Meta exige minúsculas, dígitos e underline: `^[a-z][a-z0-9_]*$`. */
   name: string;
   category: "AUTHENTICATION" | "MARKETING" | "UTILITY";
   language: string;
@@ -58,11 +58,11 @@ export async function deleteTemplate(
 }
 
 /**
- * Conecta una WABA propia sin pasar por el browser (BYO-WABA).
+ * Conecta uma WABA própria sem passar pelo browser (BYO-WABA).
  *
- * El numero y la cuenta siguen siendo del cliente: Zernio solo recibe credenciales
- * para operarla. Necesita un System User de Meta con permisos
- * `whatsapp_business_management` y `whatsapp_business_messaging`.
+ * O número e a conta continuam sendo do cliente: o Zernio só recebe credenciais
+ * para operá-la. Precisa de um System User da Meta com permissões
+ * `whatsapp_business_management` e `whatsapp_business_messaging`.
  */
 export interface ConnectWhatsappInput {
   profileId?: string;

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 /**
- * Rol del miembro de la sesion, para mostrar u ocultar lo de admin en el navegador.
- * Es solo UI: el servidor vuelve a comprobar el rol en cada ruta.
- * null = todavia no se sabe.
+ * Papel do membro da sessão, para mostrar ou ocultar o de admin no navegador.
+ * É só UI: o servidor volta a verificar o papel em cada rota.
+ * null = ainda não se sabe.
  */
 export function useEsAdmin(): boolean | null {
   const [esAdmin, setEsAdmin] = useState<boolean | null>(null);

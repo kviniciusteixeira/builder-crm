@@ -4,12 +4,12 @@ import { isChannel } from "@/lib/channels/types";
 import { requireMember } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
-// Recorrer cientos de hilos y sus mensajes no entra en el timeout por defecto.
+// Percorrer centenas de fios e suas mensagens não cabe no timeout padrão.
 export const maxDuration = 300;
 
 /**
- * Importa el historial que Zernio ya replico al conectar la cuenta. No dispara el
- * agente: ver la nota en `src/lib/channels/backfill.ts`.
+ * Importa o histórico que o Zernio já replicou ao conectar a conta. Não dispara o
+ * agente: ver a nota em `src/lib/channels/backfill.ts`.
  */
 export async function POST(request: NextRequest) {
   const auth = await requireMember();

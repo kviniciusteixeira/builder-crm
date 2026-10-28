@@ -1,16 +1,16 @@
-// Elimina las conversaciones y mensajes de las cuentas desconectadas.
+// Elimina as conversas e mensagens das contas desconectadas.
 //
-//   npm run channels:purge                 muestra que borraria (no toca nada)
-//   npm run channels:purge -- --apply      borra de verdad
+//   npm run channels:purge                 mostra o que apagaria (não toca em nada)
+//   npm run channels:purge -- --apply      apaga de verdade
 //   npm run channels:purge -- --apply --account <zernioAccountId>
-//   npm run channels:purge -- --apply --drop-accounts   ademas borra la fila de la cuenta
-//   npm run channels:purge -- --dedupe [--apply]        limpia mensajes salientes duplicados
+//   npm run channels:purge -- --apply --drop-accounts   além disso apaga a linha da conta
+//   npm run channels:purge -- --dedupe [--apply]        limpa mensagens de saída duplicadas
 //
-// Cuando se desconecta una cuenta, el CRM la marca `disconnected` y deja de mostrar sus
-// hilos en la bandeja, pero NO borra nada: si se vuelve a conectar la misma cuenta, el
-// historial reaparece solo. Este script es para cuando ya no lo querés mas.
+// Quando uma conta se desconecta, o CRM a marca `disconnected` e deixa de mostrar seus
+// fios na caixa de entrada, mas NÃO apaga nada: se a mesma conta se conectar de novo, o
+// histórico reaparece sozinho. Este script é para quando você já não quiser mais.
 //
-// ES DESTRUCTIVO Y NO SE PUEDE DESHACER. Por eso el default es dry-run.
+// É DESTRUTIVO E NÃO DÁ PARA DESFAZER. Por isso o default é dry-run.
 
 import postgres from "postgres";
 import { config } from "dotenv";
@@ -35,16 +35,16 @@ const sql = postgres(process.env.DATABASE_URL, {
 });
 
 /**
- * Limpia los duplicados que dejo el bug del id de envio.
+ * Limpa os duplicados que o bug do id de envio deixou.
  *
- * Hasta que se arreglo `extractMessageId`, la fila que escribia `deliverMessage`
- * quedaba sin external_id. Cuando despues llegaba el webhook `message.sent` con el
- * eco del mismo mensaje, el indice unico no podia frenarlo (es parcial) y se insertaba
- * una segunda fila. Resultado: el mensaje aparecia dos veces en la bandeja aunque al
- * cliente le llegara una sola.
+ * Até que se arrumou `extractMessageId`, a linha que `deliverMessage` escrevia
+ * ficava sem external_id. Quando depois chegava o webhook `message.sent` com o
+ * eco da mesma mensagem, o índice único não podia freá-lo (é parcial) e se inseria
+ * uma segunda linha. Resultado: a mensagem aparecia duas vezes na caixa de entrada embora ao
+ * cliente chegasse uma só.
  *
- * Se borra SIEMPRE la fila sin external_id: es la huerfana. La que trae el id del
- * proveedor es la que sirve para correlacionar entregas y lecturas.
+ * Apaga-se SEMPRE a linha sem external_id: é a órfã. A que traz o id do
+ * provedor é a que serve para correlacionar entregas e leituras.
  */
 async function dedupeSalientes() {
   const pares = await sql`
@@ -137,13 +137,13 @@ async function main() {
 
     if (!APPLY || hilos === 0) continue;
 
-    // Orden: primero los mensajes, despues los hilos. Las citas y actividades del
-    // contacto NO se tocan: son del contacto, no del canal por el que escribio.
+    // Ordem: primeiro as mensagens, depois os fios. Os agendamentos e as atividades do
+    // contato NÃO se tocam: são do contato, não do canal pelo qual escreveu.
     await sql`
       delete from messages
       where conversation_id in (select id from conversations where account_id = ${c.id})`;
 
-    // Trabajos del agente que quedaron encolados para esos hilos.
+    // Trabalhos do agente que ficaram enfileirados para esses fios.
     await sql`
       delete from agent_jobs
       where conversation_id in (select id from conversations where account_id = ${c.id})`;
@@ -166,8 +166,8 @@ async function main() {
     console.log("Los contactos, citas y actividades NO se tocan.");
   }
 
-  // Contactos que se quedaron sin ninguna conversacion ni operacion: quedan huerfanos
-  // en la lista y no sirven para nada.
+  // Contatos que ficaram sem nenhuma conversa nem operação: ficam órfãos
+  // na lista e não servem para nada.
   const [{ huerfanos }] = await sql`
     select count(*)::int as huerfanos from contacts c
     where not exists (select 1 from conversations v where v.contact_id = c.id)

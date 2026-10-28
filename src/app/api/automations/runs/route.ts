@@ -4,7 +4,7 @@ import { listRuns } from "@/lib/automations";
 
 export const dynamic = "force-dynamic";
 
-/** Historial de ejecuciones, mas reciente primero. */
+/** Histórico de execuções, mais recente primeiro. */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

@@ -26,11 +26,11 @@ export const contacts = pgTable("contacts", {
     .notNull()
     .default(sql`'{}'::text[]`),
   /**
-   * Campos definidos por el cliente en config/cliente.ts (`contacto.campos`):
-   * { clave: valor }. Validados contra la config en src/lib/config/campos.ts.
+   * Campos definidos pelo cliente em config/cliente.ts (`contacto.campos`):
+   * { clave: valor }. Validados contra a config em src/lib/config/campos.ts.
    */
   customFields: jsonb("custom_fields").notNull().default(sql`'{}'::jsonb`),
-  /** Resumen del lead escrito por el agente (tool resumen_lead), con su fecha. */
+  /** Resumo do lead escrito pelo agente (tool resumen_lead), com sua data. */
   aiSummary: text("ai_summary"),
   aiSummaryAt: timestamp("ai_summary_at", { withTimezone: true }),
   aiEnabled: boolean("ai_enabled").notNull().default(true),
@@ -38,9 +38,9 @@ export const contacts = pgTable("contacts", {
   needsHumanReason: text("needs_human_reason"),
   needsHumanAt: timestamp("needs_human_at", { withTimezone: true }),
   /**
-   * Propietario: el asesor a cargo. Es la clave de visibilidad (un asesor ve solo lo
-   * suyo) y lo que dispara la automatizacion `contact.assigned`. Se asigna desde la
-   * ficha o por el agente (tool `asignar_asesor`); siempre via `assignContact`.
+   * Proprietário: o assessor responsável. É a chave de visibilidade (um assessor vê só o
+   * que é dele) e o que dispara a automação `contact.assigned`. Atribui-se a partir da
+   * ficha ou pelo agente (tool `asignar_asesor`); sempre via `assignContact`.
    */
   ownerId: uuid("owner_id").references(() => teamMembers.id, {
     onDelete: "set null",
@@ -104,9 +104,9 @@ export const pipelineStages = pgTable(
       .notNull()
       .references(() => pipelines.id, { onDelete: "cascade" }),
     /**
-     * Clave estable de la etapa en config/cliente.ts (`pipeline.etapas[].clave`). La
-     * usa `sincronizarPipeline` para reconocer la etapa aunque cambie el nombre, y el
-     * agente para moverla por clave. NULL = etapa creada a mano desde la UI.
+     * Chave estável da etapa em config/cliente.ts (`pipeline.etapas[].clave`). Ela
+     * é usada por `sincronizarPipeline` para reconhecer a etapa mesmo se o nome mudar, e o
+     * agente para movê-la por chave. NULL = etapa criada à mão a partir da UI.
      */
     key: text("key"),
     name: text("name").notNull(),
@@ -163,9 +163,9 @@ export const crmSettings = pgTable("crm_settings", {
   value: text("value").notNull(),
 });
 
-// Mensajes de TODOS los canales (antes `whatsapp_messages`). `external_id` es el id del
-// proveedor y la clave de idempotencia del webhook via el indice unico (provider, external_id).
-// `meta_message_id`, `from_phone` y `to_phone` son legacy del flujo Meta directo.
+// Mensagens de TODOS os canais (antes `whatsapp_messages`). `external_id` é o id do
+// provedor e a chave de idempotência do webhook via o índice único (provider, external_id).
+// `meta_message_id`, `from_phone` e `to_phone` são legado do fluxo Meta direto.
 export const messages = pgTable("messages", {
   id: text("id")
     .primaryKey()
@@ -177,7 +177,7 @@ export const messages = pgTable("messages", {
   channel: text("channel").notNull().default("whatsapp"),
   provider: text("provider").notNull().default("meta"),
   direction: text("direction").notNull(),
-  /** Salientes: agent | human | template | webhook. Entrantes: null. Lo usan los reportes. */
+  /** De saída: agent | human | template | webhook. De entrada: null. Os relatórios usam isso. */
   origin: text("origin"),
   type: text("type").notNull().default("text"),
   body: text("body"),
@@ -216,7 +216,7 @@ export const whatsappTemplates = pgTable("whatsapp_templates", {
     .defaultNow(),
 });
 
-// Multi-tenancy (Fase 1 WhatsApp Coexistence). RLS y tenant_members -> Fase 2.
+// Multi-tenancy (Fase 1 WhatsApp Coexistence). RLS e tenant_members -> Fase 2.
 export const tenants = pgTable("tenants", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
@@ -226,8 +226,8 @@ export const tenants = pgTable("tenants", {
     .defaultNow(),
 });
 
-// Una fila por numero de WhatsApp conectado. `phone_number_id` es la clave de
-// routing entrante; `access_token` es texto plano en Fase 1 (solo server-side).
+// Uma linha por número de WhatsApp conectado. `phone_number_id` é a chave de
+// routing de entrada; `access_token` é texto puro na Fase 1 (só server-side).
 export const whatsappAccounts = pgTable("whatsapp_accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id")
@@ -251,8 +251,8 @@ export const whatsappAccounts = pgTable("whatsapp_accounts", {
 // Multicanal via Zernio (Instagram DM + Facebook Messenger + WhatsApp)
 // ============================================================
 
-// Una fila por cuenta social conectada. `zernioAccountId` es la clave de routing
-// entrante, el equivalente de `whatsappAccounts.phoneNumberId` en el flujo Meta directo.
+// Uma linha por conta social conectada. `zernioAccountId` é a chave de routing
+// de entrada, o equivalente de `whatsappAccounts.phoneNumberId` no fluxo Meta direto.
 export const channelAccounts = pgTable("channel_accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id")
@@ -264,7 +264,7 @@ export const channelAccounts = pgTable("channel_accounts", {
   zernioProfileId: text("zernio_profile_id"),
   username: text("username"),
   displayName: text("display_name"),
-  /** phone_number_id | page_id | ig_business_id, segun la plataforma. */
+  /** phone_number_id | page_id | ig_business_id, conforme a plataforma. */
   externalRef: text("external_ref"),
   status: text("status").notNull().default("active"),
   connectedAt: timestamp("connected_at", { withTimezone: true }),
@@ -276,7 +276,7 @@ export const channelAccounts = pgTable("channel_accounts", {
     .defaultNow(),
 });
 
-// El hilo real. Un contacto puede tener varias: WhatsApp e Instagram no se mezclan.
+// O fio real. Um contato pode ter vários: WhatsApp e Instagram não se misturam.
 export const conversations = pgTable(
   "conversations",
   {
@@ -292,9 +292,9 @@ export const conversations = pgTable(
     }),
     channel: text("channel").notNull(),
     provider: text("provider").notNull().default("zernio"),
-    /** conversationId de Zernio, o `legacy:<contactId>` para los hilos previos. */
+    /** conversationId do Zernio, ou `legacy:<contactId>` para os fios anteriores. */
     externalId: text("external_id").notNull(),
-    /** Telefono E.164 | IGSID | PSID. */
+    /** Telefone E.164 | IGSID | PSID. */
     participantId: text("participant_id"),
     participantName: text("participant_name"),
     participantHandle: text("participant_handle"),
@@ -305,15 +305,15 @@ export const conversations = pgTable(
     lastMessageBody: text("last_message_body"),
     lastDirection: text("last_direction"),
     /**
-     * Ventana de 24h materializada del lado del servidor. La politica de Meta no se
-     * puede delegar al cliente, que es donde hoy se calcula (ChatPanel.tsx).
+     * Janela de 24h materializada do lado do servidor. A política da Meta não se
+     * pode delegar ao cliente, que é onde hoje se calcula (ChatPanel.tsx).
      */
     lastInboundAt: timestamp("last_inbound_at", { withTimezone: true }),
     aiEnabled: boolean("ai_enabled").notNull().default(true),
     needsHuman: boolean("needs_human").notNull().default(false),
     needsHumanReason: text("needs_human_reason"),
     needsHumanAt: timestamp("needs_human_at", { withTimezone: true }),
-    /** Campos ctwa_* y meta_ad_* de Zernio: de que anuncio vino el lead. */
+    /** Campos ctwa_* e meta_ad_* do Zernio: de qual anúncio veio o lead. */
     metadata: jsonb("metadata"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -327,8 +327,8 @@ export const conversations = pgTable(
   ]
 );
 
-// Identidad por canal. Reemplaza a `contacts.phone` como clave de deduplicacion:
-// Instagram usa IGSID y Messenger PSID, no hay telefono.
+// Identidade por canal. Substitui `contacts.phone` como chave de deduplicação:
+// Instagram usa IGSID e Messenger PSID, não há telefone.
 export const contactIdentities = pgTable(
   "contact_identities",
   {
@@ -351,8 +351,8 @@ export const contactIdentities = pgTable(
   ]
 );
 
-// Un agente distinto por canal. NULL = usar el fallback (crm_settings y despues el
-// default hardcodeado en src/lib/agent/prompt.ts).
+// Um agente distinto por canal. NULL = usar o fallback (crm_settings e depois o
+// default hardcoded em src/lib/agent/prompt.ts).
 export const agentConfigs = pgTable(
   "agent_configs",
   {
@@ -376,11 +376,11 @@ export const agentConfigs = pgTable(
 );
 
 /**
- * Zernio entrega at-least-once y reintenta 7 veces: el event id es la deduplicacion.
+ * O Zernio entrega at-least-once e tenta de novo 7 vezes: o event id é a deduplicação.
  *
- * Guarda el payload y no solo el id porque el reintento se auto-deduplica: si el
- * `after()` del handler muere despues de haber claimeado el evento, el reintento lo ve
- * como duplicado y el evento se perderia. Con el payload guardado, el sweeper reprocesa.
+ * Guarda o payload e não só o id porque a nova tentativa se auto-deduplica: se o
+ * `after()` do handler morre depois de ter reivindicado o evento, a nova tentativa o vê
+ * como duplicado e o evento se perderia. Com o payload guardado, o sweeper reprocessa.
  */
 export const webhookEvents = pgTable("webhook_events", {
   eventId: text("event_id").primaryKey(),
@@ -398,13 +398,13 @@ export const webhookEvents = pgTable("webhook_events", {
 });
 
 // ============================================================
-// Equipo, automatizaciones y push
+// Equipe, automações e push
 // ============================================================
 
 /**
- * Espejo de `auth.users` con lo que Supabase Auth no sabe: el rol y si sigue activo.
- * `id` ES el id del usuario de Auth. Los usuarios que existian antes de la migracion
- * quedaron como admin; los nuevos se crean desde Ajustes -> Equipo como asesor.
+ * Espelho de `auth.users` com o que o Supabase Auth não sabe: o papel e se continua ativo.
+ * `id` É o id do usuário de Auth. Os usuários que existiam antes da migração
+ * ficaram como admin; os novos são criados em Ajustes -> Equipo como assessor.
  */
 export const teamMembers = pgTable("team_members", {
   id: uuid("id").primaryKey(),
@@ -421,7 +421,7 @@ export const teamMembers = pgTable("team_members", {
     .defaultNow(),
 });
 
-/** Una fila por dispositivo: el mismo asesor en celular y notebook tiene dos. */
+/** Uma linha por dispositivo: o mesmo assessor no celular e no notebook tem duas. */
 export const pushSubscriptions = pgTable(
   "push_subscriptions",
   {
@@ -442,9 +442,9 @@ export const pushSubscriptions = pgTable(
 );
 
 /**
- * Una regla: disparador + filtros + cadena de acciones. Es DATO: se arma desde
- * /automatizaciones. El catalogo de disparadores y acciones (que existe y que hace cada
- * uno) vive en codigo, en `src/lib/automations/triggers.ts` y `actions.ts`.
+ * Uma regra: gatilho + filtros + cadeia de ações. É DADO: monta-se a partir de
+ * /automatizaciones. O catálogo de gatilhos e ações (o que existe e o que cada
+ * um faz) vive no código, em `src/lib/automations/triggers.ts` e `actions.ts`.
  */
 export const automations = pgTable("automations", {
   key: text("key").primaryKey(),
@@ -453,11 +453,11 @@ export const automations = pgTable("automations", {
   trigger: text("trigger").notNull(),
   enabled: boolean("enabled").notNull().default(true),
   config: jsonb("config").notNull().default(sql`'{}'::jsonb`),
-  /** `[{ field, op, value }]` sobre el payload del disparador. Vacio = siempre. */
+  /** `[{ field, op, value }]` sobre o payload do gatilho. Vazio = sempre. */
   filters: jsonb("filters").notNull().default(sql`'[]'::jsonb`),
-  /** `[{ type, params }]` en orden de ejecucion. */
+  /** `[{ type, params }]` em ordem de execução. */
   actions: jsonb("actions").notNull().default(sql`'[]'::jsonb`),
-  /** `seed` (vino en una migracion, no se borra) | `user` (creada desde la UI). */
+  /** `seed` (veio numa migração, não se apaga) | `user` (criada a partir da UI). */
   source: text("source").notNull().default("user"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -468,9 +468,9 @@ export const automations = pgTable("automations", {
 });
 
 /**
- * Cola e historial en una sola tabla. Un evento genera una fila `pending` por regla
- * activa; el worker la pasa a `done`/`skipped`/`failed`. Lo que queda es el historial
- * que se ve en Ajustes -> Automatizaciones.
+ * Fila e histórico numa só tabela. Um evento gera uma linha `pending` por regra
+ * ativa; o worker a passa para `done`/`skipped`/`failed`. O que resta é o histórico
+ * que se vê em Ajustes -> Automatizaciones.
  */
 export const automationRuns = pgTable("automation_runs", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -497,8 +497,8 @@ export const automationRuns = pgTable("automation_runs", {
 });
 
 /**
- * Notificaciones internas (la campanita). El push es best-effort; esto es el registro
- * que siempre queda: se ve en el CRM aunque el push no llegue, y se marca leida.
+ * Notificações internas (o sininho). O push é best-effort; isto é o registro
+ * que sempre fica: vê-se no CRM mesmo que o push não chegue, e marca-se como lida.
  */
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -518,9 +518,9 @@ export const notifications = pgTable("notifications", {
 });
 
 /**
- * Documentos de la ficha (PDFs, cedulas, contratos). El archivo vive en un bucket
- * S3-compatible (`src/lib/storage.ts`); aca solo su ficha. `status='pending'` mientras
- * el navegador sube; 'ready' cuando el servidor confirmo que el objeto existe.
+ * Documentos da ficha (PDFs, cédulas, contratos). O arquivo vive num bucket
+ * S3-compatible (`src/lib/storage.ts`); aqui só a ficha dele. `status='pending'` enquanto
+ * o navegador envia; 'ready' quando o servidor confirmou que o objeto existe.
  */
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -1,18 +1,18 @@
-// Da de alta (o repunta) el webhook del CRM en Zernio, sin pasar por el dashboard.
+// Cadastra (ou reaponte) o webhook do CRM no Zernio, sem passar pelo dashboard.
 //
-//   node scripts/zernio-webhook.mjs                       # lista los webhooks existentes
-//   node scripts/zernio-webhook.mjs --url https://tu.app  # crea o actualiza el del CRM
-//   node scripts/zernio-webhook.mjs --url ... --test      # ademas dispara un webhook.test
-//   node scripts/zernio-webhook.mjs --delete              # borra el del CRM
+//   node scripts/zernio-webhook.mjs                       # lista os webhooks existentes
+//   node scripts/zernio-webhook.mjs --url https://tu.app  # cria ou atualiza o do CRM
+//   node scripts/zernio-webhook.mjs --url ... --test      # além disso dispara um webhook.test
+//   node scripts/zernio-webhook.mjs --delete              # apaga o do CRM
 //
-// La URL que se registra es `<url>/api/webhooks/zernio`. Si ya existe un webhook con
-// ese nombre lo actualiza (PUT) en vez de crear uno nuevo: Zernio tolera hasta 50 por
-// usuario y no valida duplicados de URL, asi que sin esto cada corrida sumaria una
-// entrega mas del mismo evento.
+// A URL que se registra é `<url>/api/webhooks/zernio`. Se já existe um webhook com
+// esse nome, atualiza (PUT) em vez de criar um novo: o Zernio tolera até 50 por
+// usuário e não valida duplicados de URL, então sem isto cada execução somaria uma
+// entrega a mais do mesmo evento.
 //
-// El secreto sale de ZERNIO_WEBHOOK_SECRET. Tiene que ser el MISMO valor que este
-// cargado en Vercel: si no coinciden, `verifyZernioSignature` rechaza todo con 401 y
-// los mensajes entran a Zernio pero nunca llegan al CRM.
+// O segredo sai de ZERNIO_WEBHOOK_SECRET. Tem que ser o MESMO valor que esteja
+// carregado na Vercel: se não coincidirem, `verifyZernioSignature` rejeita tudo com 401 e
+// as mensagens entram no Zernio mas nunca chegam ao CRM.
 
 import { config } from "dotenv";
 
@@ -25,9 +25,9 @@ const SECRET = process.env.ZERNIO_WEBHOOK_SECRET || "";
 const WEBHOOK_NAME = "Builder CRM";
 const WEBHOOK_PATH = "/api/webhooks/zernio";
 
-// Espeja SUBSCRIBED_EVENTS de src/lib/zernio/webhooks.ts. Suscribirse a menos deja
-// huecos silenciosos (p.ej. sin `message.sent` no se ve en el CRM lo que el humano
-// contesta desde la app de Instagram).
+// Espelha SUBSCRIBED_EVENTS de src/lib/zernio/webhooks.ts. Inscrever-se em menos deixa
+// buracos silenciosos (p.ex. sem `message.sent` não se vê no CRM o que o humano
+// responde a partir do app do Instagram).
 const EVENTS = [
   "conversation.started",
   "message.received",
@@ -66,7 +66,7 @@ async function api(path, init = {}) {
   try {
     json = text ? JSON.parse(text) : null;
   } catch {
-    /* respuesta no-JSON */
+    /* resposta não-JSON */
   }
   if (!res.ok) {
     throw new Error(`${init.method ?? "GET"} ${path} -> HTTP ${res.status}: ${text.slice(0, 400)}`);

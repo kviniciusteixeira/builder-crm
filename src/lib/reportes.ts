@@ -4,12 +4,12 @@ import { sql } from "drizzle-orm";
 import type { TeamMember } from "@/lib/team";
 
 /**
- * Reportes: numeros reales sobre un rango de dias, con la visibilidad del miembro
- * (un asesor ve solo sus contactos; el admin todo). Los contactos creados desde el
- * simulador (source = 'simulador') no suman; los datos de demostracion si.
+ * Relatórios: números reais sobre um intervalo de dias, com a visibilidade do membro
+ * (um assessor vê só os seus contatos; o admin, tudo). Os contatos criados a partir do
+ * simulador (source = 'simulador') não somam; os dados de demonstração sim.
  *
- * Todo sale de SQL directo porque son agregaciones con joins; cada bloque documenta
- * que mide. Los valores de operaciones estan en centavos (como en toda la app).
+ * Tudo sai de SQL direto porque são agregações com joins; cada bloco documenta
+ * o que mede. Os valores de operações estão em centavos (como em todo o app).
  */
 
 export const RANGOS = [7, 30, 90] as const;
@@ -29,11 +29,11 @@ export interface Reporte {
     mensajesEntrantes: Kpi;
     operacionesGanadas: Kpi;
     valorGanado: Kpi;
-    /** 0-100. null si no hubo cierres. */
+    /** 0-100. null se não houve fechamentos. */
     tasaCierre: number | null;
-    /** 0-100 sobre los salientes del periodo. null si no hubo salientes. */
+    /** 0-100 sobre as saídas do período. null se não houve saídas. */
     porcentajeAgente: number | null;
-    /** Minutos, promedio. null si ninguna conversacion tuvo respuesta. */
+    /** Minutos, média. null se nenhuma conversa teve resposta. */
     primeraRespuestaMin: number | null;
     derivaciones: number;
   };
@@ -51,10 +51,10 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
   const ahora = new Date();
   const desde = new Date(ahora.getTime() - dias * 86_400_000);
   const desdePrev = new Date(desde.getTime() - dias * 86_400_000);
-  // Como texto ISO con cast: el driver no serializa Date en SQL crudo (db.execute).
+  // Como texto ISO com cast: o driver não serializa Date em SQL cru (db.execute).
   const desdeIso = desde.toISOString();
   const desdePrevIso = desdePrev.toISOString();
-  // Filtro de propietario sobre el alias `ct` (contacts). Vacio para el admin.
+  // Filtro de proprietário sobre o alias `ct` (contacts). Vazio para o admin.
   const owner = member.role === "admin" ? sql`` : sql`and ct.owner_id = ${member.id}`;
 
   const [contactos, conversaciones, mensajes, cierres, salientes, derivaciones, respuesta, fuente, canal, dia, embudo] =
@@ -154,7 +154,7 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
   const deAgente = salientesPorOrigen.find((s) => s.origen === "agent")?.cantidad ?? 0;
   const minutos = f(respuesta).minutos;
 
-  // Serie diaria completa (dias sin mensajes = 0) para que la linea no salte.
+  // Série diária completa (dias sem mensagens = 0) para que a linha não salte.
   const porDiaMap = new Map((dia as unknown as Fila[]).map((r) => [String(r.dia), r]));
   const porDia: Reporte["porDia"] = [];
   for (let i = dias - 1; i >= 0; i--) {
@@ -192,12 +192,12 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
   };
 }
 
-/** Serie diaria de contactos nuevos (ultimos `dias`) y comparacion, para el dashboard. */
+/** Série diária de contatos novos (últimos `dias`) e comparação, para o dashboard. */
 export async function serieContactos(member: TeamMember, dias = 7): Promise<{ serie: number[]; actual: number; anterior: number }> {
   const ahora = new Date();
   const desde = new Date(ahora.getTime() - dias * 86_400_000);
   const desdePrev = new Date(desde.getTime() - dias * 86_400_000);
-  // Como texto ISO con cast: el driver no serializa Date en SQL crudo (db.execute).
+  // Como texto ISO com cast: o driver não serializa Date em SQL cru (db.execute).
   const desdePrevIso = desdePrev.toISOString();
   const owner = member.role === "admin" ? sql`` : sql`and ct.owner_id = ${member.id}`;
   const rows = (await db.execute(sql`

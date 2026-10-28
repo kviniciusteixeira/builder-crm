@@ -27,5 +27,5 @@ export const ETIQUETA_ESTADO: Record<EstadoVisita, string> = {
   cancelled: "Cancelada",
 };
 
-/** Ruta de la API del modulo (catch-all /api/m/<modulo>). */
+/** Rota da API do módulo (catch-all /api/m/<modulo>). */
 export const API_VISITAS = "/api/m/visitas";

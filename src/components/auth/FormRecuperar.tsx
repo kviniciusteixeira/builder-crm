@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { pedirEnlaceDeAcceso } from "@/app/auth/recuperar/actions";
 
-/** Formulario de "olvide mi contrasena". Solo se muestra si la instancia manda correos. */
+/** Formulário de "olvide mi contrasena". Só aparece se a instância envia e-mails. */
 export function FormRecuperar() {
   const [error, setError] = useState<string | null>(null);
   const [enviado, setEnviado] = useState(false);

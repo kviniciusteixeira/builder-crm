@@ -1,10 +1,10 @@
 /**
- * Carga (Fase 1) el numero de WhatsApp del CRM en `whatsapp_accounts`, asociado
- * al tenant 'default'. Idempotente por phone_number_id.
+ * Carga (Fase 1) o número de WhatsApp do CRM em `whatsapp_accounts`, associado
+ * ao tenant 'default'. Idempotente por phone_number_id.
  *
- * Correr:  npm run connect:whatsapp
- *   Toma las credenciales de argumentos o, si faltan, de las env WHATSAPP_* que
- *   el CRM ya tiene (.env.local).
+ * Rodar:  npm run connect:whatsapp
+ *   Toma as credenciais dos argumentos ou, se faltarem, das env WHATSAPP_* que
+ *   o CRM já tem (.env.local).
  *   Uso opcional: npm run connect:whatsapp -- <phone_number_id> <access_token> <waba_id> <display_phone>
  */
 import { config } from "dotenv";

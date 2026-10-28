@@ -8,9 +8,9 @@ import { marca } from "@/lib/config";
 
 const STORAGE_KEY = "crm-notifications";
 
-// El estado vive en localStorage y en la API Notification del navegador; se lee con
-// useSyncExternalStore para no setear estado dentro de un efecto. En el servidor
-// (y durante la hidratacion) todo vale `false`, por eso existe el estado "Cargando".
+// O estado vive no localStorage e na API Notification do navegador; lê-se com
+// useSyncExternalStore para não definir estado dentro de um efeito. No servidor
+// (e durante a hidratação) tudo vale `false`, por isso existe o estado "Cargando".
 function subscribe(callback: () => void) {
   window.addEventListener("storage", callback);
   return () => window.removeEventListener("storage", callback);

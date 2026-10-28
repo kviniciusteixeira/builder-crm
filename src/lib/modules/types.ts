@@ -7,43 +7,43 @@ import type { z } from "zod";
 import type { ToolContext, ToolResult } from "@/lib/agent/tools";
 
 /**
- * Contrato publico de un modulo (`modules/<nombre>/`). Es la interfaz entre la zona
- * del cliente y el nucleo: cambiarla es un cambio mayor de version.
+ * Contrato público de um módulo (`modules/<nombre>/`). É a interface entre a zona
+ * do cliente e o núcleo: mudá-la é uma mudança maior de versão.
  *
- * Dos archivos por modulo:
- *  - `manifiesto.ts`  -> ManifiestoModulo. Seguro para el navegador (lo importa el
- *                        sidebar): nada de base de datos ni secretos.
- *  - `servidor.ts`    -> ModuloServidor. Paginas, API, tools del agente y seed.
+ * Dois arquivos por módulo:
+ *  - `manifiesto.ts`  -> ManifiestoModulo. Seguro para o navegador (importa-o o
+ *                        sidebar): nada de base de dados nem segredos.
+ *  - `servidor.ts`    -> ModuloServidor. Páginas, API, tools do agente e seed.
  */
 
 export type SeccionNav = "Operaciones" | "Productividad" | "Inteligencia";
 
 export interface ItemNavModulo {
-  /** Ruta relativa a /m/<modulo>. "" es la pagina principal del modulo. */
+  /** Rota relativa a /m/<modulo>. "" é a página principal do módulo. */
   ruta?: string;
   etiqueta: string;
-  /** Un icono de lucide-react (el modulo lo importa). */
+  /** Um ícone de lucide-react (o módulo o importa). */
   icono: ComponentType<{ className?: string }>;
   seccion?: SeccionNav;
 }
 
 export interface ManifiestoModulo {
-  /** Igual al nombre de la carpeta (snake_case). */
+  /** Igual ao nome da pasta (snake_case). */
   nombre: string;
   titulo: string;
   descripcion?: string;
   version: string;
-  /** Entradas del menu lateral. Sin `nav`, el modulo no aparece en el menu. */
+  /** Entradas do menu lateral. Sem `nav`, o módulo não aparece no menu. */
   nav?: ItemNavModulo[];
-  /** Campos de contacto que aporta (se suman a config/cliente.ts). Misma forma que alli. */
+  /** Campos de contato que aporta (somam-se a config/cliente.ts). Mesma forma que ali. */
   campos?: z.input<typeof esquemaCampo>[];
 }
 
 export interface PropsPaginaModulo {
-  /** Segmentos capturados del patron, ej. { id: "abc" } para "[id]". */
+  /** Segmentos capturados do padrão, ex. { id: "abc" } para "[id]". */
   params: Record<string, string>;
   searchParams: Record<string, string | string[] | undefined>;
-  /** Miembro de la sesion: ya pasado por requireMember. */
+  /** Membro da sessão: já passado por requireMember. */
   member: TeamMember;
 }
 
@@ -59,7 +59,7 @@ export interface ContextoApiModulo {
 export type HandlerModulo = (request: NextRequest, ctx: ContextoApiModulo) => Promise<Response> | Response;
 
 export interface ToolModulo {
-  /** Definicion para el modelo (OpenAI tool calling). El nombre debe ser unico. */
+  /** Definição para o modelo (OpenAI tool calling). O nome deve ser único. */
   definicion: OpenAI.Chat.Completions.ChatCompletionFunctionTool;
   /** Texto para Ajustes -> Agente IA. */
   descripcionUI: string;
@@ -69,14 +69,14 @@ export interface ToolModulo {
 export interface ModuloServidor {
   manifiesto: ManifiestoModulo;
   /**
-   * Paginas por patron de ruta relativa: "" (principal), "nueva", "[id]", "[id]/editar".
-   * Un segmento entre corchetes captura y llega en `params`.
+   * Páginas por padrão de rota relativa: "" (principal), "nueva", "[id]", "[id]/editar".
+   * Um segmento entre colchetes captura e chega em `params`.
    */
   paginas?: Record<string, PaginaModulo>;
-  /** Handlers por patron y metodo. Ya protegidos por requireMember. */
+  /** Handlers por padrão e método. Já protegidos por requireMember. */
   api?: Record<string, Partial<Record<MetodoHttp, HandlerModulo>>>;
-  /** Tools que el agente puede usar mientras el modulo esta activo. */
+  /** Tools que o agente pode usar enquanto o módulo está ativo. */
   tools?: ToolModulo[];
-  /** Datos de demostracion del modulo (`npm run seed`). Debe ser idempotente. */
+  /** Dados de demonstração do módulo (`npm run seed`). Deve ser idempotente. */
   seed?: () => Promise<void>;
 }

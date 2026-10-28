@@ -9,8 +9,8 @@ import { touchConversation } from "./ingest";
 import type { Channel } from "./types";
 
 /**
- * Unico camino de salida del sistema: envia por el conector de la conversacion y
- * persiste. Nada mas sale a la red: el agente, el chat y las plantillas pasan por aqui.
+ * Único caminho de saída do sistema: envia pelo conector da conversa e
+ * persiste. Nada mais sai para a rede: o agente, o chat e os templates passam por aqui.
  */
 
 export interface DeliverResult {
@@ -58,8 +58,8 @@ export async function deliverMessage(
     return { ok: false, messageId: null, error: "mensaje vacio" };
   }
 
-  // Fila optimista antes de salir a la red: si el proveedor tarda o falla, el mensaje
-  // ya esta en el hilo y el usuario ve el estado real en vez de que desaparezca.
+  // Linha otimista antes de sair para a rede: se o provedor demora ou falha, a mensagem
+  // já está no fio e o usuário vê o estado real em vez de ela desaparecer.
   const [pending] = await db
     .insert(messages)
     .values({
@@ -125,10 +125,10 @@ export async function deliverMessage(
 }
 
 /**
- * Persistencia de un saliente que ya se envio por fuera del adapter.
+ * Persistência de uma saída que já se enviou fora do adapter.
  *
- * Lo usa el agente cuando le inyectan un sender propio (el experimento de GHL): el
- * transporte es ajeno pero la fila tiene que quedar igual de bien formada que el resto.
+ * Usa-o o agente quando lhe injetam um sender próprio (o experimento do GHL): o
+ * transporte é alheio mas a linha tem que ficar tão bem formada quanto o resto.
  */
 export async function persistOutbound(
   conversation: ConversationRow,

@@ -6,17 +6,17 @@ import { createClient } from "@/lib/supabase/server";
 import { ID_MIEMBRO_LOCAL, modoLocal } from "@/lib/modo-local";
 
 /**
- * Equipo y visibilidad.
+ * Equipe e visibilidade.
  *
- * Supabase Auth dice QUIEN entro; `team_members` dice QUE ES (admin o asesor) y si
- * sigue activo. Toda ruta que devuelva contactos, conversaciones, operaciones o
- * actividades pasa por `getCurrentMember()` y aplica `ownerFilter()`:
+ * O Supabase Auth diz QUEM entrou; `team_members` diz O QUE É (admin ou assessor) e se
+ * continua ativo. Toda rota que devolva contatos, conversas, operações ou
+ * atividades passa por `getCurrentMember()` e aplica `ownerFilter()`:
  *
- *   admin   -> ve todo, asigna, administra el equipo
- *   asesor  -> ve solo los contactos que tiene asignados (y lo que cuelga de ellos)
+ *   admin   -> vê tudo, atribui, administra a equipe
+ *   asesor  -> vê só os contatos que tem atribuídos (e o que pende deles)
  *
- * El filtro se aplica en el servidor, no en la UI: un asesor que arme la URL a mano
- * tampoco ve lo ajeno.
+ * O filtro se aplica no servidor, não na UI: um assessor que monte a URL à mão
+ * também não vê o alheio.
  */
 
 export type TeamRole = "admin" | "asesor";
@@ -40,17 +40,17 @@ function toMember(row: typeof teamMembers.$inferSelect): TeamMember {
 }
 
 /**
- * Miembro del equipo de la sesion actual, o null si no hay sesion, si el usuario
- * no esta en `team_members` o si fue desactivado.
+ * Membro da equipe da sessão atual, ou null se não há sessão, se o usuário
+ * não está em `team_members` ou se foi desativado.
  *
- * Un usuario de Auth que no este en el equipo no es un error de programacion: es
- * alguien que quedo fuera (desactivado, o se colo por un signup abierto). Se lo
- * trata como no autorizado.
+ * Um usuário de Auth que não esteja na equipe não é um erro de programação: é
+ * alguém que ficou de fora (desativado, ou entrou por um signup aberto). Trata-se
+ * como não autorizado.
  */
 export async function getCurrentMember(): Promise<TeamMember | null> {
-  // Modo local: no hay sesion que leer. El administrador de mentira lo crea
-  // `npm run local` por el mismo camino que el primer admin de una instancia real (el
-  // disparador sobre auth.users), asi que se lee de la base como cualquier otro.
+  // Modo local: não há sessão para ler. O administrador de mentira o cria
+  // `npm run local` pelo mesmo caminho que o primeiro admin de uma instância real (o
+  // gatilho sobre auth.users), então se lê da base como qualquer outro.
   if (modoLocal()) {
     const [row] = await db
       .select()
@@ -95,9 +95,9 @@ export async function getMember(id: string): Promise<TeamMember | null> {
 }
 
 /**
- * Condicion SQL de visibilidad sobre `contacts`. `undefined` = sin filtro (admin).
- * Para tablas que cuelgan del contacto (conversaciones, operaciones, actividades) se
- * hace join a `contacts` y se aplica la misma condicion.
+ * Condição SQL de visibilidade sobre `contacts`. `undefined` = sem filtro (admin).
+ * Para tabelas que pendem do contato (conversas, operações, atividades) se
+ * faz join a `contacts` e se aplica a mesma condição.
  */
 export function ownerFilter(member: TeamMember): SQL | undefined {
   if (member.role === "admin") return undefined;
@@ -105,13 +105,13 @@ export function ownerFilter(member: TeamMember): SQL | undefined {
 }
 
 /**
- * Para `listConversations({ ownerId })` y similares: `undefined` = sin filtro.
+ * Para `listConversations({ ownerId })` e similares: `undefined` = sem filtro.
  */
 export function visibleOwnerId(member: TeamMember): string | undefined {
   return member.role === "admin" ? undefined : member.id;
 }
 
-/** true si el miembro puede ver/tocar este contacto. */
+/** true se o membro pode ver/mexer neste contato. */
 export function canAccessContact(
   member: TeamMember,
   contact: { ownerId: string | null }
@@ -120,9 +120,9 @@ export function canAccessContact(
 }
 
 /**
- * Como `canAccessContact`, pero a partir del id: consulta `owner_id`. Para rutas por
- * id (operacion, actividad, hilo) que solo tienen el contact_id a mano. Un contacto
- * inexistente devuelve false, y la ruta responde 404 sin confirmar que exista.
+ * Como `canAccessContact`, mas a partir do id: consulta `owner_id`. Para rotas por
+ * id (operação, atividade, fio) que só têm o contact_id à mão. Um contato
+ * inexistente devolve false, e a rota responde 404 sem confirmar que exista.
  */
 export async function canAccessContactId(
   member: TeamMember,
@@ -137,19 +137,19 @@ export async function canAccessContactId(
   return Boolean(row) && row.ownerId === member.id;
 }
 
-/** true si ya hay al menos un miembro: decide si el registro publico sigue abierto. */
+/** true se já há pelo menos um membro: decide se o cadastro público continua aberto. */
 export async function hayMiembros(): Promise<boolean> {
   const [row] = await db.select({ id: teamMembers.id }).from(teamMembers).limit(1);
   return Boolean(row);
 }
 
 /**
- * Busca un asesor activo por nombre o email, tolerante a mayusculas, acentos y
- * nombres parciales ("juan" matchea "Juan Perez"). Lo usa el agente: el prompt dice
- * "asignaselo a Juan" y aca se resuelve a quien es Juan.
+ * Busca um assessor ativo por nome ou e-mail, tolerante a maiúsculas, acentos e
+ * nomes parciais ("juan" casa com "Juan Perez"). Usa o agente: o prompt diz
+ * "atribua a Juan" e aqui se resolve quem é Juan.
  *
- * Devuelve `ambiguous` cuando mas de uno matchea, para que el agente pregunte en vez
- * de adivinar.
+ * Devolve `ambiguous` quando mais de um casa, para que o agente pergunte em vez
+ * de adivinhar.
  */
 export async function findMemberByName(
   query: string

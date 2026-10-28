@@ -1,104 +1,104 @@
-# Spec: Modulos (requisito 2 del brief, parte 2)
+# Spec: Módulos (requisito 2 do brief, parte 2)
 
-**Carril**: completo (contrato publico: la interfaz de un modulo)
-**Estado**: aprobada (plan de Fase 0, 2026-10-01)
-**Fecha**: 2026-10-01
-**Escrita antes del codigo**: si
+**Trilho**: completo (contrato público: a interface de um módulo)
+**Estado**: aprovada (plano da Fase 0, 2026-10-01)
+**Data**: 2026-10-01
+**Escrita antes do código**: sim
 
 ## Problema
 
-Lo especifico de un cliente (pedidos, citas, propiedades, visitas...) hoy solo se puede
-agregar editando `src/`: nuevas carpetas en `src/app`, items en el sidebar, tablas en
-el schema, tools en el agente. Eso rompe las actualizaciones. Hace falta una carpeta
-`modules/` donde cada agregado viva completo (pantallas, API, tablas, tools, seed) y se
-encienda o apague desde la configuracion, sin tocar el nucleo.
+O que é específico de um cliente (pedidos, consultas, imóveis, visitas...) hoje só se pode
+adicionar editando `src/`: pastas novas em `src/app`, itens na sidebar, tabelas no
+schema, tools no agente. Isso quebra as atualizações. Faz falta uma pasta
+`modules/` onde cada acréscimo viva completo (telas, API, tabelas, tools, seed) e se
+ligue ou desligue a partir da configuração, sem tocar no núcleo.
 
-## Decisiones del dueno
+## Decisões do dono
 
-- D1 (Fase 0) Mixto: automatizaciones, actividades, plantillas, campana y push quedan
-  en el nucleo pero apagables por config; visitas/calendario y propiedades pasan a
+- D1 (Fase 0) Misto: automações, atividades, templates, campanha e push ficam
+  no núcleo mas desligáveis por config; visitas/calendário e imóveis passam a
   `modules/` (Fase 9).
 
-## Escenarios
+## Cenários
 
-1. **Crear** — El miembro (o la skill `crear-modulo`) copia `modules/_plantilla/` a
-   `modules/<nombre>/`, completa `manifiesto.ts` y `servidor.tsx`, agrega su
-   `migrations/0000_<nombre>.sql` y lo agrega a `config/modulos.json`.
-2. **Ver** — Al arrancar, el modulo aparece en el menu lateral (y movil) en la seccion
-   que declara, sus paginas responden en `/m/<nombre>/...` y su API en
-   `/api/m/<nombre>/...`, ya protegidas por `requireMember`.
-3. **Apagar** — Quitarlo de `config/modulos.json` lo saca del menu y sus rutas
-   responden 404; sus tablas no se tocan.
-4. **Migrar** — `npm run db:migrar` aplica tambien `modules/<activo>/migrations/*.sql`.
-5. **Calificar** — Los campos de contacto que declara el modulo (`campos`) se suman a
-   los de `config/cliente.ts` en formulario, ficha, tabla y agente.
-6. **Agente** — Las tools que declara el modulo se suman a las del nucleo cuando esta
-   activo (cableado en la Fase 6).
+1. **Criar** — O membro (ou a skill `crear-modulo`) copia `modules/_plantilla/` para
+   `modules/<nombre>/`, completa `manifiesto.ts` e `servidor.tsx`, adiciona a
+   `migrations/0000_<nombre>.sql` e inclui em `config/modulos.json`.
+2. **Ver** — Ao iniciar, o módulo aparece no menu lateral (e móvel) na seção
+   que declara, as páginas respondem em `/m/<nombre>/...` e a API em
+   `/api/m/<nombre>/...`, já protegidas por `requireMember`.
+3. **Desligar** — Tirá-lo de `config/modulos.json` o tira do menu e as rotas
+   respondem 404; as tabelas não são tocadas.
+4. **Migrar** — `npm run db:migrar` aplica também `modules/<activo>/migrations/*.sql`.
+5. **Qualificar** — Os campos de contato que o módulo declara (`campos`) somam-se aos
+   de `config/cliente.ts` no formulário, na ficha, na tabela e no agente.
+6. **Agente** — As tools que o módulo declara somam-se às do núcleo quando está
+   ativo (fiação na Fase 6).
 
 ## Requisitos
 
-- FR-001 Un modulo es una carpeta `modules/<nombre>/` (nombre en snake_case) con:
-  `manifiesto.ts` (seguro para el navegador: nombre, titulo, version, nav, campos),
-  `servidor.tsx` (paginas, api, tools, seed), `migrations/`, `README.md`.
-- FR-002 La lista de modulos activos vive en `config/modulos.json` (`activos`); la lee
-  `config/cliente.ts`, el runner de migraciones y el generador del registro.
-- FR-003 `scripts/generar-registro-modulos.mjs` genera
-  `src/lib/modules/registro.generated.ts` (servidor) y
-  `registro-cliente.generated.ts` (navegador) con imports estaticos de los modulos
-  activos. Corre al cargar `next.config.ts` (dev, build, Docker) y en
-  `npm run typecheck`. Es idempotente (no reescribe si no cambio).
-- FR-004 `src/app/m/[modulo]/[[...ruta]]/page.tsx` y
-  `src/app/api/m/[modulo]/[[...ruta]]/route.ts` resuelven la pagina o el handler por
-  patron (`""`, `"nueva"`, `"[id]"`, `"[id]/editar"`), exigen miembro y pasan
-  `{ params, searchParams, member }`. Modulo inactivo o ruta sin match: 404.
-- FR-005 El sidebar y el menu movil se construyen desde: funciones del nucleo activas
-  (`modulos.nucleo`) + `nav` de los manifiestos activos. Las paginas del nucleo
-  apagables (`/automatizaciones`, `/activities`, `/plantillas`, `/reportes`) responden
-  404 cuando estan apagadas (layout servidor con `notFound()`).
-- FR-006 `camposContacto()` devuelve los campos de la config mas los de los modulos
-  activos, sin claves repetidas (error de config si se repiten).
-- FR-007 Las migraciones de un modulo deben habilitar RLS en sus tablas; el runner lo
-  fuerza igual al final.
-- FR-008 Un modulo nunca importa de otro modulo ni del nucleo mas que de `@/lib/*`,
-  `@/components/ui/*`, `@/db` y los tipos publicos de `@/lib/modules/types`.
+- FR-001 Um módulo é uma pasta `modules/<nombre>/` (nome em snake_case) com:
+  `manifiesto.ts` (seguro para o navegador: nome, título, versão, nav, campos),
+  `servidor.tsx` (páginas, api, tools, seed), `migrations/`, `README.md`.
+- FR-002 A lista de módulos ativos vive em `config/modulos.json` (`activos`); leem
+  `config/cliente.ts`, o runner de migrações e o gerador do registro.
+- FR-003 `scripts/generar-registro-modulos.mjs` gera
+  `src/lib/modules/registro.generated.ts` (servidor) e
+  `registro-cliente.generated.ts` (navegador) com imports estáticos dos módulos
+  ativos. Roda ao carregar `next.config.ts` (dev, build, Docker) e em
+  `npm run typecheck`. É idempotente (não reescreve se não mudou).
+- FR-004 `src/app/m/[modulo]/[[...ruta]]/page.tsx` e
+  `src/app/api/m/[modulo]/[[...ruta]]/route.ts` resolvem a página ou o handler por
+  padrão (`""`, `"nueva"`, `"[id]"`, `"[id]/editar"`), exigem membro e passam
+  `{ params, searchParams, member }`. Módulo inativo ou rota sem match: 404.
+- FR-005 A sidebar e o menu móvel se constroem a partir de: funções do núcleo ativas
+  (`modulos.nucleo`) + `nav` dos manifestos ativos. As páginas do núcleo
+  desligáveis (`/automatizaciones`, `/activities`, `/plantillas`, `/reportes`) respondem
+  404 quando estão desligadas (layout servidor com `notFound()`).
+- FR-006 `camposContacto()` devolve os campos da config mais os dos módulos
+  ativos, sem chaves repetidas (erro de config se se repetirem).
+- FR-007 As migrações de um módulo devem habilitar RLS nas suas tabelas; o runner
+  força isso no final de qualquer forma.
+- FR-008 Um módulo nunca importa de outro módulo nem do núcleo além de `@/lib/*`,
+  `@/components/ui/*`, `@/db` e os tipos públicos de `@/lib/modules/types`.
 
-## Configuracion y modulos
+## Configuração e módulos
 
-`config/modulos.json` nuevo. `modules/_plantilla/` como plantilla (no activable: el
-generador ignora carpetas que empiezan con `_`). `modules/ejemplo/` minimo para
-validar el mecanismo (inactivo por defecto).
+`config/modulos.json` novo. `modules/_plantilla/` como modelo (não ativável: o
+gerador ignora pastas que começam com `_`). `modules/ejemplo/` mínimo para
+validar o mecanismo (inativo por padrão).
 
-## Modelo de datos
+## Modelo de dados
 
-Ninguno en el nucleo. Cada modulo trae sus tablas en `migrations/`.
+Nenhum no núcleo. Cada módulo traz as suas tabelas em `migrations/`.
 
 ## Agente de IA
 
-Se define el tipo `ToolModulo` (misma forma que las tools del nucleo). El cableado en
-`src/lib/agent` es de la Fase 6.
+Define-se o tipo `ToolModulo` (mesma forma que as tools do núcleo). A fiação em
+`src/lib/agent` é da Fase 6.
 
-## Criterios de aceptacion
+## Critérios de aceitação
 
-- CA-001 Con `ejemplo` en `config/modulos.json`, `npm run build` termina, aparece
-  "Ejemplo" en el menu y `/m/ejemplo` y `/api/m/ejemplo` responden; sin el, 404 y no
-  esta en el menu.
-- CA-002 `npm run db:migrar --status` lista `modules/ejemplo/0000_ejemplo.sql` solo
-  cuando el modulo esta activo.
-- CA-003 Apagar `automatizaciones` en `config/cliente.ts` saca el item del menu y
+- CA-001 Com `ejemplo` em `config/modulos.json`, `npm run build` termina, aparece
+  "Ejemplo" no menu e `/m/ejemplo` e `/api/m/ejemplo` respondem; sem ele, 404 e não
+  está no menu.
+- CA-002 `npm run db:migrar --status` lista `modules/ejemplo/0000_ejemplo.sql` só
+  quando o módulo está ativo.
+- CA-003 Desligar `automatizaciones` em `config/cliente.ts` tira o item do menu e
   `/automatizaciones` responde 404.
-- CA-004 Un modulo con un campo `clave` repetido respecto de `config/cliente.ts` hace
-  que `/api/health` responda `config_invalida`.
-- CA-005 `typecheck + lint + build` en verde.
+- CA-004 Um módulo com um campo `clave` repetido em relação a `config/cliente.ts` faz
+  `/api/health` responder `config_invalida`.
+- CA-005 `typecheck + lint + build` em verde.
 
 ## Constitution Check
 
-- I. Nucleo intocable: los modulos son la via; `src/` no se edita para agregar uno.
-- II. Spec antes que codigo: esta spec.
-- III. Autoverificacion: CA-001..005; `probar-instancia` abre cada `/m/<modulo>`.
-- IV. Cero secretos: las credenciales de un modulo van en env, documentadas en su README.
+- I. Núcleo intocável: os módulos são o caminho; `src/` não se edita para adicionar um.
+- II. Spec antes do código: esta spec.
+- III. Autoverificação: CA-001..005; `probar-instancia` abre cada `/m/<modulo>`.
+- IV. Zero segredos: as credenciais de um módulo vão no env, documentadas no README.
 
-## Fuera de alcance
+## Fora de escopo
 
-- Modulos con layouts propios o rutas fuera de `/m/<nombre>` (el prefijo es fijo para
-  que no choquen con el nucleo).
-- Instalar modulos desde un registro remoto (se copian carpetas).
+- Módulos com layouts próprios ou rotas fora de `/m/<nombre>` (o prefixo é fixo para
+  que não choquem com o núcleo).
+- Instalar módulos a partir de um registro remoto (copiam-se pastas).

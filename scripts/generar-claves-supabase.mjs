@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 // ============================================================================
-// Builder CRM - claves para un Supabase autoalojado
+// Builder CRM - chaves para um Supabase auto-hospedado
 // ============================================================================
-// Supabase cloud te da las claves hechas. Autoalojado no: la clave anonima y la de
-// servicio son JWT firmados con TU secreto, y tienen que ser los mismos que use
-// GoTrue. Este script los genera de una sola vez.
+// O Supabase cloud te entrega as chaves prontas. Auto-hospedado não: a chave anônima e a de
+// serviço são JWT assinados com O SEU segredo, e têm que ser os mesmos que o
+// GoTrue use. Este script os gera de uma só vez.
 //
 //   node scripts/generar-claves-supabase.mjs
 //   node scripts/generar-claves-supabase.mjs --anos 5 --env
 //
-// Con --env imprime las lineas listas para pegar en las variables de la instancia.
-// Sin argumentos muestra tambien que va en GoTrue y que va en el CRM.
+// Com --env imprime as linhas prontas para colar nas variáveis da instância.
+// Sem argumentos mostra também o que vai no GoTrue e o que vai no CRM.
 //
-// El secreto NO se guarda en ningun archivo: se imprime una vez. Si lo perdes,
-// generas otro, pero entonces todas las sesiones abiertas dejan de valer.
+// O segredo NÃO se guarda em nenhum arquivo: imprime-se uma vez. Se você o perder,
+// gera outro, mas então todas as sessões abertas deixam de valer.
 // ============================================================================
 
 import { createHmac, randomBytes } from "node:crypto";
@@ -41,7 +41,7 @@ function firmar(payload, secreto) {
   return `${cabecera}.${cuerpo}.${firma}`;
 }
 
-// El secreto de GoTrue tiene que tener al menos 32 caracteres.
+// O segredo do GoTrue tem que ter pelo menos 32 caracteres.
 const jwtSecret = randomBytes(32).toString("hex");
 const ahora = Math.floor(Date.now() / 1000);
 const exp = ahora + Math.round(anos * 365 * 24 * 60 * 60);
@@ -85,5 +85,5 @@ La clave anonima viaja al navegador: es publica por diseno. La de servicio NO:
 solo en variables del servidor. Las dos estan firmadas con el mismo secreto que
 GoTrue, asi que si cambias el secreto hay que regenerar las dos.
 
-Guia completa: docs/SUPABASE-EN-VPS.md
+Guia completa: docs/SUPABASE-NO-VPS.md
 `);

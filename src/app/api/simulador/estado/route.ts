@@ -11,9 +11,9 @@ import { autorizarSimulador } from "@/lib/simulador";
 export const dynamic = "force-dynamic";
 
 /**
- * Estado de la instancia para la autoverificacion (scripts/verificar-instancia.mjs):
- * marca, etapas reales del pipeline por defecto, campos configurados, modulos
- * activos y si el agente esta configurado. Admin con sesion o AGENT_WORKER_SECRET.
+ * Estado da instância para a autoverificação (scripts/verificar-instancia.mjs):
+ * marca, etapas reais do pipeline padrão, campos configurados, módulos
+ * ativos e se o agente está configurado. Admin com sessão ou AGENT_WORKER_SECRET.
  */
 export async function GET(request: NextRequest) {
   const auth = await autorizarSimulador(request);

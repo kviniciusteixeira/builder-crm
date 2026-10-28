@@ -5,17 +5,17 @@ import { pushSubscriptions } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 /**
- * Web Push con VAPID. Va por Google (Chrome/Android) y Apple (iOS 16.4+ con la PWA
- * instalada en la pantalla de inicio) sin Firebase ni cuenta de desarrollador.
+ * Web Push com VAPID. Vai pelo Google (Chrome/Android) e Apple (iOS 16.4+ com a PWA
+ * instalada na tela de início) sem Firebase nem conta de desenvolvedor.
  *
- * Reglas que no son obvias:
- *  - Es best-effort. Un push que no llega no es un bug del CRM: el sistema operativo
- *    puede demorarlo o descartarlo. Por eso el push es el AVISO; la asignacion se ve
- *    en el CRM aunque el push nunca llegue.
- *  - Una suscripcion muerta (410/404) se borra en el acto. iOS ademas puede fallar
- *    SIN status: tambien se trata como muerta, si no se acumulan filas que nunca
- *    entregan.
- *  - 429 y 5xx no borran: es el proveedor pidiendo calma.
+ * Regras que não são óbvias:
+ *  - É best-effort. Um push que não chega não é um bug do CRM: o sistema operacional
+ *    pode atrasá-lo ou descartá-lo. Por isso o push é o AVISO; a atribuição se vê
+ *    no CRM mesmo que o push nunca chegue.
+ *  - Uma assinatura morta (410/404) se apaga na hora. O iOS além disso pode falhar
+ *    SEM status: também se trata como morta, senão se acumulam linhas que nunca
+ *    entregam.
+ *  - 429 e 5xx não apagam: é o provedor pedindo calma.
  */
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
@@ -38,9 +38,9 @@ export function hasVapidKeys(): boolean {
 export interface PushPayload {
   title: string;
   body: string;
-  /** Ruta a abrir al tocar la notificacion (relativa: "/contacts/abc"). */
+  /** Rota a abrir ao tocar a notificação (relativa: "/contacts/abc"). */
   url?: string;
-  /** Agrupa notificaciones del mismo asunto: la nueva reemplaza a la anterior. */
+  /** Agrupa notificações do mesmo assunto: a nova substitui a anterior. */
   tag?: string;
 }
 
@@ -48,7 +48,7 @@ export interface PushOutcome {
   sent: number;
   failed: number;
   removed: number;
-  /** No habia ningun dispositivo suscripto para ese miembro. */
+  /** Não havia nenhum dispositivo inscrito para esse membro. */
   noDevices: boolean;
 }
 

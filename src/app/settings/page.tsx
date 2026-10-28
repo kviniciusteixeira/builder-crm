@@ -79,7 +79,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Canales conectados */}
+        {/* Canais conectados */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -92,7 +92,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Equipo */}
+        {/* Equipe */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -105,7 +105,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Automatizaciones: tienen su propia pagina */}
+        {/* Automações: têm a própria página */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Agente IA */}
+        {/* Agente de IA */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">

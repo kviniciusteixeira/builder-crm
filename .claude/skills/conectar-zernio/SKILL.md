@@ -1,79 +1,79 @@
 ---
 name: conectar-zernio
 description: |
-  Conecta WhatsApp, Instagram DM y Facebook Messenger de un cliente a una instancia de
-  Builder CRM a traves de Zernio: credenciales, webhook por API, cuentas, prueba de punta
-  a punta y diagnostico. Activar cuando el usuario dice: conecta WhatsApp, conecta
-  Instagram/Messenger, configura Zernio, no entran mensajes, el webhook no funciona.
+  Conecta WhatsApp, Instagram DM e Facebook Messenger de um cliente a uma instância do
+  Builder CRM através do Zernio: credenciais, webhook por API, contas, teste de ponta
+  a ponta e diagnóstico. Ativar quando o usuário diz: conecta o WhatsApp, conecta
+  Instagram/Messenger, configura o Zernio, não entram mensagens, o webhook não funciona.
 allowed-tools: Read, Edit, Bash, Grep
 ---
 
-# Conectar canales via Zernio
+# Conectar canais via Zernio
 
-> Instancia / canal: $ARGUMENTS
+> Instância / canal: $ARGUMENTS
 
-Zernio es el proveedor por defecto: una API y un webhook para los tres canales. Meta
-Cloud API directo existe como conector parcial (`src/lib/channels/conectores/README.md`)
-y no es este flujo.
+O Zernio é o provedor padrão: uma API e um webhook para os três canais. A Meta
+Cloud API direta existe como conector parcial (`src/lib/channels/conectores/README.md`)
+e não é este fluxo.
 
-## 1. Credenciales (del cliente o de la agencia)
+## 1. Credenciais (do cliente ou da agência)
 
-| Variable | Donde |
+| Variável | Onde |
 |---|---|
 | `ZERNIO_API_KEY` | zernio.com -> Settings -> API Keys |
-| `ZERNIO_PROFILE_ID` | `npm run zernio:setup` las lista; vacio = perfil Default |
-| `ZERNIO_WEBHOOK_SECRET` | lo inventas (`openssl rand -hex 32`); va en la instancia Y en la suscripcion |
+| `ZERNIO_PROFILE_ID` | `npm run zernio:setup` as lista; vazio = perfil Default |
+| `ZERNIO_WEBHOOK_SECRET` | você inventa (`openssl rand -hex 32`); vai na instância E na assinatura |
 
-Cargarlas en Coolify (runtime) y redesplegar, o en `.env.local` si es local.
+Carregá-las no Coolify (runtime) e reimplantar, ou em `.env.local` se for local.
 
-## 2. Webhook (por API, no a mano)
+## 2. Webhook (por API, não à mão)
 
 ```bash
 ZERNIO_API_KEY=... ZERNIO_WEBHOOK_SECRET=... npm run zernio:webhook -- --url https://<dominio>
 ```
 
-El script busca la suscripcion por nombre y hace PUT si ya existe (Zernio no valida
-URLs duplicadas: sin esto cada corrida duplica entregas). `--test` manda un evento de
-prueba. Sin `--url` lista las suscripciones con su contador de fallos.
+O script busca a assinatura pelo nome e faz PUT se já existe (o Zernio não valida
+URLs duplicadas: sem isso cada corrida duplica entregas). `--test` manda um evento de
+teste. Sem `--url` lista as assinaturas com o contador de falhas.
 
-**Trampa**: si `ZERNIO_WEBHOOK_SECRET` no es identico en la instancia y en Zernio, el
-endpoint responde 401 y los mensajes "no llegan" sin ningun error visible en el CRM.
-**Trampa 2**: 10 fallos de entrega seguidos (por ejemplo un deploy roto que devolvio
-500) y Zernio apaga la suscripcion: volver a correr el script la reactiva.
+**Armadilha**: se `ZERNIO_WEBHOOK_SECRET` não for idêntico na instância e no Zernio, o
+endpoint responde 401 e as mensagens "não chegam" sem nenhum erro visível no CRM.
+**Armadilha 2**: 10 falhas de entrega seguidas (por exemplo um deploy quebrado que devolveu
+500) e o Zernio desliga a assinatura: rodar o script de novo a reativa.
 
-## 3. Conectar cuentas
+## 3. Conectar contas
 
-- **Instagram / Messenger**: Ajustes -> Canales -> Conectar (popup OAuth de Meta). Al
-  volver, `npm run zernio:setup -- --sync` o el boton "Sincronizar cuentas" deja la
-  fila en `channel_accounts`.
-- **WhatsApp**: elegir el modo ANTES de conectar.
-  - *Coexistencia* (`business_app`, default): el numero sigue en la app WhatsApp
-    Business del celular y lo que se contesta desde ahi tambien entra al CRM.
-  - *Solo Cloud API* (`api`): el numero sale del celular. Un numero que esta en la app
-    aparece como "no cumple los requisitos" en este modo (es el sintoma de haber
-    elegido mal, no un problema del numero).
-  - BYO-WABA sin navegador: `npm run zernio:whatsapp` con `WHATSAPP_ACCESS_TOKEN`,
-    `WHATSAPP_BUSINESS_ACCOUNT_ID` y `WHATSAPP_PHONE_NUMBER_ID` del cliente.
-- Historial previo: "Importar historial" en Ajustes -> Canales (no dispara el agente).
+- **Instagram / Messenger**: Ajustes -> Canales -> Conectar (popup OAuth da Meta). Ao
+  voltar, `npm run zernio:setup -- --sync` ou o botão "Sincronizar cuentas" deixa a
+  linha em `channel_accounts`.
+- **WhatsApp**: escolher o modo ANTES de conectar.
+  - *Coexistência* (`business_app`, default): o número continua no app WhatsApp
+    Business do celular e o que se responde dali também entra no CRM.
+  - *Só Cloud API* (`api`): o número sai do celular. Um número que está no app
+    aparece como "não cumpre os requisitos" neste modo (é o sintoma de ter
+    escolhido errado, não um problema do número).
+  - BYO-WABA sem navegador: `npm run zernio:whatsapp` com `WHATSAPP_ACCESS_TOKEN`,
+    `WHATSAPP_BUSINESS_ACCOUNT_ID` e `WHATSAPP_PHONE_NUMBER_ID` do cliente.
+- Histórico prévio: "Importar historial" em Ajustes -> Canales (não dispara o agente).
 
-## 4. Probar de punta a punta
+## 4. Testar de ponta a ponta
 
-1. `GET /api/channels` (con sesion) -> el conector `zernio` aparece `configurado` y la
-   cuenta esta `active`.
-2. Enviar un mensaje real al numero/cuenta del cliente desde otro telefono.
-3. En 2-10 segundos aparece en `/conversations`; si el agente esta encendido para ese
-   canal (Ajustes -> Agente), responde en ~7 s.
-4. Responder desde el chat: el mensaje sale y queda `sent`.
+1. `GET /api/channels` (com sessão) -> o conector `zernio` aparece `configurado` e a
+   conta está `active`.
+2. Enviar uma mensagem real ao número/conta do cliente a partir de outro telefone.
+3. Em 2-10 segundos aparece em `/conversations`; se o agente está ligado para esse
+   canal (Ajustes -> Agente), responde em ~7 s.
+4. Responder a partir do chat: a mensagem sai e fica `sent`.
 
-Instagram y Messenger arrancan con el agente **apagado**: encenderlos desde Ajustes ->
-Agente despues de escribir su prompt (si no, usarian el de WhatsApp).
+Instagram e Messenger começam com o agente **desligado**: ligá-los em Ajustes ->
+Agente depois de escrever o prompt deles (se não, usariam o do WhatsApp).
 
-## Diagnostico
+## Diagnóstico
 
-| Sintoma | Causa probable | Que mirar |
+| Sintoma | Causa provável | O que olhar |
 |---|---|---|
-| No entran mensajes, sin errores | secreto desincronizado (401) o suscripcion apagada | `npm run zernio:webhook` (sin --url) muestra fallos; logs de Coolify buscando `firma invalida` |
-| Entran pero el agente no contesta | agente apagado para el canal, contacto/hilo en pausa, falta `OPENROUTER_API_KEY` | Ajustes -> Agente; panel del chat; `/api/health` |
-| Enviar falla con `TEMPLATE_REQUIRED` | WhatsApp fuera de la ventana de 24 h | mandar una plantilla aprobada (Plantillas) |
-| Enviar falla 401/403 | `ZERNIO_API_KEY` invalida o cuenta desconectada | reconectar desde Ajustes -> Canales |
-| Mensajes duplicados | dos suscripciones a la misma URL | `npm run zernio:webhook` lista y repunta; borrar la extra en Zernio |
+| Não entram mensagens, sem erros | segredo dessincronizado (401) ou assinatura desligada | `npm run zernio:webhook` (sem --url) mostra falhas; logs do Coolify buscando `firma invalida` |
+| Entram mas o agente não responde | agente desligado para o canal, contato/fio em pausa, falta `OPENROUTER_API_KEY` | Ajustes -> Agente; painel do chat; `/api/health` |
+| Enviar falha com `TEMPLATE_REQUIRED` | WhatsApp fora da janela de 24 h | mandar um template aprovado (Plantillas) |
+| Enviar falha 401/403 | `ZERNIO_API_KEY` inválida ou conta desconectada | reconectar em Ajustes -> Canales |
+| Mensagens duplicadas | duas assinaturas na mesma URL | `npm run zernio:webhook` lista e aponta; apagar a extra no Zernio |

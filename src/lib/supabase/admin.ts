@@ -2,9 +2,9 @@ import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Cliente con la service role key. SOLO en el servidor y SOLO para lo que el cliente
- * normal no puede hacer: crear usuarios de Auth desde Ajustes -> Equipo sin pasar por
- * el signup publico.
+ * Cliente com a service role key. SÓ no servidor e SÓ para o que o cliente
+ * normal não pode fazer: criar usuários de Auth em Ajustes -> Equipo sem passar pelo
+ * signup público.
  */
 export function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Carga los datos de demostracion. Acepta un admin con sesion (boton del inicio) o el
- * secreto del worker como Bearer (scripts/seed-demo.mjs y la skill deploy-coolify).
- * Idempotente: una segunda llamada no duplica nada.
+ * Carrega os dados de demonstração. Aceita um admin com sessão (botão do início) ou o
+ * segredo do worker como Bearer (scripts/seed-demo.mjs e a skill deploy-coolify).
+ * Idempotente: uma segunda chamada não duplica nada.
  */
 export async function POST(request: NextRequest) {
   const secreto = process.env.AGENT_WORKER_SECRET;
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, ...resultado });
   } catch (err) {
     console.error("[seed] fallo:", err);
-    // Un error de Postgres trae nombres de tablas y restricciones: no sale de aca.
+    // Um erro do Postgres traz nomes de tabelas e restrições: não sai daqui.
     console.error("[seed] fallo cargando la demo:", err);
     return NextResponse.json({ ok: false, error: "No se pudieron cargar los datos demo" }, { status: 500 });
   }

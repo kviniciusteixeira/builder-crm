@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
-/** Editar nombre, rol o estado de un miembro (solo admin). */
+/** Editar nome, papel ou estado de um membro (somente admin). */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,8 +36,8 @@ export async function PATCH(
   if (body.role !== undefined) update.role = body.role === "admin" ? "admin" : "asesor";
   if (body.active !== undefined) update.active = Boolean(body.active);
 
-  // No dejar el equipo sin ningun admin activo: si esta accion baja o apaga al
-  // ultimo, se rechaza.
+  // Não deixar a equipe sem nenhum admin ativo: se esta ação rebaixa ou desliga o
+  // último, é rejeitada.
   const quitaAdmin =
     target.role === "admin" &&
     target.active &&

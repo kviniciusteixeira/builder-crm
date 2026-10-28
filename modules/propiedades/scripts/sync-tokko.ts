@@ -1,11 +1,11 @@
 /**
- * Carga (MVP) del catalogo de Tokko a la tabla `propiedades`.
- * Trae todas las propiedades, genera embeddings y hace upsert por tokko_id.
+ * Carga (MVP) do catálogo do Tokko para a tabela `propiedades`.
+ * Traz todas as propriedades, gera embeddings e faz upsert por tokko_id.
  *
- * Correr:  npm run sync:tokko
- *   (carga TOKKO_API_KEY + OPENAI_API_KEY + DATABASE_URL desde .env.local via --env-file)
+ * Rodar:  npm run sync:tokko
+ *   (carrega TOKKO_API_KEY + OPENAI_API_KEY + DATABASE_URL a partir de .env.local via --env-file)
  *
- * Idempotente: re-correr actualiza precios/datos, no duplica.
+ * Idempotente: rodar de novo atualiza preços/dados, não duplica.
  */
 import { config } from "dotenv";
 import postgres from "postgres";

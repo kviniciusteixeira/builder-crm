@@ -2,9 +2,9 @@ import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
 import { contacts, deals } from "@/db/schema";
 
 /**
- * Tabla del modulo (espejo tipado de migrations/0000_visitas.sql). Drizzle acepta
- * tablas definidas fuera de src/db/schema.ts: el modulo la consulta con `db` del
- * nucleo sin tocar el schema del nucleo.
+ * Tabela do módulo (espelho tipado de migrations/0000_visitas.sql). O Drizzle aceita
+ * tabelas definidas fora de src/db/schema.ts: o módulo a consulta com `db` do
+ * núcleo sem tocar o schema do núcleo.
  */
 export const visitas = pgTable("visitas", {
   id: text("id")
@@ -14,7 +14,7 @@ export const visitas = pgTable("visitas", {
     .notNull()
     .references(() => contacts.id, { onDelete: "cascade" }),
   dealId: text("deal_id").references(() => deals.id, { onDelete: "set null" }),
-  /** Direccion o nombre del lugar a visitar. */
+  /** Endereço ou nome do lugar a visitar. */
   propertyAddress: text("property_address"),
   /** coordinating | scheduled | completed | cancelled */
   status: text("status").notNull().default("coordinating"),

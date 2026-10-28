@@ -7,11 +7,11 @@ export const dynamic = "force-dynamic";
 interface SubscriptionBody {
   endpoint?: string;
   keys?: { p256dh?: string; auth?: string };
-  /** Cuando el navegador rota la suscripcion (`pushsubscriptionchange`). */
+  /** Quando o navegador rotaciona a assinatura (`pushsubscriptionchange`). */
   oldEndpoint?: string;
 }
 
-/** Registra este dispositivo para el miembro de la sesion. */
+/** Registra este dispositivo para o membro da sessão. */
 export async function POST(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

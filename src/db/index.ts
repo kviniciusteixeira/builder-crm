@@ -6,30 +6,30 @@ import * as schema from "./schema";
 import { CARPETA_BASE_LOCAL, modoLocal } from "@/lib/modo-local";
 
 /**
- * Cliente de base PEREZOSO.
+ * Cliente de base PREGUIÇOSO.
  *
- * `next build` importa cada route handler para recolectar metadatos, asi que si este
- * modulo leyera DATABASE_URL al importarse, el build pediria credenciales de base. Y
- * no debe: en el Dockerfile solo las NEXT_PUBLIC_* son build args; DATABASE_URL es de
- * runtime, porque la base de cada instancia se conoce al desplegar, no al compilar.
+ * `next build` importa cada route handler para coletar metadados, então se este
+ * módulo lesse DATABASE_URL ao ser importado, o build pediria credenciais de base. E
+ * não deve: no Dockerfile só as NEXT_PUBLIC_* são build args; DATABASE_URL é de
+ * runtime, porque a base de cada instância se conhece ao implantar, não ao compilar.
  *
- * Por eso `db` es un proxy: la conexion se arma en el primer uso real. Si falta la
- * variable, el error salta ahi (con el mismo mensaje de siempre) y no durante el build.
- * El driver `postgres` tampoco abre socket hasta la primera consulta.
+ * Por isso `db` é um proxy: a conexão se monta no primeiro uso real. Se falta a
+ * variável, o erro aparece ali (com a mesma mensagem de sempre) e não durante o build.
+ * O driver `postgres` também não abre socket até a primeira consulta.
  *
- * En MODO LOCAL (ver src/lib/modo-local.ts) no hay base por red: se usa un Postgres
- * embebido guardado en `.local/db`. Es el mismo Postgres y las mismas migraciones, solo
- * que compilado a WebAssembly y corriendo dentro del proceso de Node.
+ * Em MODO LOCAL (ver src/lib/modo-local.ts) não há base pela rede: usa-se um Postgres
+ * embutido guardado em `.local/db`. É o mesmo Postgres e as mesmas migrações, só
+ * que compilado para WebAssembly e rodando dentro do processo do Node.
  */
 
 type BaseDeDatos = ReturnType<typeof crearCliente>;
 
 /**
- * El paquete del Postgres embebido se carga a mano y solo si hace falta.
+ * O pacote do Postgres embutido se carrega à mão e só se fizer falta.
  *
- * Es una devDependency: no esta en la imagen de produccion y no debe entrar al bundle.
- * El nombre va en una variable a proposito, para que el compilador de Next no lo
- * resuelva en tiempo de build y lo arrastre.
+ * É uma devDependency: não está na imagem de produção e não deve entrar no bundle.
+ * O nome vai numa variável de propósito, para que o compilador do Next não o
+ * resolva em tempo de build e o arraste.
  */
 function crearClienteLocal() {
   const requerir = createRequire(import.meta.url);
@@ -72,15 +72,15 @@ function crearCliente() {
     max: 10,
     idle_timeout: 20,
     connect_timeout: 10,
-    // TLS obligatorio salvo que se diga lo contrario a mano.
+    // TLS obrigatório salvo que se diga o contrário à mão.
     //
-    // postgres-js deja `ssl` en false si la URL no trae `sslmode`, y ni la que copia y
-    // pega Supabase ni la plantilla de .env.example lo traen: sin esto, cada consulta
-    // (contactos, conversaciones enteras de WhatsApp, telefonos) cruza la red en claro
-    // entre el VPS y la base. No falla nada ni se nota: solo viaja legible.
+    // postgres-js deixa `ssl` em false se a URL não traz `sslmode`, e nem a que se copia e
+    // cola do Supabase nem o modelo de .env.example o trazem: sem isso, cada consulta
+    // (contatos, conversas inteiras de WhatsApp, telefones) cruza a rede em claro
+    // entre o VPS e a base. Nada falha nem se nota: só viaja legível.
     //
-    // `DATABASE_SSL=off` existe para un Postgres en la misma maquina o en la red
-    // interna de Docker, donde no hay certificado y no hay red publica que cruzar.
+    // `DATABASE_SSL=off` existe para um Postgres na mesma máquina ou na rede
+    // interna do Docker, onde não há certificado e não há rede pública para cruzar.
     ssl: process.env.DATABASE_SSL === "off" ? false : "require",
   });
 
@@ -88,9 +88,9 @@ function crearCliente() {
 }
 
 /**
- * En modo local la instancia vive en globalThis. `next dev` recarga los modulos en
- * caliente y la base embebida es un archivo con un solo dueno: una segunda instancia
- * sobre la misma carpeta no abre.
+ * No modo local a instância vive em globalThis. `next dev` recarrega os módulos a
+ * quente e a base embutida é um arquivo com um só dono: uma segunda instância
+ * sobre a mesma pasta não abre.
  */
 const almacen = globalThis as unknown as { __dbBuilderCrm?: BaseDeDatos };
 let instancia: BaseDeDatos | null = null;
@@ -105,13 +105,13 @@ function obtenerCliente(): BaseDeDatos {
 }
 
 /**
- * `db.execute(sql...)` devuelve cosas distintas segun el driver: `postgres` devuelve el
- * array de filas y el embebido devuelve `{ rows, fields }`. Media docena de lugares
- * (reportes, equipo, automatizaciones, seed) hacen `resultado[0]` sobre eso.
+ * `db.execute(sql...)` devolve coisas distintas conforme o driver: `postgres` devolve o
+ * array de linhas e o embutido devolve `{ rows, fields }`. Meia dúzia de lugares
+ * (relatórios, equipe, automações, seed) fazem `resultado[0]` sobre isso.
  *
- * Si no se normalizara, en modo local no se rompe nada a la vista: las consultas crudas
- * devolverian `undefined` y los reportes saldrian en cero, sin un solo error. Por eso se
- * iguala aca y no en cada lugar que lo usa.
+ * Se não se normalizasse, no modo local nada quebra à vista: as consultas cruas
+ * devolveriam `undefined` e os relatórios sairiam em zero, sem um único erro. Por isso se
+ * iguala aqui e não em cada lugar que o usa.
  */
 function normalizarExecute(real: Record<string | symbol, unknown>) {
   const original = real.execute as (...args: unknown[]) => Promise<unknown>;

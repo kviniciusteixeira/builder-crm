@@ -22,9 +22,9 @@ interface AgentConfig {
   systemPrompt: string;
   enabledTools: string[];
   allTools: ToolMeta[];
-  /** Solo en scope de canal: si el agente contesta o no en esa red. */
+  /** Só em scope de canal: se o agente responde ou não nessa rede. */
   enabled?: boolean;
-  /** Solo en scope de canal: que campos vienen del global en vez de ser propios. */
+  /** Só em scope de canal: quais campos vêm do global em vez de serem próprios. */
   inherited?: { systemPrompt: boolean; enabledTools: boolean; model: boolean };
   defaults: {
     systemPrompt: string;
@@ -229,8 +229,8 @@ export function AgentSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Scope: global o por canal. "los agentes no deben ser iguales": cada red puede
-          tener su propio prompt y sus propias tools, heredando del global si no. */}
+      {/* Escopo: global ou por canal. "os agentes não devem ser iguais": cada rede pode
+          ter seu próprio prompt e suas próprias tools, herdando do global se não. */}
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"

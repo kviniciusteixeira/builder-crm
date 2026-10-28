@@ -1,4 +1,4 @@
-/** Tipos del lado del cliente para el constructor de automatizaciones. */
+/** Tipos do lado do cliente para o construtor de automações. */
 
 export interface CatalogOption {
   value: string;

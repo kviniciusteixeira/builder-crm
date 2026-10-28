@@ -3,13 +3,13 @@ import { esquemaConfig, type ConfigCliente, type CampoConfig, type Marca } from 
 import { camposDeModulos, erroresDeModulos } from "@/lib/modules/cliente";
 
 /**
- * Punto unico de acceso a la configuracion del cliente.
+ * Ponto único de acesso à configuração do cliente.
  *
  *   const { marca, pipeline } = getConfig();
  *
- * Se valida una vez por proceso. Si la configuracion es invalida, `getConfig()` lanza
- * con el detalle; `erroresConfig()` devuelve la lista sin lanzar (para /api/health y
- * el arranque). Importable desde componentes cliente: no hay nada server-only.
+ * Valida-se uma vez por processo. Se a configuração é inválida, `getConfig()` lança
+ * com o detalhe; `erroresConfig()` devolve a lista sem lançar (para /api/health e
+ * a inicialização). Importável a partir de componentes cliente: não há nada server-only.
  */
 
 let cache: ConfigCliente | null = null;
@@ -23,8 +23,8 @@ function validar(): { config: ConfigCliente | null; errores: string[] } {
     errores = r.error.issues.map((i) => `${i.path.join(".") || "config"}: ${i.message}`);
     return { config: null, errores };
   }
-  // Los modulos tambien aportan campos: sus errores y las claves repetidas son
-  // errores de configuracion de la instancia.
+  // Os módulos também aportam campos: seus erros e as chaves repetidas são
+  // erros de configuração da instância.
   const problemas = [...erroresDeModulos()];
   const vistas = new Set(r.data.contacto.campos.map((c) => c.clave));
   for (const campo of camposDeModulos()) {
@@ -49,7 +49,7 @@ export function getConfig(): ConfigCliente {
   return config;
 }
 
-/** Lista de problemas de la configuracion (vacia si es valida). Nunca lanza. */
+/** Lista de problemas da configuração (vazia se é válida). Nunca lança. */
 export function erroresConfig(): string[] {
   return validar().errores;
 }
@@ -58,7 +58,7 @@ export function marca(): Marca {
   return getConfig().marca;
 }
 
-/** Campos del contacto: los de config/cliente.ts mas los de los modulos activos. */
+/** Campos do contato: os de config/cliente.ts mais os dos módulos ativos. */
 export function camposContacto(): CampoConfig[] {
   return [...getConfig().contacto.campos, ...camposDeModulos()];
 }
@@ -67,12 +67,12 @@ export function etiquetaAsesor(): string {
   return getConfig().roles.etiquetaAsesor;
 }
 
-/** Zona horaria IANA de la instancia. Ver `specs/nucleo/11-zona-horaria.md`. */
+/** Fuso horário IANA da instância. Ver `specs/nucleo/11-fuso-horario.md`. */
 export function zonaHoraria(): string {
   return getConfig().zonaHoraria;
 }
 
-/** true si una funcion del nucleo o un modulo de `modules/` esta activo. */
+/** true se uma função do núcleo ou um módulo de `modules/` está ativo. */
 export function moduloActivo(nombre: string): boolean {
   const { modulos } = getConfig();
   if (nombre in modulos.nucleo) {
@@ -102,15 +102,15 @@ function mezclar(hex: string, con: [number, number, number], peso: number): stri
   return `#${m.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
 }
 
-/** Texto blanco o negro segun contraste con el color dado (WCAG). */
+/** Texto branco ou preto conforme o contraste com a cor dada (WCAG). */
 export function textoSobre(hex: string): "#FFFFFF" | "#0A1628" {
   return luminancia(hexARgb(hex)) > 0.4 ? "#0A1628" : "#FFFFFF";
 }
 
 /**
- * Variables CSS derivadas de la marca. Se inyectan en <head> durante el SSR para que
- * no haya "flash" del color por defecto. `:root:root` gana en especificidad a los
- * defaults de globals.css sin depender del orden de carga.
+ * Variáveis CSS derivadas da marca. Injetam-se no <head> durante o SSR para que
+ * não haja "flash" da cor padrão. `:root:root` ganha em especificidade dos
+ * defaults de globals.css sem depender da ordem de carga.
  */
 export function cssVariablesMarca(): string {
   const { colorPrimario, colorSidebar } = marca();

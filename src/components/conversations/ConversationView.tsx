@@ -26,7 +26,7 @@ interface Props {
   contact: Contact | null;
   threads?: ContactThread[];
   initialMessages: ConversationMessage[];
-  /** Solo un admin puede eliminar el hilo. */
+  /** Só um admin pode apagar o fio. */
   isAdmin?: boolean;
 }
 
@@ -44,8 +44,8 @@ export function ConversationView({
   initialMessages,
   isAdmin = false,
 }: Props) {
-  // Preferencia por navegador. useSyncExternalStore evita setear estado dentro de un
-  // efecto y no rompe la hidratacion: en el servidor vale `true`.
+  // Preferência por navegador. useSyncExternalStore evita definir estado dentro de um
+  // efeito e não quebra a hidratação: no servidor vale `true`.
   const detailsOpen = useSyncExternalStore(
     subscribeStorage,
     () => window.localStorage.getItem(STORAGE_KEY) !== "0",

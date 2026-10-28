@@ -16,17 +16,17 @@ import type { Channel } from "@/lib/channels/types";
 import type { TeamMember } from "@/lib/team";
 
 /**
- * Simulador de conversaciones: crea contactos y hilos sinteticos (provider
- * "simulador") y corre el agente de forma sincrona para que la respuesta vuelva en la
- * misma llamada. Lo usan /simulador (demos) y scripts/verificar-instancia.mjs.
+ * Simulador de conversas: cria contatos e fios sintéticos (provider
+ * "simulador") e roda o agente de forma síncrona para que a resposta volte na
+ * mesma chamada. Usam /simulador (demos) e scripts/verificar-instancia.mjs.
  */
 
 export const PROVEEDOR_SIMULADOR = "simulador";
 
 /**
- * Quien puede usar el simulador: un admin con sesion, o un script con
- * AGENT_WORKER_SECRET como Bearer (scripts/verificar-instancia.mjs). En el segundo
- * caso el "miembro" es el primer admin activo de la instancia.
+ * Quem pode usar o simulador: um admin com sessão, ou um script com
+ * AGENT_WORKER_SECRET como Bearer (scripts/verificar-instancia.mjs). No segundo
+ * caso o "membro" é o primeiro admin ativo da instância.
  */
 export async function autorizarSimulador(
   request: NextRequest
@@ -68,7 +68,7 @@ export async function crearConversacionSimulada(input: {
 
   await linkExtraIdentity(contact.id, input.canal, externalId, null);
   await emitContactCreated(contact.id, { name: nombre, source: "simulador" });
-  // Quien simula se queda con el contacto: un asesor no ve los de otros, y el admin ve todo.
+  // Quem simula fica com o contato: um assessor não vê os dos outros, e o admin vê tudo.
   await assignContact({ contactId: contact.id, ownerId: input.member.id, by: { type: "member", member: input.member } });
 
   const conversation = await upsertConversation({
@@ -99,7 +99,7 @@ export interface EstadoContactoSimulado {
 export interface ResultadoSimulacion {
   agente: { ok: boolean; reason?: string; reply?: string; toolCalls?: number };
   messages: Awaited<ReturnType<typeof getConversation>>["messages"];
-  /** Lo que el agente dejo en el CRM (para el panel y para la autoverificacion). */
+  /** O que o agente deixou no CRM (para o painel e para a autoverificação). */
   estado: EstadoContactoSimulado | null;
 }
 
@@ -124,12 +124,12 @@ async function estadoContacto(contactId: string | null): Promise<EstadoContactoS
 }
 
 /**
- * El turno del agente, que nunca se lleva puesto el mensaje de quien escribe.
+ * O turno do agente, que nunca leva embora a mensagem de quem escreve.
  *
- * Sin clave no hay a quien preguntarle; y con una clave vencida o mal copiada, el
- * proveedor contesta 401 y la excepcion llegaba hasta la ruta, que devolvia 500. En los
- * dos casos la persona veia "Error" y su mensaje desaparecia de la pantalla, cuando en
- * realidad el CRM habia hecho bien su parte.
+ * Sem chave não há a quem perguntar; e com uma chave vencida ou mal copiada, o
+ * provedor responde 401 e a exceção chegava até a rota, que devolvia 500. Nos
+ * dois casos a pessoa via "Error" e a mensagem desaparecia da tela, quando na
+ * realidade o CRM tinha feito bem a sua parte.
  */
 async function turnoDelAgente(conversationId: string): Promise<ResultadoSimulacion["agente"]> {
   if (!hasOpenRouterKey()) {
@@ -152,13 +152,13 @@ export async function enviarMensajeSimulado(input: {
   if (!conv) return { error: "no_encontrada" };
   if (conv.provider !== PROVEEDOR_SIMULADOR) return { error: "no_simulada" };
 
-  // Entrante como si viniera de un webhook, pero sin encolar: el agente corre aqui mismo.
+  // Entrante como se viesse de um webhook, mas sem enfileirar: o agente corre aqui mesmo.
   //
-  // El mensaje se guarda ANTES de mirar si el agente puede contestar, y a proposito.
-  // Sin clave de OpenRouter esto cortaba antes de guardar nada: el simulador no servia
-  // para ver el CRM funcionando, que es justo lo que alguien quiere hacer cuando lo
-  // prueba por primera vez. Ahora la conversacion entra a la bandeja, el contacto se
-  // crea y la ficha se arma igual; lo unico que falta es la respuesta del agente.
+  // A mensagem se guarda ANTES de olhar se o agente pode responder, e de propósito.
+  // Sem chave do OpenRouter isto cortava antes de guardar nada: o simulador não servia
+  // para ver o CRM funcionando, que é justamente o que alguém quer fazer quando o
+  // testa pela primeira vez. Agora a conversa entra na caixa de entrada, o contato se
+  // cria e a ficha se monta igual; a única coisa que falta é a resposta do agente.
   await ingestMessage({
     conversation: conv,
     direction: "in",

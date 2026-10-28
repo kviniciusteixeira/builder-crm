@@ -1,10 +1,10 @@
 import type { ConfigClienteEntrada } from "@/lib/config/schema";
 
 /**
- * PLANTILLA DE NICHO: inmobiliaria.
+ * MODELO DE NICHO: imobiliária.
  *
- * Pipeline, campos del contacto y prompt del agente para una inmobiliaria que vende y
- * arrienda. Se usa desde config/cliente.ts:
+ * Pipeline, campos do contato e prompt do agente para uma imobiliária que vende e
+ * aluga. Usa-se a partir de config/cliente.ts:
  *
  *   import { plantillaInmobiliaria } from "./plantillas/inmobiliaria";
  *   export default definirConfig({
@@ -12,8 +12,8 @@ import type { ConfigClienteEntrada } from "@/lib/config/schema";
  *     marca: { ...plantillaInmobiliaria.marca, nombre: "Casa Sur", ... },
  *   });
  *
- * y activando los modulos en config/modulos.json: { "activos": ["propiedades", "visitas"] }.
- * Luego: npm run db:migrar (crea las tablas de los modulos).
+ * e ativando os módulos em config/modulos.json: { "activos": ["propiedades", "visitas"] }.
+ * Depois: npm run db:migrar (cria as tabelas dos módulos).
  */
 export const plantillaInmobiliaria: ConfigClienteEntrada = {
   marca: {
@@ -117,7 +117,7 @@ Sos {{agente}}, parte del equipo de {{negocio}}. Atendes por {{canal}} a persona
       reportes: true,
       simulador: true,
     },
-    // Recordatorio: la lista real vive en config/modulos.json.
+    // Lembrete: a lista real vive em config/modulos.json.
     activos: ["propiedades", "visitas"],
   },
 };

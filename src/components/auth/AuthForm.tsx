@@ -14,17 +14,17 @@ type Mode = "login" | "signup";
 
 interface AuthFormProps {
   mode: Mode;
-  /** Proveedores externos encendidos en el servidor de autenticacion. */
+  /** Provedores externos ligados no servidor de autenticação. */
   proveedores?: { id: string; nombre: string }[];
-  /** Error que llega de vuelta del proveedor, por la query de la URL. */
+  /** Erro que volta do provedor, pela query da URL. */
   errorInicial?: string | null;
 }
 
 export function AuthForm({ mode, proveedores = [], errorInicial = null }: AuthFormProps) {
   const [error, setError] = useState<string | null>(errorInicial);
   const [isPending, startTransition] = useTransition();
-  // Sin correo configurado no se ofrece recuperar la contrasena: el enlace llevaria a
-  // una pagina que solo puede decir "pedisela a un administrador".
+  // Sem e-mail configurado não se oferece recuperar a senha: o link levaria a
+  // uma página que só pode dizer "pedisela a un administrador".
   const { authEnviaCorreos } = leerConfigPublica();
 
   function onSubmit(formData: FormData) {

@@ -3,7 +3,7 @@ import { moduloActivo } from "@/lib/config";
 import { autorizarSimulador, enviarMensajeSimulado } from "@/lib/simulador";
 
 export const dynamic = "force-dynamic";
-// Un turno del agente tarda entre 5 y 30 s (LLM + tools); se espera en la misma llamada.
+// Um turno do agente demora entre 5 e 30 s (LLM + tools); espera-se na mesma chamada.
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "conversationId y texto son requeridos" }, { status: 400 });
   }
 
-  // Que el agente no pueda contestar NO es un error de esta ruta: el mensaje entro al
-  // CRM igual y vuelve en la respuesta con `agente.ok === false` y el motivo. Aca solo
-  // quedan los dos casos en que no hay nada que simular.
+  // O agente não poder responder NÃO é um erro desta rota: a mensagem entrou no
+  // CRM mesmo assim e volta na resposta com `agente.ok === false` e o motivo. Aqui só
+  // ficam os dois casos em que não há nada para simular.
   const r = await enviarMensajeSimulado({ conversationId, texto: texto.slice(0, 4000) });
   if ("error" in r) {
     const mensaje =

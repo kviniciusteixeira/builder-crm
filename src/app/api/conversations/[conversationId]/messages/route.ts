@@ -20,7 +20,7 @@ export async function GET(
   if (!conversation) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  // Hilo de un contacto ajeno (o sin contacto, si no es admin): como si no existiera.
+  // Fio de um contato alheio (ou sem contato, se não é admin): como se não existisse.
   const accesible = contact
     ? canAccessContact(auth.member, contact)
     : auth.member.role === "admin";

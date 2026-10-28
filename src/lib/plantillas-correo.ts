@@ -1,23 +1,23 @@
 import { marca, textoSobre } from "@/lib/config";
 
 /**
- * Las dos plantillas de correo de acceso, con la marca de la instancia.
+ * Os dois templates de e-mail de acesso, com a marca da instância.
  *
- * Las sirve `/correo/[plantilla].html` y las lee el servidor de autenticacion, que es
- * quien manda el correo: en `GOTRUE_MAILER_TEMPLATES_*` se pone esa URL y GoTrue la
- * descarga, reemplaza sus marcadores y envia. Si la URL no responde, GoTrue usa su
- * plantilla por defecto (en ingles): se ve peor, pero el correo sale igual.
+ * Serve-os `/correo/[plantilla].html` e os lê o servidor de autenticação, que é
+ * quem envia o e-mail: em `GOTRUE_MAILER_TEMPLATES_*` se põe essa URL e o GoTrue a
+ * baixa, substitui os marcadores e envia. Se a URL não responde, o GoTrue usa o
+ * template padrão (em inglês): vê-se pior, mas o e-mail sai igual.
  *
- * En Supabase cloud las plantillas se pegan a mano en el panel (Auth -> Emails). La
- * misma URL sirve para eso: se abre, se copia el HTML y se pega.
+ * No Supabase cloud os templates se colam à mão no painel (Auth -> Emails). A
+ * mesma URL serve para isso: abre-se, copia-se o HTML e cola-se.
  *
- * Los marcadores con llaves dobles los reemplaza GoTrue, no React: `ConfirmationURL` es
- * el enlace de un solo uso y `Email` el destinatario. No agregar otros marcadores sin
- * revisar que GoTrue los defina para ese tipo de correo; uno inexistente se imprime como
- * texto raro en el correo.
+ * Os marcadores com chaves duplas os substitui o GoTrue, não o React: `ConfirmationURL` é
+ * o link de uso único e `Email` o destinatário. Não adicionar outros marcadores sem
+ * conferir que o GoTrue os defina para esse tipo de e-mail; um inexistente se imprime como
+ * texto estranho no e-mail.
  *
- * Se escribe en HTML de correo a proposito (tablas, estilos en linea, sin CSS externo ni
- * variables): es lo unico que renderizan igual Gmail, Outlook y Apple Mail.
+ * Escreve-se em HTML de e-mail de propósito (tabelas, estilos inline, sem CSS externo nem
+ * variáveis): é o único que renderizam igual Gmail, Outlook e Apple Mail.
  */
 
 export const PLANTILLAS = ["invitacion", "recuperacion"] as const;
@@ -51,7 +51,7 @@ const TEXTOS: Record<TipoPlantilla, Texto> = {
   },
 };
 
-/** HTML de la plantilla. `base` es la URL publica de la instancia (para el logo). */
+/** HTML do template. `base` é a URL pública da instância (para o logo). */
 export function plantillaCorreo(tipo: TipoPlantilla, base: string | null): string {
   const m = marca();
   const t = TEXTOS[tipo];
@@ -100,8 +100,8 @@ ${cabecera}
 `;
 }
 
-/** La marca la escribe el miembro en config/cliente.ts, no un desconocido, pero esto
- *  igual va escapado: un `&` o un `<` en el nombre no debe romper el correo. */
+/** A marca a escreve o membro em config/cliente.ts, não um desconhecido, mas isto
+ *  vai escapado igual: um `&` ou um `<` no nome não deve quebrar o e-mail. */
 function escapar(texto: string): string {
   return texto
     .replace(/&/g, "&amp;")

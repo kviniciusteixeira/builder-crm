@@ -1,5 +1,5 @@
--- Migracion inicial del modulo. Idempotente (if not exists / drop policy if exists).
--- Prefijo obligatorio: <nombre_del_modulo>_<tabla>.
+-- Migração inicial do módulo. Idempotente (if not exists / drop policy if exists).
+-- Prefixo obrigatório: <nombre_del_modulo>_<tabla>.
 
 create table if not exists mi_modulo_items (
   id         uuid primary key default gen_random_uuid(),
@@ -10,7 +10,7 @@ create table if not exists mi_modulo_items (
 
 create index if not exists mi_modulo_items_contact_idx on mi_modulo_items (contact_id);
 
--- RLS obligatorio: la API publica de Supabase solo deja leer lo que el rol permite.
+-- RLS obrigatório: a API pública do Supabase só deixa ler o que o papel permite.
 alter table mi_modulo_items enable row level security;
 drop policy if exists mi_modulo_items_select on mi_modulo_items;
 create policy mi_modulo_items_select on mi_modulo_items for select to authenticated

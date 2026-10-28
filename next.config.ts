@@ -5,28 +5,28 @@ import { generarRegistroModulos } from "./scripts/generar-registro-modulos.mjs";
 
 const pkg = JSON.parse(readFileSync(path.resolve("package.json"), "utf8")) as { version: string };
 
-// Registro de modulos activos (config/modulos.json -> src/lib/modules/*.generated.ts).
-// Se regenera aqui para que dev, build y la imagen Docker compilen los mismos modulos.
+// Registro de módulos ativos (config/modulos.json -> src/lib/modules/*.generated.ts).
+// Regenera-se aqui para que dev, build e a imagem Docker compilem os mesmos módulos.
 generarRegistroModulos(process.cwd());
 
 const nextConfig: NextConfig = {
-  // Standalone: la imagen Docker copia solo .next/standalone + static + public.
-  // En Windows se desactiva porque el trazado usa symlinks que ahi fallan.
+  // Standalone: a imagem Docker copia só .next/standalone + static + public.
+  // No Windows desativa-se porque o tracing usa symlinks que ali falham.
   output: process.platform === "win32" ? undefined : "standalone",
-  // `postgres` es el driver de produccion. `@electric-sql/pglite` es el Postgres
-  // embebido del modo local y tiene que quedar fuera del bundle si o si: resuelve sus
-  // extensiones a partir de la ruta de su propio archivo, y el compilador la reescribe
-  // a un marcador (`file:///ROOT/...`) con el que no encuentra nada.
+  // `postgres` é o driver de produção. `@electric-sql/pglite` é o Postgres
+  // embutido do modo local e tem que ficar fora do bundle de qualquer jeito: resolve as
+  // extensões a partir do caminho do próprio arquivo, e o compilador o reescreve
+  // para um marcador (`file:///ROOT/...`) com o qual não encontra nada.
   serverExternalPackages: ["postgres", "@electric-sql/pglite"],
   turbopack: {
     root: path.resolve("."),
   },
-  // Cabeceras de seguridad, solo en produccion (en desarrollo HSTS sobre localhost
-  // obliga a https y rompe `npm run dev`).
+  // Cabeçalhos de segurança, só em produção (em desenvolvimento HSTS sobre localhost
+  // obriga https e quebra `npm run dev`).
   //
-  // HSTS cierra la ventana de la PRIMERA visita: sin ella, un `http://crm.cliente.com`
-  // escrito a mano sale en claro una vez, y ahi viaja la cookie de sesion. Vercel la
-  // pone sola; un VPS con Coolify no necesariamente.
+  // O HSTS fecha a janela da PRIMEIRA visita: sem ele, um `http://crm.cliente.com`
+  // escrito à mão sai em claro uma vez, e ali viaja o cookie de sessão. A Vercel o
+  // coloca sozinha; um VPS com Coolify não necessariamente.
   async headers() {
     if (process.env.NODE_ENV !== "production") return [];
     return [
@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
     ];
   },
   env: {
-    // Version congelada al construir; commit solo si el build lo recibio (SOURCE_COMMIT).
+    // Versão congelada ao construir; commit só se o build o recebeu (SOURCE_COMMIT).
     NEXT_PUBLIC_APP_VERSION: pkg.version,
     NEXT_PUBLIC_BUILD_COMMIT: process.env.SOURCE_COMMIT ?? "",
   },

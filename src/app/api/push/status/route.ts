@@ -4,7 +4,7 @@ import { countSubscriptions, hasVapidKeys } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
 
-/** Cuantos dispositivos tiene registrados el miembro actual, y si el servidor puede enviar. */
+/** Quantos dispositivos o membro atual tem registrados, e se o servidor pode enviar. */
 export async function GET() {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

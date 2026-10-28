@@ -15,7 +15,7 @@ export async function GET() {
   return NextResponse.json(await listAutomations());
 }
 
-/** Crear una regla (solo admin). El cuerpo se valida contra el catalogo. */
+/** Criar uma regra (somente admin). O corpo é validado contra o catálogo. */
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;

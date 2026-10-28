@@ -30,7 +30,7 @@ export const ACTIVITY_TYPE_CONFIG: Record<
   follow_up: { label: "Seguimiento", icon: "Clock" },
 };
 
-/** Montos en centavos; la moneda sale de config/cliente.ts (`moneda`). */
+/** Valores em centavos; a moeda sai de config/cliente.ts (`moneda`). */
 export function formatCurrency(cents: number): string {
   return new Intl.NumberFormat("es", {
     style: "currency",
@@ -61,7 +61,7 @@ export function formatDate(date: Date | number | null): string {
   }).format(d);
 }
 
-/** Dia calendario en la zona de la instancia, como "2026-10-12". */
+/** Dia de calendário no fuso da instância, como "2026-10-12". */
 function diaLocal(d: Date): string {
   const partes = new Intl.DateTimeFormat("en-US", {
     timeZone: getConfig().zonaHoraria,
@@ -75,9 +75,9 @@ function diaLocal(d: Date): string {
 
 export function formatRelativeDate(date: Date | number): string {
   const d = toDate(date);
-  // "Hoy" y "Ayer" son dias del calendario, no ventanas de 24 h: a las 00:30 algo de las
-  // 23:00 es de ayer aunque hayan pasado 90 minutos. Se comparan los dias en la zona de
-  // la instancia para que la misma fila no diga una cosa en el servidor y otra en el
+  // "Hoy" e "Ayer" são dias do calendário, não janelas de 24 h: às 00:30 algo das
+  // 23:00 é de ontem mesmo que tenham passado 90 minutos. Comparam-se os dias no fuso da
+  // instância para que a mesma linha não diga uma coisa no servidor e outra no
   // navegador.
   const dias = Math.round(
     (Date.parse(`${diaLocal(new Date())}T00:00:00Z`) - Date.parse(`${diaLocal(d)}T00:00:00Z`)) /

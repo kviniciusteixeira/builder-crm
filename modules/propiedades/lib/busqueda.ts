@@ -5,13 +5,13 @@ import { scrapeUrl } from "./firecrawl";
 import { getOpenRouterClient, getAgentModel, hasOpenRouterKey } from "@/lib/agent/openrouter";
 
 /**
- * Búsqueda de UNA propiedad puntual por dirección, nombre o URL de portal.
- * Fuente: tabla `propiedades` (catalogo sincronizado desde Tokko u otro origen).
+ * Busca de UMA propriedade pontual por endereço, nome ou URL de portal.
+ * Fonte: tabela `propiedades` (catálogo sincronizado a partir do Tokko ou outra origem).
  *
- * - Si la query es texto (dirección/nombre): fuzzy match contra address / título / barrio.
- * - Si la query es URL: se scrapea con Firecrawl, se extrae la dirección y se busca esa
- *   dirección en Supabase (NO se matchea por URL exacta — la misma propiedad puede tener
- *   varios links de distintos portales).
+ * - Se a query é texto (endereço/nome): fuzzy match contra address / título / bairro.
+ * - Se a query é URL: faz scrape com Firecrawl, extrai o endereço e busca esse
+ *   endereço no Supabase (NÃO casa por URL exata — a mesma propriedade pode ter
+ *   vários links de portais diferentes).
  */
 
 export interface PropertyMatch {
@@ -38,13 +38,13 @@ export interface SearchResult {
   matchScore?: number;
   matchedBy?: "url" | "address" | "barrio" | "fuzzy";
   error?: string;
-  // Si fue por URL pero no encontramos match exacto, devolvemos lo extraido del scrape
+  // Se foi por URL mas não encontramos match exato, devolvemos o extraído do scrape
   scraped?: { direccion?: string; barrio?: string };
-  // Para que el agente sepa si es desarrollo (regla del prompt)
+  // Para o agente saber se é empreendimento (regra do prompt)
   esDesarrollo?: boolean;
 }
 
-// Fila liviana de `properties` (sin embedding ni raw) para el matching en memoria.
+// Linha leve de `properties` (sem embedding nem raw) para o matching em memória.
 interface PropRow {
   referenceCode: string | null;
   title: string | null;
@@ -65,7 +65,7 @@ interface PropRow {
   description: string | null;
 }
 
-// Cache en memoria del catálogo (evita pegarle a la DB en cada mensaje de una ráfaga).
+// Cache em memória do catálogo (evita bater na DB a cada mensagem de uma rajada).
 let cache: { rows: PropRow[]; at: number } | null = null;
 const CACHE_TTL_MS = 60_000;
 
@@ -163,8 +163,8 @@ function isUrl(query: string): boolean {
 }
 
 /**
- * Regex fallback para extraer dirección del markdown scrapeado de un portal.
- * Captura el primer patrón "<calle> <num>, <barrio>".
+ * Regex de fallback para extrair endereço do markdown obtido por scrape de um portal.
+ * Captura o primeiro padrão "<rua> <núm>, <bairro>".
  */
 function extractAddressViaRegex(
   markdown: string
@@ -189,8 +189,8 @@ function extractAddressViaRegex(
 }
 
 /**
- * Extrae dirección + barrio del markdown. 1) regex (rápido, gratis); 2) fallback a
- * un modelo mini vía OpenRouter con response_format JSON si la regex falló.
+ * Extrai endereço + bairro do markdown. 1) regex (rápido, de graça); 2) fallback para
+ * um modelo mini via OpenRouter com response_format JSON se a regex falhou.
  */
 async function extractAddressFromScrape(
   markdown: string
@@ -246,7 +246,7 @@ interface BestMatch {
 }
 
 /**
- * Score = mejor entre dirección (preferida), título de publicación y barrio/ubicación.
+ * Score = o melhor entre endereço (preferido), título do anúncio e bairro/localização.
  */
 function findBestMatch(rows: PropRow[], query: string): BestMatch {
   let best: BestMatch = { row: rows[0], score: 0, via: "fuzzy" };
@@ -269,9 +269,9 @@ function findBestMatch(rows: PropRow[], query: string): BestMatch {
 }
 
 /**
- * Busca una propiedad en el catálogo de Supabase.
- * 1. Si query es URL: scrapear con Firecrawl, extraer dirección, fuzzy match en Supabase.
- * 2. Si query es texto: fuzzy match directo contra dirección / título / barrio.
+ * Busca uma propriedade no catálogo do Supabase.
+ * 1. Se query é URL: scrape com Firecrawl, extrair endereço, fuzzy match no Supabase.
+ * 2. Se query é texto: fuzzy match direto contra endereço / título / bairro.
  */
 export async function searchProperty(query: string): Promise<SearchResult> {
   let rows: PropRow[];
@@ -288,7 +288,7 @@ export async function searchProperty(query: string): Promise<SearchResult> {
     return { ok: false, error: "no hay propiedades cargadas en el catalogo" };
   }
 
-  // URL → scrapear, extraer dirección, matchear esa dirección en Supabase.
+  // URL → scrape, extrair endereço, casar esse endereço no Supabase.
   if (isUrl(query)) {
     const scraped = await scrapeUrl(query);
     if (!scraped.ok || !scraped.markdown) {
@@ -327,7 +327,7 @@ export async function searchProperty(query: string): Promise<SearchResult> {
     };
   }
 
-  // Texto → chequear si es desarrollo (regla del prompt) y luego fuzzy match.
+  // Texto → checar se é empreendimento (regra do prompt) e depois fuzzy match.
   if (/desarrollo|emprendimiento|pozo|construccion|preventa/i.test(query)) {
     return { ok: false, esDesarrollo: true, error: "consulta sobre desarrollo" };
   }

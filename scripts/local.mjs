@@ -1,29 +1,29 @@
 #!/usr/bin/env node
 // ============================================================================
-// Builder CRM - correrlo en tu PC sin crear una cuenta en ningun lado
+// Builder CRM - rodar no seu PC sem criar uma conta em lugar nenhum
 // ============================================================================
 //
-//   npm run local                 arranca (la primera vez prepara todo)
-//   npm run local -- --reset      borra la base local y empieza de cero
-//   npm run local -- --sin-datos  sin datos de demostracion
+//   npm run local                 inicia (na primeira vez prepara tudo)
+//   npm run local -- --reset      apaga a base local e começa do zero
+//   npm run local -- --sin-datos  sem dados de demonstração
 //   npm run local -- --puerto 3001
 //
-// Que hace, en orden:
+// O que faz, em ordem:
 //
-//   1. Abre un Postgres EMBEBIDO guardado en .local/db. Es Postgres de verdad
-//      compilado a WebAssembly, instalado como un paquete de npm: no hay Docker, no
-//      hay servicio que instalar y no hay cuenta que crear.
-//   2. Le agrega lo que Supabase trae de fabrica y un Postgres pelado no: los roles
-//      anon / authenticated / service_role, el esquema auth, auth.uid() y una tabla
-//      auth.users (que en una instancia de verdad crea GoTrue).
-//   3. Aplica LAS MISMAS migraciones que una instancia desplegada, con su RLS.
-//   4. Da de alta el administrador de la demo insertandolo en auth.users, para que lo
-//      cree el mismo disparador del primer admin que corre en produccion.
-//   5. Arranca `next dev` con MODO_LOCAL=true y carga los datos demo.
+//   1. Abre um Postgres EMBUTIDO guardado em .local/db. É Postgres de verdade
+//      compilado para WebAssembly, instalado como um pacote de npm: não há Docker, não
+//      há serviço para instalar e não há conta para criar.
+//   2. Acrescenta o que o Supabase traz de fábrica e um Postgres pelado não: os papéis
+//      anon / authenticated / service_role, o esquema auth, auth.uid() e uma tabela
+//      auth.users (que numa instância de verdade o GoTrue cria).
+//   3. Aplica AS MESMAS migrações que uma instância implantada, com seu RLS.
+//   4. Cadastra o administrador da demo inserindo-o em auth.users, para que o
+//      mesmo gatilho do primeiro admin que roda em produção o crie.
+//   5. Inicia `next dev` com MODO_LOCAL=true e carrega os dados demo.
 //
-// Lo que NO es: no hay servidor de autenticacion, asi que no hay login ni equipo ni
-// invitaciones por correo. Quien abre la URL entra como administrador. Para probar eso
-// hace falta una instancia de verdad (ver README).
+// O que NÃO é: não há servidor de autenticação, então não há login nem equipe nem
+// convites por e-mail. Quem abre a URL entra como administrador. Para testar isso
+// faz falta uma instância de verdade (ver README).
 // ============================================================================
 
 import { existsSync, rmSync, mkdirSync, readFileSync } from "node:fs";
@@ -50,18 +50,18 @@ function paso(texto) {
   console.log(`[local] ${texto}`);
 }
 
-// .env.local es opcional en modo local (de eso se trata), pero si existe hay que leerlo
-// antes de opinar sobre que capacidades estan encendidas.
+// .env.local é opcional no modo local (é disso que se trata), mas se existir há que lê-lo
+// antes de opinar sobre quais capacidades estão ligadas.
 if (existsSync(join(raiz, ".env.local"))) {
   try {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local"), quiet: true });
   } catch {
-    /* sin dotenv: no pasa nada, el modo local no necesita variables */
+    /* sem dotenv: não tem problema, o modo local não precisa de variáveis */
   }
 }
 
-// --- 1. el paquete del Postgres embebido -----------------------------------
+// --- 1. o pacote do Postgres embutido --------------------------------------
 let PGlite, pgcrypto;
 try {
   ({ PGlite } = requerir("@electric-sql/pglite"));
@@ -82,10 +82,10 @@ const db = new PGlite({ dataDir: CARPETA, extensions: { pgcrypto } });
 await db.waitReady;
 paso(`base embebida en .local/db${esNueva ? " (nueva)" : ""}`);
 
-// --- 2. lo que Supabase trae de fabrica ------------------------------------
-// Idempotente: correrlo de nuevo no toca nada. auth.users es un remedo minimo con las
-// tres columnas que leen las migraciones del CRM; en una instancia real la crea GoTrue
-// con muchas mas.
+// --- 2. o que o Supabase traz de fábrica ------------------------------------
+// Idempotente: rodar de novo não toca em nada. auth.users é um arremedo mínimo com as
+// três colunas que as migrações do CRM leem; numa instância real o GoTrue a cria
+// com muitas mais.
 const SHIM_AUTH = `
 create extension if not exists pgcrypto;
 do $$ begin
@@ -113,7 +113,7 @@ try {
   await db.exec(SHIM_AUTH);
   if (esNueva) paso("esquema auth preparado (roles, auth.users, auth.uid)");
 
-  // --- 3. las mismas migraciones que una instancia de verdad ----------------
+  // --- 3. as mesmas migrações que uma instância de verdade ----------------
   await db.exec(`
     create table if not exists public._migraciones (
       nombre text primary key,
@@ -137,9 +137,9 @@ try {
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      // pgvector no existe en el Postgres embebido. Es lo unico del repo que lo pide
-      // (modulo propiedades, para la busqueda por significado). Se avisa y se sigue:
-      // el resto del modulo funciona.
+      // pgvector não existe no Postgres embutido. É o único do repositório que o pede
+      // (módulo propiedades, para a busca por significado). Avisa-se e segue-se:
+      // o resto do módulo funciona.
       if (/extension "vector" is not available|type "vector" does not exist/i.test(msg)) {
         paso(`AVISO ${a.nombre} no se aplico: el Postgres embebido no trae pgvector.`);
         paso("AVISO   la busqueda semantica de propiedades no anda en local; el resto si.");
@@ -151,7 +151,7 @@ try {
   }
   if (pendientes.length === 0) paso("migraciones al dia");
 
-  // Red de seguridad, igual que scripts/migrar.mjs: ninguna tabla de public sin RLS.
+  // Rede de segurança, igual a scripts/migrar.mjs: nenhuma tabela de public sem RLS.
   const sinRls = await db.query(`
     select c.relname as tabla from pg_class c
     join pg_namespace n on n.oid = c.relnamespace
@@ -161,9 +161,9 @@ try {
     paso(`RLS habilitado en ${tabla} (faltaba)`);
   }
 
-  // --- 4. el administrador de la demo --------------------------------------
-  // Se inserta en auth.users y lo da de alta el disparador del primer admin, que es el
-  // mismo camino que corre en una instancia desplegada.
+  // --- 4. o administrador da demo ------------------------------------------
+  // Insere-se em auth.users e o gatilho do primeiro admin o cadastra, que é o
+  // mesmo caminho que roda numa instância implantada.
   const yaEsta = await db.query("select 1 from public.team_members where id = $1", [ID_ADMIN]);
   if (yaEsta.rows.length === 0) {
     await db.query(
@@ -174,9 +174,9 @@ try {
     );
     const creado = await db.query("select 1 from public.team_members where id = $1", [ID_ADMIN]);
     if (creado.rows.length === 0) {
-      // Ya habia equipo: el disparador no da de alta al segundo. Pasa si alguien corrio
-      // migraciones y creo un admin antes. Se inserta a mano para que el modo local
-      // tenga con quien entrar.
+      // Já havia equipe: o gatilho não cadastra o segundo. Acontece se alguém rodou
+      // migrações e criou um admin antes. Insere-se à mão para que o modo local
+      // tenha com quem entrar.
       await db.query(
         `insert into public.team_members (id, email, name, role, active)
          values ($1, $2, 'Cuenta demo', 'admin', true) on conflict (id) do nothing`,
@@ -195,14 +195,14 @@ try {
   process.exit(1);
 }
 
-// La base embebida es un archivo con un solo dueno: hay que soltarla ANTES de que la
-// abra el servidor de desarrollo.
+// A base embutida é um arquivo com um só dono: há que soltá-la ANTES que o
+// servidor de desenvolvimento a abra.
 await db.close();
 
 const activos = modulosActivos(raiz);
 paso(`modulos activos: ${activos.length ? activos.join(", ") : "(ninguno)"}`);
 
-// --- 5. el servidor ---------------------------------------------------------
+// --- 5. o servidor ----------------------------------------------------------
 const servidor = spawn(
   process.platform === "win32" ? "npx.cmd" : "npx",
   ["next", "dev", "-p", String(puerto)],
@@ -228,7 +228,7 @@ async function esperarServidor() {
       const res = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(5000) });
       if (res.ok) return true;
     } catch {
-      /* todavia compilando */
+      /* ainda compilando */
     }
     await new Promise((r) => setTimeout(r, 1500));
   }

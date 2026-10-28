@@ -28,14 +28,14 @@ import { CHANNEL_LABELS, isChannel } from "@/lib/channels/types";
 import type { LeadSource } from "@/types";
 
 /**
- * Motor de automatizaciones.
+ * Motor de automações.
  *
- * Una regla = disparador + filtros + cadena de acciones, guardada en `automations`.
- * Cuando pasa algo, `emitAutomationEvent` busca las reglas activas de ese disparador,
- * evalua sus filtros contra el payload, y por cada una que pasa crea un run `pending`.
- * El run se procesa en `after()` (fuera de la request) y el sweeper
- * `GET /api/automations/process` retoma lo que quedo colgado. `automation_runs` es a
- * la vez la cola y el historial.
+ * Uma regra = gatilho + filtros + cadeia de ações, guardada em `automations`.
+ * Quando acontece algo, `emitAutomationEvent` busca as regras ativas desse gatilho,
+ * avalia os seus filtros contra o payload, e por cada uma que passa cria um run `pending`.
+ * O run se processa em `after()` (fora da request) e o sweeper
+ * `GET /api/automations/process` retoma o que ficou pendente. `automation_runs` é ao
+ * mesmo tempo a fila e o histórico.
  */
 
 const MAX_ATTEMPTS = 3;
@@ -75,7 +75,7 @@ export async function emitAutomationEvent(event: AutomationEvent): Promise<strin
   return ids;
 }
 
-/** `after()` solo existe dentro de una request de Next; fuera, se procesa en el acto. */
+/** `after()` só existe dentro de uma request do Next; fora, processa-se na hora. */
 function scheduleProcessing(ids: string[]): void {
   try {
     after(async () => {
@@ -94,7 +94,7 @@ interface ActionResult {
   detail: string;
 }
 
-/** Procesa runs concretos. Cada uno se reclama atomicamente (pending -> processing). */
+/** Processa runs concretos. Cada um se reivindica atomicamente (pending -> processing). */
 export async function processRuns(ids: string[]): Promise<void> {
   for (const id of ids) {
     const [claimed] = await db
@@ -158,7 +158,7 @@ export async function processRuns(ids: string[]): Promise<void> {
       if (claimed.attempts + 1 >= MAX_ATTEMPTS) {
         await finish(id, "failed", results, failed);
       } else {
-        // Vuelve a pending con backoff: el sweeper lo reintenta desde cero.
+        // Volta a pending com backoff: o sweeper tenta de novo do zero.
         await db
           .update(automationRuns)
           .set({
@@ -194,7 +194,7 @@ async function finish(
     .where(eq(automationRuns.id, id));
 }
 
-/** Sweeper: runs pendientes que nadie retomo. */
+/** Sweeper: runs pendentes que ninguém retomou. */
 export async function processStaleRuns(limit = 20): Promise<number> {
   const stale = await db
     .select({ id: automationRuns.id })
@@ -212,7 +212,7 @@ export async function processStaleRuns(limit = 20): Promise<number> {
 }
 
 // ---------------------------------------------------------------------------
-// Catalogo para la UI
+// Catálogo para a UI
 // ---------------------------------------------------------------------------
 
 export async function getCatalog() {
@@ -302,7 +302,7 @@ export interface AutomationData {
   description: string | null;
 }
 
-/** Valida contra el catalogo. Devuelve los datos limpios o la lista de errores. */
+/** Valida contra o catálogo. Devolve os dados limpos ou a lista de erros. */
 export function validateAutomation(
   input: AutomationInput
 ): { ok: true; data: AutomationData } | { ok: false; errors: string[] } {
@@ -357,7 +357,7 @@ export async function getAutomation(key: string): Promise<AutomationRecord | nul
   return row ? toRecord(row) : null;
 }
 
-/** Las sembradas no se borran (se apagan): son el ejemplo de como se arma una regla. */
+/** As semeadas não se apagam (desligam-se): são o exemplo de como se monta uma regra. */
 export async function deleteAutomation(key: string): Promise<"deleted" | "not_found" | "seed"> {
   const existing = await getAutomation(key);
   if (!existing) return "not_found";
@@ -376,7 +376,7 @@ export async function setAutomationEnabled(key: string, enabled: boolean): Promi
 }
 
 // ---------------------------------------------------------------------------
-// Lectura para la lista
+// Leitura para a lista
 // ---------------------------------------------------------------------------
 
 export interface AutomationListItem extends AutomationRecord {

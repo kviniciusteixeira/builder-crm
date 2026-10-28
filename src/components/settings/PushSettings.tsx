@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { usePush } from "@/lib/use-push";
 
 /**
- * Activar/desactivar push en ESTE dispositivo. Cada asesor lo hace una vez en su
- * telefono; los avisos de las automatizaciones llegan ahi.
+ * Ativar/desativar push NESTE dispositivo. Cada assessor faz isso uma vez no
+ * telefone; os avisos das automações chegam ali.
  */
 export function PushSettings() {
   const push = usePush();

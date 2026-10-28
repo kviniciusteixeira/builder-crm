@@ -7,7 +7,7 @@ import type {
   ZernioResult,
 } from "./types";
 
-/** Cuentas sociales conectadas y flujos de conexion (OAuth y headless). */
+/** Contas sociais conectadas e fluxos de conexão (OAuth e headless). */
 
 export async function listAccounts(): Promise<
   ZernioResult<ZernioListResponse<ZernioAccount>>
@@ -32,28 +32,28 @@ export async function listProfiles(): Promise<
 export interface ConnectUrlOptions {
   profileId?: string;
   /**
-   * Solo WhatsApp. Define que pantalla muestra el Embedded Signup de Meta:
-   *  - `api`: selector de WABA / numero. Es lo correcto para un numero que YA esta en
+   * Só WhatsApp. Define que tela mostra o Embedded Signup da Meta:
+   *  - `api`: seletor de WABA / número. É o correto para um número que JÁ está na
    *    Cloud API.
-   *  - `business_app`: coexistencia, un numero compartido con la app WhatsApp Business.
-   * Omitirlo NO es neutro: Meta cae en coexistencia por defecto.
+   *  - `business_app`: coexistência, um número compartilhado com o app WhatsApp Business.
+   * Omiti-lo NÃO é neutro: a Meta cai em coexistência por padrão.
    */
   onboarding?: "api" | "business_app";
   /**
-   * Solo Instagram.
-   *  - `instagram_login` (default): autoriza la cuenta profesional de Instagram
-   *    directamente, SIN necesidad de una Pagina de Facebook.
-   *  - `facebook_login`: pasa por una Pagina que tenga Instagram vinculado, y agrega un
-   *    paso de seleccion de Pagina.
+   * Só Instagram.
+   *  - `instagram_login` (default): autoriza a conta profissional do Instagram
+   *    diretamente, SEM necessidade de uma Página do Facebook.
+   *  - `facebook_login`: passa por uma Página que tenha Instagram vinculado, e adiciona um
+   *    passo de seleção de Página.
    */
   loginMethod?: "instagram_login" | "facebook_login";
 }
 
 /**
- * Paso 1 del flujo OAuth: pedir la URL de autorizacion.
+ * Passo 1 do fluxo OAuth: pedir a URL de autorização.
  *
- * El servidor la pide y devuelve solo el `authUrl` al browser. La API key de Zernio
- * nunca sale del server.
+ * O servidor a pede e devolve só o `authUrl` ao browser. A API key do Zernio
+ * nunca sai do server.
  */
 export async function buildConnectUrl(
   platform: ZernioPlatform,
@@ -66,10 +66,10 @@ export async function buildConnectUrl(
       query: {
         profileId: options.profileId ?? getProfileId() ?? undefined,
         redirect_url: redirectUrl,
-        // Coexistencia por defecto, igual que Zernio. Es el caso normal de un negocio
-        // chico: el numero ya vive en la app WhatsApp Business de un celular y tiene
-        // que seguir funcionando ahi. `api` deja el numero SOLO en Cloud API y lo saca
-        // del telefono, asi que solo sirve si el numero ya estaba en Cloud API.
+        // Coexistência por padrão, igual ao Zernio. É o caso normal de um negócio
+        // pequeno: o número já vive no app WhatsApp Business de um celular e tem
+        // que continuar funcionando ali. `api` deixa o número SÓ na Cloud API e o tira
+        // do telefone, então só serve se o número já estava na Cloud API.
         ...(platform === "whatsapp"
           ? { onboarding: options.onboarding ?? "business_app" }
           : {}),
@@ -82,7 +82,7 @@ export async function buildConnectUrl(
 }
 
 export interface ConnectWhatsappCredentials {
-  /** System User token permanente de Meta. */
+  /** System User token permanente da Meta. */
   accessToken: string;
   wabaId: string;
   phoneNumberId: string;
@@ -90,11 +90,11 @@ export interface ConnectWhatsappCredentials {
 }
 
 /**
- * Conexion headless de una WABA propia (BYO-WABA), sin pasar por el browser.
+ * Conexão headless de uma WABA própria (BYO-WABA), sem passar pelo browser.
  *
- * Es lo que permite migrar WhatsApp a Zernio sin comprar numero ni mover la WABA: el
- * numero y la cuenta siguen siendo del cliente, Zernio solo recibe credenciales para
- * operarla. Requiere un System User con `whatsapp_business_management` y
+ * É o que permite migrar o WhatsApp para o Zernio sem comprar número nem mover a WABA: o
+ * número e a conta continuam sendo do cliente, o Zernio só recebe credenciais para
+ * operá-la. Requer um System User com `whatsapp_business_management` e
  * `whatsapp_business_messaging`.
  */
 export async function connectWhatsappHeadless(
@@ -111,7 +111,7 @@ export async function connectWhatsappHeadless(
   });
 }
 
-/** Zernio devuelve el id de cuenta como `id` o `_id` segun endpoint. */
+/** O Zernio devolve o id de conta como `id` ou `_id` conforme o endpoint. */
 export function accountIdOf(account: ZernioAccount): string {
   return account.id ?? (account as unknown as { _id?: string })._id ?? "";
 }

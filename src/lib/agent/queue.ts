@@ -5,15 +5,15 @@ import { and, eq, isNull, lte } from "drizzle-orm";
 const DEBOUNCE_MS = 6000;
 
 /**
- * Encola un job para procesar el agente IA.
- * - Si ya hay un job pending para la misma CONVERSACION, NO crea uno nuevo:
- *   solo extiende su `process_after` para "absorber" mensajes en rafaga.
- * - Si no hay, crea uno nuevo.
+ * Enfileira um job para processar o agente de IA.
+ * - Se já há um job pending para a mesma CONVERSA, NÃO cria um novo:
+ *   só estende o `process_after` para "absorver" mensagens em rajada.
+ * - Se não há, cria um novo.
  *
- * La unidad de debounce es la conversacion, no el contacto: la misma persona puede
- * escribirte por WhatsApp y por Instagram, y son dos hilos que hay que responder por
- * separado. Sin `conversationId` (flujo WhatsApp por Meta, todavia sin migrar) se cae
- * al comportamiento viejo por contacto, aislado de los jobs que si tienen conversacion.
+ * A unidade de debounce é a conversa, não o contato: a mesma pessoa pode
+ * te escrever por WhatsApp e por Instagram, e são dois fios que há que responder
+ * separado. Sem `conversationId` (fluxo WhatsApp pela Meta, ainda sem migrar) cai-se
+ * no comportamento velho por contato, isolado dos jobs que sim têm conversa.
  */
 export async function enqueueAgentJob(
   contactId: string,
@@ -66,10 +66,10 @@ export async function enqueueAgentJob(
 }
 
 /**
- * Intenta tomar un job para procesar.
- * - Si el job ya no esta pending, no hace nada (otro worker lo tomo).
- * - Si su processAfter aun es futuro, no hace nada (debounce activo, otro setTimeout vendra).
- * - Si OK, marca processing y devuelve el job + contacto.
+ * Tenta tomar um job para processar.
+ * - Se o job já não está pending, não faz nada (outro worker o tomou).
+ * - Se o processAfter ainda é futuro, não faz nada (debounce ativo, outro setTimeout virá).
+ * - Se OK, marca processing e devolve o job + contato.
  */
 export async function claimAgentJob(jobId: string): Promise<
   | { ok: true; contactId: string; conversationId: string | null; attempts: number }
@@ -89,7 +89,7 @@ export async function claimAgentJob(jobId: string): Promise<
     return { ok: false, reason: "debounce_still_active" };
   }
 
-  // Pre-check rapido del contacto
+  // Pré-checagem rápida do contato
   const [contact] = await db
     .select({ aiEnabled: contacts.aiEnabled, needsHuman: contacts.needsHuman })
     .from(contacts)
@@ -116,9 +116,9 @@ export async function claimAgentJob(jobId: string): Promise<
     return { ok: false, reason: "bot_off" };
   }
 
-  // El toggle del contacto es el kill-switch global; el de la conversacion apaga el bot
-  // en un canal sin apagarlo en los otros (derivar a humano por Instagram no deberia
-  // callar al bot en WhatsApp).
+  // O toggle do contato é o kill-switch global; o da conversa desliga o bot
+  // num canal sem desligá-lo nos outros (transferir a humano pelo Instagram não deveria
+  // calar o bot no WhatsApp).
   if (job.conversationId) {
     const [conv] = await db
       .select({
@@ -142,7 +142,7 @@ export async function claimAgentJob(jobId: string): Promise<
     }
   }
 
-  // Marcar processing (no usamos transacciones distribuidas; en MVP single-runner alcanza)
+  // Marcar processing (não usamos transações distribuídas; no MVP single-runner basta)
   const updated = await db
     .update(agentJobs)
     .set({
@@ -194,8 +194,8 @@ export async function markJobFailed(
 }
 
 /**
- * Recoge jobs pendientes vencidos (por si setTimeout fallo o serverless killed
- * el worker). Pensado para llamarse desde un cron periodico.
+ * Recolhe jobs pendentes vencidos (caso o setTimeout falhe ou o serverless mate
+ * o worker). Pensado para se chamar de um cron periódico.
  */
 export async function findStaleJobs(): Promise<
   Array<{ id: string; contactId: string; conversationId: string | null }>

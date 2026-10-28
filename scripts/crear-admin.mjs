@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// Crea (o promueve) un administrador sin pasar por la pantalla de registro.
+// Cria (ou promove) um administrador sem passar pela tela de registro.
 //
 //   node scripts/crear-admin.mjs --email admin@cliente.com --password 'Secreta123' [--nombre "Ana"]
 //
-// Lo usa la skill `deploy-coolify` para dejar una cuenta de demo lista en una instancia
-// recien desplegada. Necesita SUPABASE_SERVICE_ROLE_KEY (solo server-side, nunca en el
-// navegador) y DATABASE_URL.
+// A skill `deploy-coolify` o usa para deixar uma conta de demo pronta numa instância
+// recém-implantada. Precisa de SUPABASE_SERVICE_ROLE_KEY (só server-side, nunca no
+// navegador) e DATABASE_URL.
 //
-// - Si el email no existe en Auth, lo crea confirmado (sin mail de verificacion).
-// - Si ya existe, reutiliza el usuario.
-// - En team_members queda como admin y activo (upsert).
+// - Se o email não existe no Auth, cria-o confirmado (sem e-mail de verificação).
+// - Se já existe, reutiliza o usuário.
+// - Em team_members fica como admin e ativo (upsert).
 
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -23,7 +23,7 @@ if (!process.env.DATABASE_URL && existsSync(join(raiz, ".env.local"))) {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
   } catch {
-    /* sin dotenv */
+    /* sem dotenv */
   }
 }
 
@@ -66,7 +66,7 @@ if (creado.data.user) {
   userId = creado.data.user.id;
   console.log(`[admin] usuario de Auth creado: ${email}`);
 } else {
-  // Ya existe: lo buscamos por email (paginando: la API no filtra por email).
+  // Já existe: buscamos por email (paginando: a API não filtra por email).
   let pagina = 1;
   while (!userId) {
     const { data, error } = await admin.auth.admin.listUsers({ page: pagina, perPage: 200 });

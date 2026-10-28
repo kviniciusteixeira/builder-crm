@@ -1,22 +1,22 @@
 # syntax=docker/dockerfile:1
 # ============================================================================
-# Builder CRM - imagen de produccion (Coolify / docker compose)
+# Builder CRM - imagem de produção (Coolify / docker compose)
 # ============================================================================
-# Tres etapas: deps (npm ci) -> builder (next build, standalone) -> runner (minima,
-# usuario sin privilegios, migraciones al arrancar, healthcheck sobre /api/health).
+# Três etapas: deps (npm ci) -> builder (next build, standalone) -> runner (mínima,
+# usuário sem privilégios, migrações ao iniciar, healthcheck sobre /api/health).
 #
-# Ninguna variable hace falta para construir: desde 1.2.2 la configuracion publica se
-# sirve en ejecucion (src/lib/config-publica.ts). Las NEXT_PUBLIC_* siguen aceptandose
-# como build args para plataformas que las hornean (Vercel); el resto del entorno
-# (DATABASE_URL, OPENROUTER_API_KEY, ZERNIO_*, ...) es de runtime y NO va aqui.
+# Nenhuma variável faz falta para construir: desde 1.2.2 a configuração pública se
+# serve em execução (src/lib/config-publica.ts). As NEXT_PUBLIC_* continuam aceitas
+# como build args para plataformas que as gravam na imagem (Vercel); o resto do ambiente
+# (DATABASE_URL, OPENROUTER_API_KEY, ZERNIO_*, ...) é de runtime e NÃO vai aqui.
 #
-# Los dos `--mount=type=cache` no son adorno. Cada version nueva cambia package.json (el
-# numero de version), eso invalida la capa del `npm ci` y sin cache se vuelven a bajar y
-# descomprimir 817 paquetes en cada despliegue: 4,5 minutos medidos en el VPS de la demo.
-# Con el cache de npm se saltea la red y la descompresion. El de Next ayuda poco con
-# Turbopack (deja un cache chico en disco) y mucho si algun dia se vuelve a webpack: se
-# deja porque no cuesta nada. Son caches del constructor: no entran en la imagen final y,
-# si el servidor los limpia, el build sigue funcionando, solo tarda como antes.
+# Os dois `--mount=type=cache` não são enfeite. Cada versão nova muda package.json (o
+# número de versão), isso invalida a camada do `npm ci` e sem cache voltam a baixar e
+# descompactar 817 pacotes em cada implantação: 4,5 minutos medidos no VPS da demo.
+# Com o cache do npm pula-se a rede e a descompactação. O do Next ajuda pouco com
+# Turbopack (deixa um cache pequeno em disco) e muito se algum dia voltar ao webpack:
+# deixa-se porque não custa nada. São caches do construtor: não entram na imagem final e,
+# se o servidor os limpa, o build continua funcionando, só demora como antes.
 # ============================================================================
 
 FROM node:22-alpine AS deps
@@ -52,12 +52,12 @@ ENV NODE_ENV=production \
 
 RUN addgroup -S app && adduser -S app -G app
 
-# Servidor standalone (server.js + node_modules trazados) + estaticos + publicos.
+# Servidor standalone (server.js + node_modules rastreados) + estáticos + públicos.
 COPY --from=builder --chown=app:app /app/.next/standalone ./
 COPY --from=builder --chown=app:app /app/.next/static ./.next/static
 COPY --from=builder --chown=app:app /app/public ./public
-# Migraciones del nucleo y de los modulos, y el runner. `postgres` ya esta en el
-# node_modules trazado porque la app lo usa.
+# Migrações do núcleo e dos módulos, e o runner. `postgres` já está no
+# node_modules rastreado porque o app o usa.
 COPY --from=builder --chown=app:app /app/supabase/migrations ./supabase/migrations
 COPY --from=builder --chown=app:app /app/scripts/migrar.mjs ./scripts/migrar.mjs
 COPY --from=builder --chown=app:app /app/config ./config

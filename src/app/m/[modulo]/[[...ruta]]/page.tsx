@@ -5,9 +5,9 @@ import { obtenerModulo, resolverPagina } from "@/lib/modules";
 export const dynamic = "force-dynamic";
 
 /**
- * Catch-all de paginas de modulos: /m/<modulo>/<ruta...>.
- * El modulo declara sus paginas por patron en servidor.ts; aqui solo se resuelve, se
- * exige miembro y se delega. Modulo inactivo o ruta sin match -> 404.
+ * Catch-all de páginas de módulos: /m/<modulo>/<ruta...>.
+ * O módulo declara suas páginas por padrão em servidor.ts; aqui só se resolve,
+ * exige-se membro e se delega. Módulo inativo ou rota sem match -> 404.
  */
 export default async function PaginaModuloRoute({
   params,

@@ -6,11 +6,11 @@ import { FlowEditor } from "./FlowEditor";
 import type { Catalog, RuleRecord } from "./types";
 
 interface Props {
-  /** undefined = regla nueva. */
+  /** undefined = regra nova. */
   ruleKey?: string;
 }
 
-/** Carga catalogo + regla + rol, y recien ahi monta el editor. */
+/** Carrega catálogo + regra + papel, e só então monta o editor. */
 export function FlowEditorLoader({ ruleKey }: Props) {
   const [state, setState] = useState<
     | { status: "loading" }

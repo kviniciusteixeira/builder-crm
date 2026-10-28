@@ -1,25 +1,25 @@
 -- ============================================================================
--- Builder CRM - que el alta automatica sea SOLO la del primer administrador
+-- Builder CRM - que o cadastro automático seja SÓ o do primeiro administrador
 -- ============================================================================
--- El disparador daba de alta en team_members a CUALQUIER usuario nuevo de Auth, con
--- rol asesor y activo. Como el endpoint de registro de Supabase Auth es publico por
--- naturaleza (la clave anonima viaja en el navegador), bastaba con llamarlo a mano para
--- entrar al CRM: la pagina /signup cerrada no protegia nada, porque nadie esta obligado
--- a pasar por ella.
+-- O gatilho cadastrava em team_members QUALQUER usuário novo de Auth, com
+-- papel assessor e ativo. Como o endpoint de registro do Supabase Auth é público por
+-- natureza (a chave anônima viaja no navegador), bastava chamá-lo à mão para
+-- entrar no CRM: a página /signup fechada não protegia nada, porque ninguém é obrigado
+-- a passar por ela.
 --
--- Comprobado: alta directa contra /auth/v1/signup -> sesion valida -> asesor activo ->
--- la bandeja y los contactos cargaban.
+-- Comprovado: cadastro direto contra /auth/v1/signup -> sessão válida -> assessor ativo ->
+-- a caixa de entrada e os contatos carregavam.
 --
--- A partir de aca el disparador solo resuelve el arranque: la PRIMERA cuenta de la
--- instancia queda como administradora. Cualquier otro usuario de Auth que aparezca sin
--- invitacion NO entra en team_members y cae en /sin-acceso.
+-- A partir daqui o gatilho só resolve o início: a PRIMEIRA conta da
+-- instância fica como administradora. Qualquer outro usuário de Auth que apareça sem
+-- convite NÃO entra em team_members e cai em /sin-acceso.
 --
--- No rompe el alta desde Ajustes -> Equipo: esa ruta inserta la fila ella misma con el
--- rol que elige el administrador, no dependia de este disparador.
+-- Não quebra o cadastro a partir de Ajustes -> Equipo: essa rota insere a linha ela mesma com o
+-- papel que o administrador escolhe, não dependia deste gatilho.
 --
--- IMPORTANTE al actualizar una instancia que ya estaba en linea: esto cierra la puerta
--- hacia adelante, pero no borra a quien haya entrado antes. Hay que mirar la lista de
--- Ajustes -> Equipo y desactivar lo que no reconozcas.
+-- IMPORTANTE ao atualizar uma instância que já estava no ar: isto fecha a porta
+-- daqui para a frente, mas não apaga quem tenha entrado antes. Há que olhar a lista de
+-- Ajustes -> Equipo e desativar o que você não reconhecer.
 -- ============================================================================
 
 create or replace function public.alta_miembro_desde_auth() returns trigger
@@ -29,7 +29,7 @@ declare
 begin
   select exists (select 1 from public.team_members) into hay_miembros;
 
-  -- Ya hay equipo: el alta la decide un administrador, no el registro de Auth.
+  -- Já há equipe: o cadastro quem decide é um administrador, não o registro de Auth.
   if hay_miembros then
     return new;
   end if;

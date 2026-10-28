@@ -3,9 +3,9 @@ import { emitAutomationEvent } from "@/lib/automations";
 import type { ContactCreatedPayload } from "@/lib/automations/triggers";
 
 /**
- * Emite `contact.created`. Se llama desde cada lugar que da de alta un contacto real
- * (formulario, webhook de leads, importacion, y la ingesta de mensajes cuando alguien
- * nuevo escribe). Nunca lanza: un fallo aca no debe romper el alta.
+ * Emite `contact.created`. Chama-se de cada lugar que dá alta a um contato real
+ * (formulário, webhook de leads, importação, e a ingestão de mensagens quando alguém
+ * novo escreve). Nunca lança: uma falha aqui não deve quebrar a alta.
  */
 export async function emitContactCreated(
   contactId: string,

@@ -6,8 +6,8 @@ import { requireMember } from "@/lib/api-auth";
 export const dynamic = "force-dynamic";
 
 /**
- * Paso 1 del OAuth: el SERVIDOR le pide a Zernio la URL de autorizacion y devuelve solo
- * esa URL. La API key nunca llega al browser, que la abre en un popup.
+ * Passo 1 do OAuth: o SERVIDOR pede ao Zernio a URL de autorização e devolve só
+ * essa URL. A API key nunca chega ao browser, que a abre em um popup.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
   const loginMethod = params.get("loginMethod");
 
   const result = await buildConnectUrl(platform, redirectUrl, {
-    // `business_app` (coexistencia) es el default: el numero sigue vivo en el celular.
-    // `api` muestra el selector de WABA de Meta y sirve para un numero que YA esta en
-    // Cloud API en otro lado. Un numero que esta en la app WhatsApp Business aparece
-    // como "no cumple los requisitos" en el flujo `api`: ese es el sintoma de haber
-    // elegido el modo equivocado, no un problema del numero.
+    // `business_app` (coexistência) é o default: o número continua vivo no celular.
+    // `api` mostra o seletor de WABA da Meta e serve para um número que JÁ está na
+    // Cloud API em outro lugar. Um número que está no app WhatsApp Business aparece
+    // como "no cumple los requisitos" no fluxo `api`: esse é o sintoma de ter
+    // escolhido o modo errado, não um problema do número.
     onboarding: onboarding === "api" ? "api" : "business_app",
     loginMethod: loginMethod === "facebook_login" ? "facebook_login" : undefined,
   });

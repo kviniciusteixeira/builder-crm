@@ -1,21 +1,21 @@
 import crypto from "node:crypto";
 
-// Igual que en client.ts: se lee al usarlo, no al importar el modulo.
+// Igual que em client.ts: lê-se ao usá-lo, não ao importar o módulo.
 function webhookSecret(): string {
   return process.env.ZERNIO_WEBHOOK_SECRET || "";
 }
 
 /**
- * Verifica la firma de un webhook de Zernio.
+ * Verifica a assinatura de um webhook do Zernio.
  *
- * Mismo patron que `verifyWebhookSignature` de meta-whatsapp.ts, con una diferencia:
- * Zernio manda el header `X-Zernio-Signature` como hex crudo en minuscula, SIN el
- * prefijo `sha256=` que usa Meta.
+ * Mesmo padrão que `verifyWebhookSignature` de meta-whatsapp.ts, com uma diferença:
+ * o Zernio manda o header `X-Zernio-Signature` como hex cru em minúscula, SEM o
+ * prefixo `sha256=` que a Meta usa.
  *
- * Fail-closed: sin secreto configurado devuelve false. Un webhook publico sin firma
- * deja que cualquiera inyecte mensajes falsos en la bandeja.
+ * Fail-closed: sem segredo configurado devolve false. Um webhook público sem assinatura
+ * deixa que qualquer um injete mensagens falsas na caixa de entrada.
  *
- * @param rawBody el cuerpo SIN parsear. Con `JSON.parse` + `stringify` la firma no valida.
+ * @param rawBody o corpo SEM parsear. Com `JSON.parse` + `stringify` a assinatura não valida.
  */
 export function verifyZernioSignature(
   rawBody: string,
@@ -36,7 +36,7 @@ export function verifyZernioSignature(
     .digest("hex");
   const provided = signatureHeader.trim().toLowerCase().replace(/^sha256=/, "");
 
-  // timingSafeEqual lanza si los buffers difieren en longitud: comparar antes.
+  // timingSafeEqual lança se os buffers diferem em comprimento: comparar antes.
   if (expected.length !== provided.length) return false;
 
   try {
@@ -54,14 +54,14 @@ export function hasZernioWebhookSecret(): boolean {
 }
 
 /**
- * Eventos que el CRM necesita recibir.
+ * Eventos que o CRM precisa receber.
  *
- * El alta se hace con `npm run zernio:webhook -- --url https://tu-app` (que pega a
- * `POST /v1/webhooks/settings`), no a mano en el dashboard. Si cambias esta lista,
- * volve a correr el script: la suscripcion vive del lado de Zernio y no se entera sola.
+ * A alta se faz com `npm run zernio:webhook -- --url https://tu-app` (que bate em
+ * `POST /v1/webhooks/settings`), não à mão no dashboard. Se mudar esta lista,
+ * volta a rodar o script: a assinatura vive do lado do Zernio e não fica sabendo sozinha.
  *
- * Zernio apaga el webhook despues de 10 fallos de entrega seguidos, asi que un deploy
- * roto que devuelva 500 un rato deja la suscripcion inactiva y hay que reactivarla.
+ * O Zernio desliga o webhook depois de 10 falhas de entrega seguidas, então um deploy
+ * quebrado que devolva 500 um tempo deixa a assinatura inativa e é preciso reativá-la.
  */
 export const SUBSCRIBED_EVENTS = [
   "conversation.started",

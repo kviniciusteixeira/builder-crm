@@ -24,10 +24,10 @@ import {
 import { requireMember } from "@/lib/api-auth";
 
 /**
- * Las plantillas viven en la WABA, no en el proveedor: Zernio expone
- * `/v1/whatsapp/templates` con la misma forma que Graph API (name, language, category,
- * components, status), asi que el resto del archivo y la tabla local no cambian.
- * Con `WHATSAPP_PROVIDER=meta` se sigue hablando con Graph directo.
+ * Os templates vivem na WABA, não no provedor: o Zernio expõe
+ * `/v1/whatsapp/templates` com a mesma forma que a Graph API (name, language, category,
+ * components, status), então o resto do arquivo e a tabela local não mudam.
+ * Com `WHATSAPP_PROVIDER=meta` continua-se falando com a Graph direto.
  */
 async function fetchRemoteTemplates(): Promise<{
   templates?: MetaTemplate[];
@@ -109,7 +109,7 @@ function listLocal() {
     .orderBy(desc(whatsappTemplates.updatedAt));
 }
 
-/** Inserta o actualiza por (name, language) y devuelve la fila resultante. */
+/** Insere ou atualiza por (name, language) e devolve a linha resultante. */
 async function upsertTemplate(values: TemplateValues) {
   const [existing] = await db
     .select()
@@ -134,7 +134,7 @@ async function upsertTemplate(values: TemplateValues) {
   return row;
 }
 
-/** GET /api/whatsapp/templates?sync=1 — lista local; con sync trae estado de Meta. */
+/** GET /api/whatsapp/templates?sync=1 — lista local; com sync traz o estado da Meta. */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
@@ -178,7 +178,7 @@ const createSchema = z.object({
   examples: z.array(z.string()).default([]),
 });
 
-/** POST /api/whatsapp/templates — crea la plantilla en Meta y la guarda local. */
+/** POST /api/whatsapp/templates — cria o template na Meta e o guarda localmente. */
 export async function POST(request: NextRequest) {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

@@ -9,7 +9,7 @@ import type { DashboardStats } from "@/types";
 
 interface KPICardsProps {
   stats: DashboardStats;
-  /** Contactos nuevos: serie diaria real de los ultimos 7 dias y comparacion con los 7 anteriores. */
+  /** Contatos novos: série diária real dos últimos 7 dias e comparação com os 7 anteriores. */
   contactos?: { serie: number[]; actual: number; anterior: number };
 }
 
@@ -19,7 +19,7 @@ interface KPI {
   icon: typeof Users;
   iconClass: string;
   watermarkClass: string;
-  /** Solo cuando hay una comparacion real; nunca un numero inventado. */
+  /** Só quando há uma comparação real; nunca um número inventado. */
   delta?: { pct: number | null; label: string };
   sparkline?: number[];
 }

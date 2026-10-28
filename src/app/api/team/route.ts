@@ -9,7 +9,7 @@ import { correoDeAccesoActivo, enviarEnlaceDeAcceso, invitarPorCorreo } from "@/
 
 export const dynamic = "force-dynamic";
 
-/** Lista del equipo. La ve cualquier miembro (para el selector de propietario). */
+/** Lista da equipe. Qualquer membro a vê (para o seletor de proprietário). */
 export async function GET() {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
@@ -17,17 +17,17 @@ export async function GET() {
 }
 
 /**
- * Alta de un miembro (solo admin). Crea el usuario en Supabase Auth y lo agrega al
- * equipo. No pasa por el signup publico, que esta cerrado.
+ * Cadastro de um membro (somente admin). Cria o usuário no Supabase Auth e o adiciona à
+ * equipe. Não passa pelo signup público, que está fechado.
  *
- * Dos formas de darle acceso, segun `invitar`:
- *   - invitacion por correo: la persona recibe un enlace y elige su propia contrasena.
- *     Solo si la instancia declara que el servidor de autenticacion manda correos.
- *   - contrasena temporal (o ninguna, si entra con un proveedor externo): el admin se la
- *     pasa por donde quiera. Es el unico camino cuando no hay correo configurado.
+ * Duas formas de dar acesso, segundo `invitar`:
+ *   - convite por e-mail: a pessoa recebe um link e escolhe a própria senha.
+ *     Só se a instância declara que o servidor de autenticação envia e-mails.
+ *   - senha temporária (ou nenhuma, se entra com um provedor externo): o admin a
+ *     passa por onde quiser. É o único caminho quando não há e-mail configurado.
  *
- * Si el email ya tiene usuario en Auth (se registro antes, o entro con Google), se
- * reutiliza ese usuario y la contrasena que venga se ignora.
+ * Se o e-mail já tem usuário no Auth (cadastrou-se antes, ou entrou com o Google),
+ * reutiliza-se esse usuário e a senha que vier é ignorada.
  */
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
   const name = (body.name ?? "").trim();
   const role = body.role === "admin" ? "admin" : "asesor";
   const password = body.password ?? "";
-  // El interruptor manda sobre lo que pida el navegador: sin correo configurado, una
-  // "invitacion enviada" seria mentira (ver src/lib/auth-correo.ts).
+  // O interruptor manda sobre o que o navegador peça: sem e-mail configurado, um
+  // "convite enviado" seria mentira (ver src/lib/auth-correo.ts).
   const invitar = Boolean(body.invitar) && correoDeAccesoActivo();
 
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json({ error: "Email invalido" }, { status: 400 });
   }
 
-  // Usuario de Auth existente?
+  // Usuário de Auth existente?
   const [existing] = await db.execute<{ id: string }>(
     sql`select id from auth.users where lower(email) = ${email} limit 1`
   );
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
   let avisoCorreo: string | null = null;
 
   if (!userId && invitar) {
-    // GoTrue crea el usuario y manda el correo en la misma transaccion: si el envio
-    // falla, no queda ningun usuario a medias y el error se puede mostrar tal cual.
+    // O GoTrue cria o usuário e envia o e-mail na mesma transação: se o envio
+    // falha, não fica nenhum usuário pela metade e o erro pode ser mostrado tal qual.
     const r = await invitarPorCorreo(email, name);
     if ("error" in r) {
       return NextResponse.json(
@@ -76,9 +76,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (!userId) {
-    // La contrasena es opcional: si el equipo entra con un proveedor externo (Google y
-    // companeros), inventar una temporal solo agrega algo que nadie va a usar. Sin
-    // contrasena la cuenta existe y entra por el proveedor; con contrasena, por las dos.
+    // A senha é opcional: se a equipe entra com um provedor externo (Google e
+    // similares), inventar uma temporária só acrescenta algo que ninguém vai usar. Sem
+    // senha a conta existe e entra pelo provedor; com senha, pelos dois.
     if (password && password.length < 8) {
       return NextResponse.json(
         { error: "La contrasena temporal debe tener al menos 8 caracteres" },
@@ -101,9 +101,9 @@ export async function POST(request: NextRequest) {
     userId = data.user.id;
   }
 
-  // Usuario que ya existia y el admin pidio avisarle: no se puede invitar dos veces, se
-  // le manda un enlace para definir la contrasena. Si el envio falla, el alta igual
-  // vale: se avisa y el admin le pasa el acceso por otro lado.
+  // Usuário que já existia e o admin pediu para avisá-lo: não dá para convidar duas vezes,
+  // manda-se um link para definir a senha. Se o envio falha, o cadastro mesmo assim
+  // vale: avisa-se e o admin passa o acesso por outro lado.
   if (existing && invitar) {
     const { error } = await enviarEnlaceDeAcceso(email);
     if (error) avisoCorreo = error;

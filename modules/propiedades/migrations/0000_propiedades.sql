@@ -1,4 +1,4 @@
--- Modulo propiedades. Idempotente. Requiere pgvector (Supabase lo trae).
+-- Módulo propiedades. Idempotente. Exige pgvector (o Supabase já traz).
 
 create extension if not exists vector;
 
@@ -42,8 +42,8 @@ create index if not exists propiedades_property_type_idx on propiedades (propert
 create index if not exists propiedades_price_idx         on propiedades (price);
 create index if not exists propiedades_embedding_idx     on propiedades using hnsw (embedding vector_cosine_ops);
 
--- Busqueda hibrida: filtros duros (SQL) + ranking semantico (coseno). Cualquier
--- filtro en null se ignora. similarity = 1 es identico.
+-- Busca híbrida: filtros duros (SQL) + ranking semântico (cosseno). Qualquer
+-- filtro em null se ignora. similarity = 1 é idêntico.
 create or replace function propiedades_buscar(
   query_embedding        vector(1536),
   match_count            int     default 5,
@@ -83,7 +83,7 @@ create or replace function propiedades_buscar(
   limit match_count;
 $$;
 
--- RLS: todo miembro puede leer el catalogo por la API publica.
+-- RLS: todo membro pode ler o catálogo pela API pública.
 alter table propiedades enable row level security;
 drop policy if exists propiedades_select on propiedades;
 create policy propiedades_select on propiedades for select to authenticated

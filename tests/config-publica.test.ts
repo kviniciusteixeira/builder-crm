@@ -6,10 +6,10 @@ import {
 } from "@/lib/config-publica";
 
 /**
- * Este bloque JSON se incrusta dentro de una etiqueta <script> en todas las paginas. Dos
- * cosas tienen que seguir siendo ciertas: que no se pueda cerrar la etiqueta desde el
- * contenido (seria inyeccion de codigo en el navegador de cada persona del equipo) y que
- * el valor que ve el navegador sea el del entorno, no uno horneado en el build.
+ * Este bloco JSON se incrusta dentro de uma etiqueta <script> em todas as páginas. Duas
+ * coisas têm que continuar certas: que não dê para fechar a etiqueta a partir do
+ * conteúdo (seria injeção de código no navegador de cada pessoa da equipe) e que
+ * o valor que o navegador vê seja o do ambiente, não um gravado no build.
  */
 
 const ORIGINAL = { ...process.env };
@@ -37,7 +37,7 @@ describe("configuracion publica", () => {
     const json = configPublicaSerializada();
     expect(json).not.toContain("</script>");
     expect(json).toContain("\\u003c");
-    // Y lo escapado sigue siendo JSON valido con el valor intacto.
+    // E o escapado continua sendo JSON válido com o valor intacto.
     expect(JSON.parse(json).supabaseUrl).toContain("</script>");
   });
 
@@ -50,8 +50,8 @@ describe("configuracion publica", () => {
   });
 
   it("no cambia el id del bloque sin querer", () => {
-    // El layout lo escribe y el navegador lo busca por este id: si cambia en un lado y
-    // no en el otro, el cliente de Supabase del navegador nace vacio y nada avisa.
+    // O layout o escreve e o navegador o busca por este id: se muda de um lado e
+    // não do outro, o cliente de Supabase do navegador nasce vazio e nada avisa.
     expect(ID_CONFIG_PUBLICA).toBe("builder-crm-config");
   });
 });

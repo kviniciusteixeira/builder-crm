@@ -2,9 +2,9 @@ import { CalendarDays, MapPin } from "lucide-react";
 import type { ManifiestoModulo } from "@/lib/modules/types";
 
 /**
- * Modulo visitas: coordinacion de visitas a propiedades (o a cualquier lugar) con
- * agenda mensual. Lo usa la plantilla inmobiliaria; sirve para cualquier negocio que
- * agende encuentros presenciales.
+ * Módulo visitas: coordenação de visitas a propriedades (ou a qualquer lugar) com
+ * agenda mensal. O modelo imobiliário o usa; serve para qualquer negócio que
+ * agende encontros presenciais.
  */
 const manifiesto: ManifiestoModulo = {
   nombre: "visitas",

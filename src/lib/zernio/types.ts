@@ -1,9 +1,9 @@
 /**
- * Tipos de la API de Zernio (https://docs.zernio.com), escritos a mano contra la doc.
- * Solo se tipa lo que consumimos; el resto de la superficie llega como `unknown`.
+ * Tipos da API do Zernio (https://docs.zernio.com), escritos à mão contra a doc.
+ * Só se tipa o que consumimos; o resto da superfície chega como `unknown`.
  */
 
-/** Zernio soporta 16 plataformas; el CRM usa estas tres mas las que puedan llegar. */
+/** O Zernio suporta 16 plataformas; o CRM usa estas três mais as que possam chegar. */
 export type ZernioPlatform =
   | "whatsapp"
   | "instagram"
@@ -18,7 +18,7 @@ export interface ZernioError {
   status: number;
   code?: string;
   message: string;
-  /** Segundos a esperar si el status es 429. */
+  /** Segundos a esperar se o status é 429. */
   retryAfter?: number;
   raw?: unknown;
 }
@@ -42,8 +42,8 @@ export interface ZernioFailedAccount {
 }
 
 /**
- * Zernio no falla la request entera si una cuenta no responde: la degrada aca. Hay que
- * mirarlo o una sincronizacion parcial se lee como completa.
+ * O Zernio não falha a request inteira se uma conta não responde: degrada-a aqui. Há que
+ * olhar ou uma sincronização parcial se lê como completa.
  */
 export interface ZernioListMeta {
   accountsQueried?: number;
@@ -67,8 +67,8 @@ export interface ZernioInstagramProfile {
 }
 
 /**
- * Atribucion de origen. `ctwa_*` = Click To WhatsApp Ads, `meta_ad_*` = anuncio de
- * Meta que genero el DM. Para una inmobiliaria esto es saber de que aviso vino el lead.
+ * Atribuição de origem. `ctwa_*` = Click To WhatsApp Ads, `meta_ad_*` = anúncio da
+ * Meta que gerou o DM. Para uma imobiliária isto é saber de que anúncio veio o lead.
  */
 export interface ZernioConversationMetadata {
   ctwa_clid?: string;
@@ -95,7 +95,7 @@ export interface ZernioConversation {
   platform: ZernioPlatform;
   accountId: string;
   accountUsername?: string;
-  /** IGSID en Instagram, PSID en Messenger, telefono en WhatsApp. */
+  /** IGSID no Instagram, PSID no Messenger, telefone no WhatsApp. */
   participantId?: string;
   participantName?: string;
   participantPicture?: string;
@@ -117,23 +117,23 @@ export interface ZernioAttachment {
   [key: string]: unknown;
 }
 
-/** Direccion tal cual la manda Zernio; se normaliza a "in"/"out" al persistir. */
+/** Direção tal qual o Zernio manda; normaliza-se a "in"/"out" ao persistir. */
 export type ZernioDirection = "incoming" | "outgoing";
 
 export interface ZernioMessageSender {
   /**
-   * Identificador del remitente en la plataforma. En WhatsApp es el telefono SIN el `+`
-   * cuando esta disponible, y si no el `businessScopedUserId`.
+   * Identificador do remetente na plataforma. No WhatsApp é o telefone SEM o `+`
+   * quando está disponível, e senão o `businessScopedUserId`.
    */
   id: string;
-  /** Contacto del CRM de Zernio, si ya lo tiene mapeado. No lo usamos: el CRM es el nuestro. */
+  /** Contato do CRM do Zernio, se já o tem mapeado. Não o usamos: o CRM é o nosso. */
   contactId?: string;
   name?: string;
   username?: string;
   /**
-   * Solo WhatsApp, E.164 con `+`. NULLABLE desde el rollout de BSUID (abril 2026): los
-   * usuarios con username pueden escribir sin exponer el telefono. Para esos casos hay
-   * que anclar la identidad en `businessScopedUserId`.
+   * Só WhatsApp, E.164 com `+`. NULLABLE desde o rollout de BSUID (abril 2026): os
+   * usuários com username podem escrever sem expor o telefone. Para esses casos há
+   * que ancorar a identidade em `businessScopedUserId`.
    */
   phone?: string | null;
   businessScopedUserId?: string;
@@ -143,7 +143,7 @@ export interface ZernioMessage {
   id: string;
   conversationId: string;
   platform: ZernioPlatform;
-  /** Id del mensaje en la plataforma (wamid.* en WhatsApp). */
+  /** Id da mensagem na plataforma (wamid.* no WhatsApp). */
   platformMessageId?: string;
   direction: ZernioDirection;
   text?: string | null;
@@ -157,11 +157,11 @@ export interface ZernioMessage {
 }
 
 /**
- * Mensaje tal como lo devuelve el REST (`GET /inbox/conversations/{id}/messages`).
+ * Mensagem tal como a devolve o REST (`GET /inbox/conversations/{id}/messages`).
  *
- * OJO: NO es la misma forma que la del webhook. El REST usa `message` / `senderId` /
- * `createdAt` y no expone `platformMessageId`; el webhook usa `text` / `sender.id` /
- * `sentAt` y si lo expone. Son dos contratos distintos para la misma entidad.
+ * ATENÇÃO: NÃO é a mesma forma que a do webhook. O REST usa `message` / `senderId` /
+ * `createdAt` e não expõe `platformMessageId`; o webhook usa `text` / `sender.id` /
+ * `sentAt` e sim o expõe. São dois contratos distintos para a mesma entidade.
  */
 export interface ZernioInboxMessage {
   id: string;
@@ -229,7 +229,7 @@ export type ZernioEventName =
   | (typeof ZERNIO_ACCOUNT_EVENTS)[number]
   | (string & {});
 
-/** La conversacion tal como viaja dentro de un webhook (no es la del endpoint de listado). */
+/** A conversa tal como viaja dentro de um webhook (não é a do endpoint de listagem). */
 export interface ZernioWebhookConversation {
   id: string;
   platformConversationId?: string;
@@ -252,9 +252,9 @@ export interface ZernioWebhookAccount {
 }
 
 /**
- * Envelope de todo webhook de Zernio: `{ id, event, message, conversation, account,
- * timestamp }`. Los campos concretos varian por evento, asi que se leen defensivamente
- * y el payload entero se guarda en `webhook_events.payload` / `messages.raw_payload`.
+ * Envelope de todo webhook do Zernio: `{ id, event, message, conversation, account,
+ * timestamp }`. Os campos concretos variam por evento, então se leem defensivamente
+ * e o payload inteiro se guarda em `webhook_events.payload` / `messages.raw_payload`.
  */
 export interface ZernioWebhookPayload {
   id?: string;

@@ -1,4 +1,4 @@
--- Modulo visitas. Idempotente.
+-- Módulo visitas. Idempotente.
 
 create table if not exists visitas (
   id               text primary key,
@@ -17,7 +17,7 @@ create index if not exists visitas_contact_idx   on visitas (contact_id);
 create index if not exists visitas_scheduled_idx on visitas (scheduled_at);
 create index if not exists visitas_status_idx    on visitas (status);
 
--- RLS: cada miembro lee las visitas de sus contactos; el admin todas.
+-- RLS: cada membro lê as visitas dos seus contatos; o admin, todas.
 alter table visitas enable row level security;
 drop policy if exists visitas_select on visitas;
 create policy visitas_select on visitas for select to authenticated

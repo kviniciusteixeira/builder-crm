@@ -12,28 +12,28 @@ import { isChannel, type Channel } from "./types";
 import type { ZernioConversation, ZernioInboxMessage } from "@/lib/zernio/types";
 
 /**
- * Importa el historial que Zernio ya tiene replicado.
+ * Importa o histórico que o Zernio já tem replicado.
  *
- * Al conectar una cuenta, Zernio copia hasta 500 conversaciones y los 500 mensajes mas
- * nuevos de cada una, pero **eso no llega por webhook**: sin este paso el CRM arranca
- * vacio aunque el historial exista del otro lado.
+ * Ao conectar uma conta, o Zernio copia até 500 conversas e as 500 mensagens mais
+ * novas de cada uma, mas **isso não chega por webhook**: sem este passo o CRM arranca
+ * vazio mesmo que o histórico exista do outro lado.
  *
- * REGLA DURA: nunca encola al agente. Importar 500 hilos con el bot prendido seria
- * mandarle una respuesta automatica a cientos de clientes viejos. `ingestMessage`
- * ademas descarta por antiguedad, o sea que hay dos cinturones.
+ * REGRA DURA: nunca enfileira o agente. Importar 500 fios com o bot ligado seria
+ * mandar uma resposta automática a centenas de clientes velhos. `ingestMessage`
+ * além disso descarta por antiguidade, ou seja, há dois cintos.
  */
 
 export interface BackfillOptions {
-  /** Limitar a un canal. Por defecto importa todos los conectados. */
+  /** Limitar a um canal. Por padrão importa todos os conectados. */
   channel?: Channel;
-  /** Tope de conversaciones a recorrer. */
+  /** Teto de conversas a percorrer. */
   maxConversations?: number;
-  /** Mensajes por conversacion (Zernio permite hasta 100 por pagina). */
+  /** Mensagens por conversa (o Zernio permite até 100 por página). */
   messagesPerConversation?: number;
   /**
-   * Presupuesto de tiempo. El plan Hobby de Vercel corta las funciones a los 300s con
-   * un 504, asi que se corta antes por las buenas y se informa que quedo pendiente:
-   * mejor una importacion parcial y reanudable que una muerta a mitad de camino.
+   * Orçamento de tempo. O plano Hobby da Vercel corta as funções aos 300s com
+   * um 504, então se corta antes por bem e se informa que ficou pendente:
+   * melhor uma importação parcial e retomável que uma morta no meio do caminho.
    */
   timeBudgetMs?: number;
 }
@@ -43,7 +43,7 @@ export interface BackfillResult {
   conversations: number;
   messages: number;
   skipped: number;
-  /** true si quedaron hilos sin importar: volver a correr para continuar. */
+  /** true se ficaram fios sem importar: voltar a rodar para continuar. */
   incomplete: boolean;
   errors: string[];
 }
@@ -58,9 +58,9 @@ export async function backfillFromZernio(
     timeBudgetMs = 240_000,
   } = options;
 
-  // Los mensajes posteriores al arranque los trae el webhook en vivo. Ignorarlos evita
-  // insertarlos dos veces: el REST no expone `platformMessageId`, asi que la misma
-  // fila entraria con dos external_id distintos y el indice unico no la frenaria.
+  // As mensagens posteriores ao arranque as traz o webhook ao vivo. Ignorá-las evita
+  // inseri-las duas vezes: o REST não expõe `platformMessageId`, então a mesma
+  // linha entraria com dois external_id distintos e o índice único não a frearia.
   const startedAt = Date.now();
 
   const result: BackfillResult = {
@@ -88,8 +88,8 @@ export async function backfillFromZernio(
     for (const conv of page) {
       const outOfTime = Date.now() - startedAt > timeBudgetMs;
       if (outOfTime || result.conversations >= maxConversations) {
-        // La ingesta es idempotente (external_id unico), asi que volver a correr
-        // continua sin duplicar nada.
+        // A ingestão é idempotente (external_id único), então voltar a rodar
+        // continua sem duplicar nada.
         result.incomplete = true;
         result.errors.push(
           outOfTime
@@ -123,7 +123,7 @@ export async function backfillFromZernio(
   return result;
 }
 
-/** @returns cantidad de mensajes importados, o null si la conversacion se salteo. */
+/** @returns quantidade de mensagens importadas, ou null se a conversa foi pulada. */
 async function importConversation(
   conv: ZernioConversation,
   limit: number,
@@ -191,7 +191,7 @@ async function importConversation(
       sentAt,
       status: statusOf(msg),
       rawPayload: msg,
-      // Lo importante de todo el archivo.
+      // O importante de todo o arquivo.
       enqueueAgent: false,
     });
 
@@ -203,8 +203,8 @@ async function importConversation(
 
 function statusOf(msg: ZernioInboxMessage): string | undefined {
   if (msg.direction === "outgoing") return msg.deliveryStatus ?? "sent";
-  // Entrantes historicos entran como leidos: no tiene sentido que el inbox muestre
-  // cientos de no leidos la primera vez que se conecta la cuenta.
+  // Entrantes históricos entram como lidos: não faz sentido que a caixa de entrada mostre
+  // centenas de não lidos a primeira vez que se conecta a conta.
   return "read";
 }
 

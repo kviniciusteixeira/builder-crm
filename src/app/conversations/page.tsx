@@ -4,7 +4,7 @@ import { getCurrentMember, visibleOwnerId } from "@/lib/team";
 import { ConversationsListLive } from "@/components/conversations/ConversationsListLive";
 import { MessageSquare } from "lucide-react";
 
-// El inbox lee la base en cada request: nunca se prerenderiza en build.
+// A caixa de entrada lê a base em cada request: nunca se pré-renderiza no build.
 export const dynamic = "force-dynamic";
 
 export default async function ConversationsPage() {

@@ -6,7 +6,7 @@ import { Database, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-/** Boton del inicio (solo admin): carga los datos de demostracion y refresca. */
+/** Botão do início (só admin): carrega os dados de demonstração e atualiza. */
 export function CargarDemo() {
   const router = useRouter();
   const [ocupado, setOcupado] = useState(false);

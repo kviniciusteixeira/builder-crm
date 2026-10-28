@@ -1,4 +1,4 @@
 import { gateLayout } from "@/lib/modules/gate";
 
-// Apagable desde config/cliente.ts (modulos.nucleo.automatizaciones): apagado = 404 y fuera del menu.
+// Desligável em config/cliente.ts (modulos.nucleo.automatizaciones): desligado = 404 e fora do menu.
 export default gateLayout("automatizaciones");

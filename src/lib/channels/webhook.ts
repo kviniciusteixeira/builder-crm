@@ -8,17 +8,17 @@ import type { Conector } from "./conector";
 import { autorizadoPorSecreto } from "@/lib/secreto-worker";
 
 /**
- * Mecanica generica de webhooks para cualquier conector:
+ * Mecânica genérica de webhooks para qualquer conector:
  *
- *   POST -> manejarWebhook(conector, req)   verifica firma, reclama el evento
- *                                            (idempotencia), responde 2xx, procesa en after()
- *   GET  -> barrerWebhook(conector, req)     reprocesa lo que quedo colgado (con secreto)
+ *   POST -> manejarWebhook(conector, req)   verifica assinatura, reivindica o evento
+ *                                            (idempotência), responde 2xx, processa em after()
+ *   GET  -> barrerWebhook(conector, req)     reprocessa o que ficou pendente (com segredo)
  *
- * Los proveedores entregan at-least-once: el claim en `webhook_events` descarta los
- * reintentos. Pero si el `after()` muere, el evento queda reclamado y nadie lo vuelve a
- * ver; por eso el payload se guarda y el barrido lo reintenta hasta MAX_ATTEMPTS.
+ * Os provedores entregam at-least-once: o claim em `webhook_events` descarta as
+ * novas tentativas. Mas se o `after()` morre, o evento fica reivindicado e ninguém o volta a
+ * ver; por isso o payload se guarda e a varredura o tenta de novo até MAX_ATTEMPTS.
  *
- * Este modulo importa lo minimo (db, crypto). Lo pesado entra por `import()` dentro de
+ * Este módulo importa o mínimo (db, crypto). O pesado entra por `import()` dentro de
  * `conector.webhook.procesar`.
  */
 
@@ -111,11 +111,11 @@ export async function barrerWebhook(conector: Conector, request: NextRequest): P
 }
 
 /**
- * Los crons de Vercel solo mandan `Authorization: Bearer`; el worker del agente acepta
- * tambien `x-agent-secret`. Sin AGENT_WORKER_SECRET configurado NO se atiende: esta
- * ruta es publica en el middleware y el secreto es lo unico que la protege.
+ * Os crons da Vercel só mandam `Authorization: Bearer`; o worker do agente aceita
+ * também `x-agent-secret`. Sem AGENT_WORKER_SECRET configurado NÃO se atende: esta
+ * rota é pública no middleware e o segredo é o único que a protege.
  */
-// Se re-exporta para no romper a quien ya lo importaba desde aca.
+// Reexporta-se para não quebrar quem já o importava daqui.
 export { autorizadoPorSecreto };
 
 async function ejecutarEvento(conector: Conector, eventId: string, payload: unknown, headers: Headers): Promise<void> {
@@ -123,8 +123,8 @@ async function ejecutarEvento(conector: Conector, eventId: string, payload: unkn
     const result = await conector.webhook!.procesar(payload);
 
     if (result.status === "retry") {
-      // Fuera de orden (tipico: `delivered` antes de que exista el mensaje). Queda en
-      // 'received' para que el barrido lo reintente.
+      // Fora de ordem (típico: `delivered` antes que exista a mensagem). Fica em
+      // 'received' para que a varredura tente de novo.
       await db
         .update(webhookEvents)
         .set({ attempts: (await intentos(eventId)) + 1, error: result.reason ?? null })

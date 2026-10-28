@@ -1,12 +1,12 @@
 #!/bin/sh
-# Arranque del contenedor: migraciones primero, servidor despues.
+# Início do contêiner: migrações primeiro, servidor depois.
 #
-# Por que aqui y no en un "pre-deployment command" de Coolify: ese comando corre en el
-# contenedor VIEJO, con el codigo viejo; las migraciones tienen que correr con el codigo
-# que va a servir. Si la base no responde, migrar.mjs reintenta 15 veces (30 s) antes
-# de fallar, y el start-period del HEALTHCHECK cubre esa espera.
+# Por que aqui e não num "pre-deployment command" do Coolify: esse comando roda no
+# contêiner VELHO, com o código velho; as migrações têm que rodar com o código
+# que vai servir. Se a base não responde, migrar.mjs tenta de novo 15 vezes (30 s) antes
+# de falhar, e o start-period do HEALTHCHECK cobre essa espera.
 #
-# SKIP_MIGRATIONS=true salta el paso (por ejemplo en una replica que no debe migrar).
+# SKIP_MIGRATIONS=true pula o passo (por exemplo numa réplica que não deve migrar).
 set -e
 
 if [ "$SKIP_MIGRATIONS" != "true" ]; then

@@ -1,76 +1,76 @@
 ---
 name: crear-modulo
 description: |
-  Crea un modulo nuevo en modules/<nombre>/ respetando el contrato del nucleo
-  (manifiesto, servidor, migraciones con RLS, campos, tools del agente, seed) y lo activa
-  en config/modulos.json. Activar cuando el usuario dice: crea un modulo, necesito una
-  seccion de <pedidos|citas|propiedades|...>, agrega una tabla para el cliente, el CRM
-  tiene que manejar <cosa>, o cuando adaptar-a-cliente lo requiere.
+  Cria um módulo novo em modules/<nombre>/ respeitando o contrato do núcleo
+  (manifesto, servidor, migrações com RLS, campos, tools do agente, seed) e o ativa
+  em config/modulos.json. Ativar quando o usuário diz: cria um módulo, preciso de uma
+  seção de <pedidos|consultas|imóveis|...>, adiciona uma tabela para o cliente, o CRM
+  tem que lidar com <coisa>, ou quando adaptar-a-cliente o exige.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-# Crear un modulo
+# Criar um módulo
 
-> Modulo a crear: $ARGUMENTS
+> Módulo a criar: $ARGUMENTS
 
-Un modulo es una carpeta autocontenida que el nucleo descubre por configuracion.
-Antes de escribir, lee `modules/README.md` (reglas), `src/lib/modules/types.ts`
-(contrato) y `modules/ejemplo/` (modulo minimo funcionando).
+Um módulo é uma pasta autocontida que o núcleo descobre pela configuração.
+Antes de escrever, leia `modules/README.md` (regras), `src/lib/modules/types.ts`
+(contrato) e `modules/ejemplo/` (módulo mínimo funcionando).
 
 ## 1. Definir
 
-- **Nombre** en snake_case, igual a la carpeta (`pedidos`, `citas`, `propiedades`).
-- Que **pantallas** tiene (`""` principal, `nueva`, `[id]`, `[id]/editar`), que **API**,
-  que **tablas** (prefijo `<nombre>_`), que **campos de contacto** aporta (prefijo
-  `<nombre>_` en la clave), que **tools** le da al agente, y que **seed**.
-- Si hay spec del cliente (`specs/<cliente>/spec.md`), la seccion "Configuracion y
-  modulos" ya lo dice. Si no, escribe la spec ligera primero.
+- **Nome** em snake_case, igual à pasta (`pedidos`, `citas`, `propiedades`).
+- Que **telas** tem (`""` principal, `nueva`, `[id]`, `[id]/editar`), que **API**,
+  que **tabelas** (prefixo `<nombre>_`), que **campos de contato** contribui (prefixo
+  `<nombre>_` na chave), que **tools** dá ao agente, e que **seed**.
+- Se houver spec do cliente (`specs/<cliente>/spec.md`), a seção "Configuração e
+  módulos" já diz. Se não, escreva a spec leve primeiro.
 
-## 2. Crear la carpeta
+## 2. Criar a pasta
 
 ```bash
 cp -r modules/_plantilla modules/<nombre>
 ```
 
-Completa:
+Complete:
 
-- `manifiesto.ts`: `nombre`, `titulo`, `descripcion`, `version`, `nav` (icono de
-  lucide, seccion Operaciones | Productividad | Inteligencia), `campos`.
-  **Seguro para el navegador**: nada de base de datos ni `server-only`.
-- `tabla.ts` (si hay tablas): `pgTable` de drizzle, espejo exacto de la migracion.
-- `migrations/0000_<nombre>.sql`: `create table if not exists`, indices, `alter table
-  ... enable row level security` y una politica de lectura (`public.contacto_visible`
-  si cuelga de un contacto; `public.es_miembro()` si es catalogo; `public.es_admin()`
-  si es sensible). Idempotente.
-- `servidor.tsx`: `paginas`, `api` (handlers reciben `{ params, member }`, ya pasaron
-  `requireMember`; filtra por `ownerFilter(member)` / `canAccessContactId` lo que cuelga
-  de contactos), `tools` (nombre unico, `descripcionUI`, `ejecutar(args, ctx)` devuelve
+- `manifiesto.ts`: `nombre`, `titulo`, `descripcion`, `version`, `nav` (ícone de
+  lucide, seção Operaciones | Productividad | Inteligencia), `campos`.
+  **Seguro para o navegador**: nada de banco de dados nem `server-only`.
+- `tabla.ts` (se houver tabelas): `pgTable` do drizzle, espelho exato da migração.
+- `migrations/0000_<nombre>.sql`: `create table if not exists`, índices, `alter table
+  ... enable row level security` e uma política de leitura (`public.contacto_visible`
+  se pende de um contato; `public.es_miembro()` se é catálogo; `public.es_admin()`
+  se é sensível). Idempotente.
+- `servidor.tsx`: `paginas`, `api` (handlers recebem `{ params, member }`, já passaram
+  `requireMember`; filtra por `ownerFilter(member)` / `canAccessContactId` o que pende
+  de contatos), `tools` (nome único, `descripcionUI`, `ejecutar(args, ctx)` devolve
   `{ ok, data | error }`), `seed` idempotente.
-- `componentes/`: UI. Importa solo `@/components/{ui,layout,shared}/*`, `@/lib/*`.
-- `README.md`: tabla de que hay donde, variables de entorno (si las hay), como activar.
+- `componentes/`: UI. Importe só `@/components/{ui,layout,shared}/*`, `@/lib/*`.
+- `README.md`: tabela do que há onde, variáveis de ambiente (se houver), como ativar.
 
-## 3. Activar y migrar
+## 3. Ativar e migrar
 
-1. Agrega `"<nombre>"` a `config/modulos.json` -> `activos`.
+1. Adicione `"<nombre>"` a `config/modulos.json` -> `activos`.
 2. `npm run db:migrar` (aplica `modules/<nombre>/migrations/`).
 3. `npm run typecheck && npm run lint && npm run build`.
 
 ## 4. Verificar
 
-- `npm run dev` y abrir `/m/<nombre>`: la pagina carga, el item esta en el menu.
-- `curl` (con sesion) o la UI: crear un registro, verlo, editarlo.
-- Si aporta campos: aparecen en el formulario de contacto y en la ficha.
-- Si aporta tools: aparecen en Ajustes -> Agente IA; probar con `/simulador` que el
-  agente las usa.
-- Si tiene variables de entorno: agregarlas a `.env.example` con guia y al README.
+- `npm run dev` e abrir `/m/<nombre>`: a página carrega, o item está no menu.
+- `curl` (com sessão) ou a UI: criar um registro, vê-lo, editá-lo.
+- Se contribui campos: aparecem no formulário de contato e na ficha.
+- Se contribui tools: aparecem em Ajustes -> Agente IA; testar com `/simulador` que o
+  agente as usa.
+- Se tem variáveis de ambiente: adicioná-las a `.env.example` com guia e ao README.
 
 Commit: `Agregar modulo <nombre>`.
 
-## Lo que NO se hace
+## O que NÃO se faz
 
-- Tocar `src/` para "ayudar" al modulo. Si el contrato no alcanza, es una mejora del
-  nucleo: anotarla y proponerla al repo original.
-- Importar de otro modulo.
-- Tablas sin RLS, claves de campos sin prefijo, tools con nombres genericos que choquen
-  con las del nucleo (`mover_etapa`, `actualizar_contacto`, `registrar_actividad`,
+- Tocar em `src/` para "ajudar" o módulo. Se o contrato não alcançar, é uma melhoria do
+  núcleo: anotá-la e propô-la ao repositório original.
+- Importar de outro módulo.
+- Tabelas sem RLS, chaves de campos sem prefixo, tools com nomes genéricos que choquem
+  com as do núcleo (`mover_etapa`, `actualizar_contacto`, `registrar_actividad`,
   `resumen_lead`, `derivar_asesor`, `asignar_asesor`).

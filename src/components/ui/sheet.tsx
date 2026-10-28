@@ -67,9 +67,9 @@ function SheetContent({
                 variant="ghost"
                 className={cn(
                   "absolute right-3",
-                  // En una PWA a pantalla completa el borde de arriba queda debajo de la
-                  // barra de estado del telefono. Los paneles anclados arriba bajan la X;
-                  // el de abajo no, que ahi no hay notch.
+                  // Numa PWA em tela cheia a borda de cima fica debaixo da
+                  // barra de estado do telefone. Os painéis ancorados em cima descem o X;
+                  // o de baixo não, porque ali não há notch.
                   side === "bottom"
                     ? "top-3"
                     : "top-[max(0.75rem,env(safe-area-inset-top))]"

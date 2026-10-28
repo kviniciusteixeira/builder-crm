@@ -1,24 +1,24 @@
 -- ============================================================================
 -- Builder CRM - Row Level Security
 -- ============================================================================
--- Por que: la anon key viaja en el navegador y, sin RLS, PostgREST deja leer y
--- escribir cualquier tabla de `public` con ella. La app escribe por Drizzle con el
--- rol `postgres` (dueno de las tablas, con bypass de RLS), asi que estas politicas
--- NO afectan al CRM: son la red de seguridad de la API publica de Supabase.
+-- Por quê: a anon key viaja no navegador e, sem RLS, o PostgREST deixa ler e
+-- escrever qualquer tabela de `public` com ela. O app escreve pelo Drizzle com o
+-- papel `postgres` (dono das tabelas, com bypass de RLS), então estas políticas
+-- NÃO afetam o CRM: são a rede de segurança da API pública do Supabase.
 --
 -- Modelo:
---   anon          -> sin privilegios sobre nada de `public`.
---   authenticated -> solo LECTURA, segun team_members:
---                      admin   ve todo
---                      asesor  ve sus contactos y lo que cuelga de ellos
---                      cada miembro ve sus notificaciones y suscripciones push
---                    Sin politicas de escritura: la app no escribe por PostgREST.
+--   anon          -> sem privilégios sobre nada de `public`.
+--   authenticated -> só LEITURA, segundo team_members:
+--                      admin     vê tudo
+--                      assessor  vê seus contatos e o que depende deles
+--                      cada membro vê suas notificações e assinaturas push
+--                    Sem políticas de escrita: o app não escreve pelo PostgREST.
 --
--- Las tablas que agregue un modulo tambien deben tener RLS: el runner
--- (scripts/migrar.mjs) lo habilita al final de cada corrida si falta.
+-- As tabelas que um módulo acrescentar também devem ter RLS: o runner
+-- (scripts/migrar.mjs) habilita no final de cada execução se faltar.
 -- ============================================================================
 
--- Funciones de apoyo (security definer: leen team_members aunque RLS aplique) ----
+-- Funções de apoio (security definer: leem team_members mesmo que RLS se aplique) ----
 create or replace function public.es_miembro() returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.team_members where id = auth.uid() and active);
@@ -29,7 +29,7 @@ language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.team_members where id = auth.uid() and active and role = 'admin');
 $$;
 
--- true si el usuario de la sesion puede ver ese contacto (admin, o es su propietario).
+-- true se o usuário da sessão pode ver esse contato (admin, ou é o proprietário).
 create or replace function public.contacto_visible(cid text) returns boolean
 language sql stable security definer set search_path = public as $$
   select public.es_admin()
@@ -44,7 +44,7 @@ alter default privileges in schema public revoke all on tables    from anon;
 alter default privileges in schema public revoke all on sequences from anon;
 alter default privileges in schema public revoke all on functions from anon;
 
--- RLS en todas las tablas -----------------------------------------------------
+-- RLS em todas as tabelas -----------------------------------------------------
 do $$
 declare t record;
 begin
@@ -53,15 +53,15 @@ begin
   end loop;
 end $$;
 
--- Politicas de lectura para authenticated -------------------------------------
--- Se recrean siempre (drop + create) para que la migracion sea idempotente.
+-- Políticas de leitura para authenticated -------------------------------------
+-- Recriam-se sempre (drop + create) para que a migração seja idempotente.
 
--- Equipo: cada uno se ve a si mismo; el admin ve a todos.
+-- Equipe: cada um se vê a si mesmo; o admin vê todos.
 drop policy if exists team_members_select on team_members;
 create policy team_members_select on team_members for select to authenticated
   using (public.es_admin() or id = auth.uid());
 
--- Contactos y lo que cuelga de ellos.
+-- Contatos e o que depende deles.
 drop policy if exists contacts_select on contacts;
 create policy contacts_select on contacts for select to authenticated
   using (public.es_admin() or owner_id = auth.uid());
@@ -74,9 +74,9 @@ drop policy if exists activities_select on activities;
 create policy activities_select on activities for select to authenticated
   using (public.contacto_visible(contact_id));
 
--- Las tablas de los modulos (visitas, propiedades, ...) NO se tocan aca: cada modulo
--- habilita su RLS y declara su politica en su propia migracion. Si el nucleo las
--- nombrara, una instancia con los modulos apagados no podria migrar.
+-- As tabelas dos módulos (visitas, propiedades, ...) NÃO se tocam aqui: cada módulo
+-- habilita seu RLS e declara sua política na própria migração. Se o núcleo as
+-- nomeasse, uma instância com os módulos desligados não poderia migrar.
 
 drop policy if exists documents_select on documents;
 create policy documents_select on documents for select to authenticated
@@ -107,7 +107,7 @@ drop policy if exists automation_runs_select on automation_runs;
 create policy automation_runs_select on automation_runs for select to authenticated
   using (public.es_admin() or (contact_id is not null and public.contacto_visible(contact_id)));
 
--- Lo propio de cada miembro.
+-- O que é de cada membro.
 drop policy if exists notifications_select on notifications;
 create policy notifications_select on notifications for select to authenticated
   using (member_id = auth.uid() or public.es_admin());
@@ -116,7 +116,7 @@ drop policy if exists push_subscriptions_select on push_subscriptions;
 create policy push_subscriptions_select on push_subscriptions for select to authenticated
   using (member_id = auth.uid() or public.es_admin());
 
--- Catalogos que todo miembro puede leer.
+-- Catálogos que todo membro pode ler.
 drop policy if exists pipelines_select on pipelines;
 create policy pipelines_select on pipelines for select to authenticated using (public.es_miembro());
 drop policy if exists pipeline_stages_select on pipeline_stages;
@@ -124,7 +124,7 @@ create policy pipeline_stages_select on pipeline_stages for select to authentica
 drop policy if exists whatsapp_templates_select on whatsapp_templates;
 create policy whatsapp_templates_select on whatsapp_templates for select to authenticated using (public.es_miembro());
 
--- Configuracion y credenciales: solo admin.
+-- Configuração e credenciais: só admin.
 drop policy if exists crm_settings_select on crm_settings;
 create policy crm_settings_select on crm_settings for select to authenticated using (public.es_admin());
 drop policy if exists agent_configs_select on agent_configs;
@@ -135,5 +135,5 @@ drop policy if exists tenants_select on tenants;
 create policy tenants_select on tenants for select to authenticated using (public.es_admin());
 drop policy if exists channel_accounts_select on channel_accounts;
 create policy channel_accounts_select on channel_accounts for select to authenticated using (public.es_admin());
--- whatsapp_accounts guarda el token de Meta: nadie lo lee por la API publica.
--- webhook_events guarda payloads crudos: idem. (RLS activo, sin politicas = nadie.)
+-- whatsapp_accounts guarda o token da Meta: ninguém o lê pela API pública.
+-- webhook_events guarda payloads crus: idem. (RLS ativo, sem políticas = ninguém.)

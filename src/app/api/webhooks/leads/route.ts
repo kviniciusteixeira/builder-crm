@@ -77,11 +77,11 @@ function extractFields(
 }
 
 /**
- * Webhook generico de leads: formularios, landings, Zapier/Make, Meta Lead Ads via un
- * intermediario... Publico por el prefijo /api/webhooks; se protege con
- * LEADS_WEBHOOK_SECRET (header `x-webhook-secret`). Si la variable esta vacia, se
- * acepta el secreto guardado en crm_settings (clave `webhook_secret`); sin ninguno de
- * los dos, el endpoint queda abierto (solo para pruebas).
+ * Webhook genérico de leads: formulários, landings, Zapier/Make, Meta Lead Ads via um
+ * intermediário... Público pelo prefixo /api/webhooks; protege-se com
+ * LEADS_WEBHOOK_SECRET (header `x-webhook-secret`). Se a variável está vazia,
+ * aceita-se o segredo guardado em crm_settings (chave `webhook_secret`); sem nenhum dos
+ * dois, o endpoint fica aberto (só para testes).
  */
 export const dynamic = "force-dynamic";
 

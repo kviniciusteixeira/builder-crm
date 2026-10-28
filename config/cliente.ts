@@ -2,14 +2,14 @@ import { definirConfig } from "@/lib/config/schema";
 import modulos from "./modulos.json";
 
 /**
- * CONFIGURACION DEL CLIENTE — zona del cliente, no del nucleo.
+ * CONFIGURAÇÃO DO CLIENTE — zona do cliente, não do núcleo.
  *
- * Todo lo que distingue a esta instancia vive aqui: marca, pipeline, campos del
- * contacto, agente y modulos activos. Cambiar este archivo (y los assets de
- * public/marca/) es la unica forma prevista de personalizar el CRM; el nucleo (src/)
- * no se toca. El esquema completo esta en src/lib/config/schema.ts.
+ * Tudo o que distingue esta instância vive aqui: marca, pipeline, campos do
+ * contato, agente e módulos ativos. Mudar este arquivo (e os assets de
+ * public/marca/) é a única forma prevista de personalizar o CRM; o núcleo (src/)
+ * não se toca. O esquema completo está em src/lib/config/schema.ts.
  *
- * Para una plantilla de nicho: importar la plantilla y extenderla, por ejemplo
+ * Para um modelo de nicho: importar o modelo e estendê-lo, por exemplo
  *   import { plantillaInmobiliaria } from "./plantillas/inmobiliaria";
  *   export default definirConfig({ ...plantillaInmobiliaria, marca: { ... } });
  */
@@ -20,15 +20,15 @@ export default definirConfig({
     descripcion: "El CRM multicanal con agente de IA de la comunidad IA Builder Lab.",
     logo: "/marca/logo.png",
     icono: "/marca/icono.png",
-    // Medidos del logo de IA Builder Lab: el cian del anillo sobre el carbon del fondo.
+    // Medidos no logo de IA Builder Lab: o ciano do anel sobre o carvão do fundo.
     colorPrimario: "#3CF5F5",
     colorSidebar: "#171E21",
   },
 
   idioma: "es",
   moneda: "USD",
-  // La del negocio del cliente, no la tuya: decide el dia que el agente le nombra a
-  // quien escribe de noche. America/Mexico_City, America/Bogota, Europe/Madrid...
+  // A do negócio do cliente, não a sua: decide o dia que o agente nomeia a
+  // quem escreve de noite. America/Mexico_City, America/Bogota, Europe/Madrid...
   zonaHoraria: "America/Santiago",
 
   roles: {
@@ -49,7 +49,7 @@ export default definirConfig({
   },
 
   contacto: {
-    // Campos propios del negocio. Ejemplo:
+    // Campos próprios do negócio. Exemplo:
     // { clave: "presupuesto", etiqueta: "Presupuesto", tipo: "numero", enTabla: true,
     //   agente: { descripcion: "presupuesto maximo del cliente" } },
     campos: [],
@@ -68,8 +68,8 @@ export default definirConfig({
       reportes: true,
       simulador: true,
     },
-    // Carpetas de modules/ activas en esta instancia: se editan en config/modulos.json
-    // (lo leen tambien el runner de migraciones y el generador del registro).
+    // Pastas de modules/ ativas nesta instância: editam-se em config/modulos.json
+    // (também os leem o runner de migrações e o gerador do registro).
     activos: modulos.activos,
   },
 });

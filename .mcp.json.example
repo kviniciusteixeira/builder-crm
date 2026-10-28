@@ -1,15 +1,15 @@
 {
-  "//": "EJEMPLO. Copiar a .mcp.json (ignorado por git) y completar. Nunca pegar tokens reales en este archivo de ejemplo. Guia de cada credencial en docs/MCP.md.",
+  "//": "EXEMPLO. Copiar para .mcp.json (ignorado pelo git) e completar. Nunca colar tokens reais neste arquivo de exemplo. Guia de cada credencial em docs/MCP.md.",
 
   "mcpServers": {
     "supabase": {
-      "//": "Modo CUENTA (sin project_ref): permite crear proyectos. Al abrirlo Claude Code pide iniciar sesion en Supabase (OAuth). Para limitarlo a un proyecto: https://mcp.supabase.com/mcp?project_ref=<ref>",
+      "//": "Modo CONTA (sem project_ref): permite criar projetos. Ao abri-lo o Claude Code pede iniciar sessão no Supabase (OAuth). Para limitá-lo a um projeto: https://mcp.supabase.com/mcp?project_ref=<ref>",
       "type": "http",
       "url": "https://mcp.supabase.com/mcp"
     },
 
     "coolify": {
-      "//": "MCP comunitario con escritura (crear apps, variables, deploy). El MCP oficial de Coolify v4 es de solo lectura. Verificar el nombre del paquete en el repo elegido (p. ej. github.com/stumason/coolify-mcp o github.com/forsonny/Coolify-MCP-Server-for-Claude-Code). Sin MCP, deploy-coolify usa la REST API con curl.",
+      "//": "MCP comunitário com escrita (criar apps, variáveis, deploy). O MCP oficial do Coolify v4 é só de leitura. Verificar o nome do pacote no repositório escolhido (p. ex. github.com/stumason/coolify-mcp ou github.com/forsonny/Coolify-MCP-Server-for-Claude-Code). Sem MCP, deploy-coolify usa a REST API com curl.",
       "command": "npx",
       "args": ["-y", "coolify-mcp"],
       "env": {
@@ -19,13 +19,13 @@
     },
 
     "playwright": {
-      "//": "Navegar la instancia para capturas y pruebas manuales (skill playwright-cli).",
+      "//": "Navegar a instância para capturas e testes manuais (skill playwright-cli).",
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"]
     },
 
     "next-devtools": {
-      "//": "Diagnostico de Next.js en desarrollo local.",
+      "//": "Diagnóstico de Next.js em desenvolvimento local.",
       "command": "npx",
       "args": ["-y", "next-devtools-mcp@latest"]
     }

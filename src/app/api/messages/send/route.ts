@@ -7,9 +7,9 @@ import { canAccessContactId } from "@/lib/team";
 import { requireMember } from "@/lib/api-auth";
 
 /**
- * Envio generico por conversacion: sirve para WhatsApp, Instagram y Messenger.
- * Reemplaza al `/api/whatsapp/send` del chat, que razonaba por telefono y por eso
- * bloqueaba los canales donde no hay telefono.
+ * Envio genérico por conversa: serve para WhatsApp, Instagram e Messenger.
+ * Substitui o `/api/whatsapp/send` do chat, que raciocinava por telefone e por isso
+ * bloqueava os canais onde não há telefone.
  */
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Un asesor solo escribe en hilos de sus contactos (404: no se confirma que exista).
+  // Um assessor só escreve em fios dos seus contatos (404: não se confirma que exista).
   const [conv] = await db
     .select({ contactId: conversations.contactId })
     .from(conversations)

@@ -4,36 +4,36 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { configPublica } from "@/lib/config-publica";
 
 /**
- * Correos de acceso: invitaciones al equipo y "olvide mi contrasena".
+ * E-mails de acesso: convites para a equipe e "esqueci minha senha".
  *
- * Los manda el servidor de autenticacion (GoTrue / Supabase), no el CRM: ahi estan las
- * credenciales de SMTP, los limites de envio y la generacion de los enlaces. El CRM solo
- * decide tres cosas, que son las que viven en este archivo: si la capacidad esta
- * encendida, a donde vuelve la persona cuando hace clic, y como se pide cada correo.
+ * Quem os envia é o servidor de autenticação (GoTrue / Supabase), não o CRM: lá estão as
+ * credenciais de SMTP, os limites de envio e a geração dos links. O CRM só
+ * decide três coisas, que são as que vivem neste arquivo: se a capacidade está
+ * ligada, para onde a pessoa volta quando clica, e como se pede cada e-mail.
  *
- * POR QUE HACE FALTA UN INTERRUPTOR EXPLICITO: cuando GoTrue no tiene SMTP configurado
- * no falla, usa un cliente de correo "noop" que se traga el mensaje y responde 200. Sin
- * esta variable el CRM diria "invitacion enviada" sobre un correo que nunca salio, y el
- * administrador se quedaria esperando. Es el caso contrario al de los proveedores
- * externos (`auth-proveedores.ts`), que se detectan preguntandole a `/auth/v1/settings`:
- * el SMTP no aparece ahi, asi que no hay nada que preguntar.
+ * POR QUE FAZ FALTA UM INTERRUPTOR EXPLÍCITO: quando o GoTrue não tem SMTP configurado
+ * não falha, usa um cliente de e-mail "noop" que engole a mensagem e responde 200. Sem
+ * esta variável o CRM diria "convite enviado" sobre um e-mail que nunca saiu, e o
+ * administrador ficaria esperando. É o caso contrário ao dos provedores
+ * externos (`auth-proveedores.ts`), que se detectam perguntando a `/auth/v1/settings`:
+ * o SMTP não aparece ali, então não há nada a perguntar.
  *
- * Como se configura (autoalojado o Supabase cloud): docs/CORREO.md
+ * Como se configura (auto-hospedado ou Supabase cloud): docs/CORREIO.md
  */
 
-/** Pagina donde la persona define su contrasena al volver del correo. */
+/** Página onde a pessoa define a senha ao voltar do e-mail. */
 export const RUTA_DEFINIR_CLAVE = "/auth/definir-clave";
 
 /**
- * true si esta instancia declara que su servidor de autenticacion manda correos.
- * El valor sale de la configuracion publica, que es la que tambien ve el navegador: asi
- * el boton que ofrece la UI y lo que acepta la API no pueden contradecirse.
+ * true se esta instância declara que o servidor de autenticação envia e-mails.
+ * O valor sai da configuração pública, que é a que o navegador também vê: assim
+ * o botão que a UI oferece e o que a API aceita não podem se contradizer.
  */
 export function correoDeAccesoActivo(): boolean {
   return configPublica().authEnviaCorreos;
 }
 
-/** URL publica de la instancia, sin barra final. Null si no esta configurada. */
+/** URL pública da instância, sem barra final. Null se não estiver configurada. */
 export function urlPublica(): string | null {
   const base = (process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "").trim();
   return base ? base.replace(/\/$/, "") : null;
@@ -43,13 +43,13 @@ const SIN_BASE =
   "Falta APP_BASE_URL: sin la URL publica de la instancia el enlace del correo no sabe a donde volver.";
 
 /**
- * Cliente anonimo de un solo uso, con flujo implicito y sin guardar nada.
+ * Cliente anônimo de uso único, com fluxo implícito e sem guardar nada.
  *
- * El flujo PKCE guarda un verificador en el navegador que pidio el correo, y el enlace
- * solo sirve en ese mismo navegador. Estos correos los pide el servidor (o un
- * administrador desde otra computadora), asi que PKCE los volveria inservibles: con el
- * flujo implicito el enlace funciona en cualquier dispositivo, que es justo lo que uno
- * espera de "te mande el acceso por correo".
+ * O fluxo PKCE guarda um verificador no navegador que pediu o e-mail, e o link
+ * só serve nesse mesmo navegador. Esses e-mails os pede o servidor (ou um
+ * administrador de outro computador), então o PKCE os tornaria inúteis: com o
+ * fluxo implícito o link funciona em qualquer dispositivo, que é justamente o que se
+ * espera de "te mandei o acesso por e-mail".
  */
 function clienteSinEstado() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -61,11 +61,11 @@ function clienteSinEstado() {
 }
 
 /**
- * Invita a alguien que todavia no tiene usuario. Crea el usuario sin contrasena y manda
- * el correo con el enlace; la contrasena la elige la persona al entrar.
+ * Convida alguém que ainda não tem usuário. Cria o usuário sem senha e envia
+ * o e-mail com o link; a senha a pessoa escolhe ao entrar.
  *
- * Si el correo ya tiene usuario, GoTrue responde `email_exists`: eso lo resuelve quien
- * llama (se reutiliza el usuario y se le manda un enlace de acceso).
+ * Se o e-mail já tem usuário, o GoTrue responde `email_exists`: isso quem resolve é quem
+ * chama (reutiliza-se o usuário e manda-se um link de acesso).
  */
 export async function invitarPorCorreo(
   email: string,
@@ -86,12 +86,12 @@ export async function invitarPorCorreo(
 }
 
 /**
- * Manda un enlace para definir la contrasena a alguien que ya tiene usuario: lo usa el
- * administrador ("reenviar acceso") y la pagina de "olvide mi contrasena".
+ * Envia um link para definir a senha a alguém que já tem usuário: usa o
+ * administrador ("reenviar acesso") e a página de "esqueci minha senha".
  *
- * Es el endpoint publico de recuperacion del proveedor, con sus propios limites de
- * frecuencia por persona y por hora. Para no confirmar quien tiene cuenta y quien no,
- * el proveedor responde lo mismo en los dos casos.
+ * É o endpoint público de recuperação do provedor, com os próprios limites de
+ * frequência por pessoa e por hora. Para não confirmar quem tem conta e quem não,
+ * o provedor responde o mesmo nos dois casos.
  */
 export async function enviarEnlaceDeAcceso(email: string): Promise<{ error?: string }> {
   const base = urlPublica();

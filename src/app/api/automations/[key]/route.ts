@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   return NextResponse.json(rule);
 }
 
-/** Editar la regla completa (solo admin). */
+/** Editar a regra completa (somente admin). */
 export async function PUT(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;
@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   return NextResponse.json(updated);
 }
 
-/** Prender o apagar (solo admin). */
+/** Ligar ou desligar (somente admin). */
 export async function PATCH(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;
@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   return NextResponse.json({ key, enabled: body.enabled });
 }
 
-/** Borrar (solo admin). Las sembradas no se borran: se apagan. */
+/** Excluir (somente admin). As semeadas não se excluem: são desligadas. */
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;

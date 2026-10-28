@@ -1,33 +1,33 @@
 /**
- * MODO LOCAL: el CRM corriendo en la maquina de alguien, sin cuentas de nada.
+ * MODO LOCAL: o CRM rodando na máquina de alguém, sem contas de nada.
  *
- * Para probarlo y adaptarlo no hace falta un proyecto de Supabase: `npm run local`
- * levanta un Postgres embebido (un paquete de npm, nada de Docker), aplica las mismas
- * migraciones que una instancia de verdad, carga datos demo y entra directo como un
- * administrador de mentira. Sin pantalla de login, porque no hay servidor de
- * autenticacion que la conteste.
+ * Para testá-lo e adaptá-lo não faz falta um projeto de Supabase: `npm run local`
+ * sobe um Postgres embutido (um pacote de npm, nada de Docker), aplica as mesmas
+ * migrações que uma instância de verdade, carrega dados demo e entra direto como um
+ * administrador de mentira. Sem tela de login, porque não há servidor de
+ * autenticação que a responda.
  *
- * ESO ES EXACTAMENTE LO QUE LO HACE PELIGROSO. En modo local no hay sesion, no hay
- * roles y no hay nadie verificando nada: cualquiera que abra la URL es administrador.
- * Si esto se encendiera en una instancia desplegada, el CRM de un cliente quedaria
- * abierto a internet y no fallaria nada, no habria ningun error en los logs y la UI se
- * veria normal. Por eso:
+ * ISSO É EXATAMENTE O QUE O TORNA PERIGOSO. No modo local não há sessão, não há
+ * papéis e não há ninguém verificando nada: qualquer um que abra a URL é administrador.
+ * Se isto se ligasse numa instância implantada, o CRM de um cliente ficaria
+ * aberto à internet e não falharia nada, não haveria nenhum erro nos logs e a UI se
+ * veria normal. Por isso:
  *
- *   1. Hace falta MODO_LOCAL=true, que `npm run local` pone y nadie mas.
- *   2. Y ademas NODE_ENV distinto de "production". `next build` + `next start` y la
- *      imagen de Docker corren en production, asi que el modo local es imposible ahi
- *      aunque la variable este puesta por error o por copiar un .env ajeno.
+ *   1. Faz falta MODO_LOCAL=true, que `npm run local` põe e mais ninguém.
+ *   2. E além disso NODE_ENV diferente de "production". `next build` + `next start` e a
+ *      imagem de Docker rodam em production, então o modo local é impossível ali
+ *      mesmo que a variável esteja definida por erro ou por copiar um .env alheio.
  *
- * El segundo candado es el que importa: el primero se puede filtrar en un `.env` que
- * alguien copie de su maquina al servidor; el segundo no depende de la configuracion.
+ * O segundo cadeado é o que importa: o primeiro pode vazar num `.env` que
+ * alguém copie da sua máquina para o servidor; o segundo não depende da configuração.
  */
 
-/** Id fijo del administrador de mentira del modo local. */
+/** Id fixo do administrador de mentira do modo local. */
 export const ID_MIEMBRO_LOCAL = "00000000-0000-4000-8000-000000000001";
 export const EMAIL_MIEMBRO_LOCAL = "demo@local";
 export const NOMBRE_MIEMBRO_LOCAL = "Cuenta demo";
 
-/** Carpeta (relativa a la raiz del repo) donde vive la base embebida. */
+/** Pasta (relativa à raiz do repo) onde vive a base embutida. */
 export const CARPETA_BASE_LOCAL = ".local/db";
 
 export function modoLocal(): boolean {

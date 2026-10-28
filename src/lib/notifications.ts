@@ -5,24 +5,24 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { sendPushToMember, type PushOutcome } from "@/lib/push";
 
 /**
- * Notificaciones a miembros del equipo. Dos canales, siempre juntos:
+ * Notificações a membros da equipe. Dois canais, sempre juntos:
  *
- *   1. Interna (tabla `notifications`): la campanita del CRM. Siempre se escribe.
- *   2. Push (Web Push al telefono): best-effort, solo si el miembro activo un dispositivo.
+ *   1. Interna (tabela `notifications`): o sininho do CRM. Sempre se escreve.
+ *   2. Push (Web Push ao telefone): best-effort, só se o membro ativou um dispositivo.
  *
- * Si el push no llega, la interna queda. Por eso "me llego la notificacion" no depende
- * de que el asesor haya instalado la PWA.
+ * Se o push não chega, a interna fica. Por isso "chegou a notificação" não depende
+ * de o assessor ter instalado a PWA.
  */
 
 export interface NotifyInput {
   memberId: string;
   title: string;
   body?: string;
-  /** Ruta relativa a abrir al tocarla. */
+  /** Rota relativa a abrir ao tocá-la. */
   url?: string;
   contactId?: string | null;
   kind?: string;
-  /** Agrupa pushes del mismo asunto (el nuevo reemplaza al anterior en el telefono). */
+  /** Agrupa pushes do mesmo assunto (o novo substitui o anterior no telefone). */
   tag?: string;
 }
 
@@ -98,7 +98,7 @@ export async function listNotifications(
   return { items, unread };
 }
 
-/** Marca leidas: las indicadas, o todas las del miembro si no se pasan ids. */
+/** Marca lidas: as indicadas, ou todas as do membro se não se passam ids. */
 export async function markNotificationsRead(
   memberId: string,
   ids?: string[]

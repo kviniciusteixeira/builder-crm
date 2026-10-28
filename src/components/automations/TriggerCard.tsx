@@ -26,8 +26,8 @@ const OPS = [
 ];
 
 /**
- * Primera tarjeta del flujo: que lo dispara y con que filtros. Cambiar el disparador
- * limpia los filtros, porque los campos son de cada disparador.
+ * Primeiro cartão do fluxo: o que o dispara e com quais filtros. Mudar o gatilho
+ * limpa os filtros, porque os campos são de cada gatilho.
  */
 export function TriggerCard({
   triggers,
@@ -57,7 +57,7 @@ export function TriggerCard({
 
   return (
     <div className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(10,22,40,0.04),0_8px_24px_-12px_rgba(10,22,40,0.18)] overflow-hidden">
-      {/* Cabecera */}
+      {/* Cabeçalho */}
       <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-[#0A1628] to-[#1E3A5F] text-white">
         <div className="h-9 w-9 rounded-xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center shrink-0">
           <Zap className="h-4 w-4" />

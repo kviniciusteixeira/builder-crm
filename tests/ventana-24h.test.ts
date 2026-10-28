@@ -2,10 +2,10 @@ import { describe, it, expect } from "vitest";
 import { capabilitiesFor, isOutsideFreeFormWindow } from "@/lib/channels/types";
 
 /**
- * La ventana de texto libre la decide el servidor, no el canal. Si este calculo se
- * equivoca hacia adentro (cree que esta abierta cuando se cerro), Meta descarta el
- * mensaje y el CRM lo muestra como enviado: el lead queda esperando una respuesta que
- * nunca le llego y nadie se entera hasta que el cliente reclama.
+ * A janela de texto livre quem decide é o servidor, não o canal. Se este cálculo se
+ * engana para dentro (crê que está aberta quando se fechou), a Meta descarta a
+ * mensagem e o CRM a mostra como enviada: o lead fica esperando uma resposta que
+ * nunca chegou e ninguém fica sabendo até que o cliente reclame.
  */
 
 const AHORA = new Date("2026-10-06T12:00:00.000Z");
@@ -27,13 +27,13 @@ describe("ventana de texto libre por canal", () => {
   });
 
   it("en el limite exacto todavia esta abierta", () => {
-    // Justo a las 24 h no se cierra: cerrar un segundo antes manda una plantilla sin
-    // necesidad, y eso le cuesta plata al cliente en cada conversacion.
+    // Justo às 24 h não se fecha: fechar um segundo antes manda um template sem
+    // necessidade, e isso custa dinheiro ao cliente em cada conversa.
     expect(isOutsideFreeFormWindow("whatsapp", horasAntes(24), AHORA)).toBe(false);
   });
 
   it("sin mensaje entrante previo la considera cerrada", () => {
-    // Fail-closed: una conversacion que arranca el negocio nunca tiene ventana abierta.
+    // Fail-closed: uma conversa que o negócio inicia nunca tem janela aberta.
     expect(isOutsideFreeFormWindow("whatsapp", null, AHORA)).toBe(true);
     expect(isOutsideFreeFormWindow("whatsapp", undefined, AHORA)).toBe(true);
   });

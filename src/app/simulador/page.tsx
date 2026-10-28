@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Simulador" };
 
 /**
- * Simulador de conversaciones: solo admin. Un asesor recibe 404 (no se confirma que
- * exista), y con `modulos.nucleo.simulador = false` tampoco existe para nadie.
+ * Simulador de conversas: somente admin. Um assessor recebe 404 (não se confirma que
+ * exista), e com `modulos.nucleo.simulador = false` também não existe para ninguém.
  */
 export default async function SimuladorPage() {
   if (!moduloActivo("simulador")) notFound();

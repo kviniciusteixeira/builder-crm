@@ -4,10 +4,10 @@ import { ownerFilter, visibleOwnerId } from "@/lib/team";
 import type { TeamMember } from "@/lib/team";
 
 /**
- * El filtro por propietario es lo unico que separa "el asesor ve sus contactos" de "el
- * asesor ve toda la cartera del cliente". Si un dia `ownerFilter` devolviera `undefined`
- * para un asesor, nada fallaria: las pantallas cargarian igual, con datos de mas. Por eso
- * el admin tiene que ser el UNICO caso sin filtro.
+ * O filtro por proprietário é o único que separa "o assessor vê seus contatos" de "o
+ * assessor vê toda a carteira do cliente". Se um dia `ownerFilter` devolvesse `undefined`
+ * para um assessor, nada falharia: as telas carregariam igual, com dados a mais. Por isso
+ * o admin tem que ser o ÚNICO caso sem filtro.
  */
 
 function miembro(role: "admin" | "asesor"): TeamMember {
@@ -35,16 +35,16 @@ describe("visibilidad por rol", () => {
   it("el filtro del asesor compara owner_id contra su propio id", () => {
     const m = miembro("asesor");
     const condicion = ownerFilter(m)!;
-    // Se traduce la condicion a SQL sin tocar la base: asi se ve por que columna filtra
-    // y con que valor. Lo que no puede pasar es que filtre por otra columna o por un id
-    // que no sea el de quien pregunta.
+    // Traduz-se a condição para SQL sem tocar a base: assim se vê por qual coluna filtra
+    // e com qual valor. O que não pode acontecer é filtrar por outra coluna ou por um id
+    // que não seja o de quem pergunta.
     const { sql, params } = new PgDialect().sqlToQuery(condicion);
     expect(sql).toContain("owner_id");
     expect(params).toContain(m.id);
   });
 
   it("un rol desconocido no se trata como administrador", () => {
-    // Si manana aparece un rol nuevo en la base, el default seguro es ver menos, no mas.
+    // Se amanhã aparecer um papel novo na base, o default seguro é ver menos, não mais.
     const raro = { ...miembro("asesor"), role: "lo-que-sea" } as unknown as TeamMember;
     expect(ownerFilter(raro)).toBeDefined();
     expect(visibleOwnerId(raro)).toBe(raro.id);

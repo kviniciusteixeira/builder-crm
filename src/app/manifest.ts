@@ -2,11 +2,11 @@ import type { MetadataRoute } from "next";
 import { getConfig } from "@/lib/config";
 
 /**
- * Manifest de la PWA, generado desde config/cliente.ts. Se sirve en
- * /manifest.webmanifest (el middleware lo deja pasar sin sesion: si fuera a /login el
- * navegador recibiria HTML y la app no se instalaria).
+ * Manifest da PWA, gerado a partir de config/cliente.ts. Serve-se em
+ * /manifest.webmanifest (o middleware o deixa passar sem sessão: se fosse para /login o
+ * navegador receberia HTML e o app não se instalaria).
  *
- * Los iconos los genera `npm run pwa:icons` a partir de marca.icono.
+ * Os ícones são gerados por `npm run pwa:icons` a partir de marca.icono.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const { marca, idioma } = getConfig();

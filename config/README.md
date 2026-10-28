@@ -1,22 +1,22 @@
-# config/ — zona del cliente
+# config/ — zona do cliente
 
-Todo lo que distingue a esta instancia vive aqui. El nucleo (`src/`) no se toca.
+Tudo o que distingue esta instância vive aqui. O núcleo (`src/`) não se toca.
 
-| Archivo | Que es |
+| Arquivo | O que é |
 |---|---|
-| `cliente.ts` | La configuracion de esta instancia: marca, pipeline, campos del contacto, agente y modulos activos. Validada con el esquema de `src/lib/config/schema.ts` al arrancar y en `/api/health`. |
-| `plantillas/` | Plantillas de nicho reutilizables (por ejemplo `inmobiliaria.ts`). `cliente.ts` las importa y las extiende. |
+| `cliente.ts` | A configuração desta instância: marca, pipeline, campos do contato, agente e módulos ativos. Validada com o esquema de `src/lib/config/schema.ts` na inicialização e em `/api/health`. |
+| `plantillas/` | Modelos de nicho reutilizáveis (por exemplo `inmobiliaria.ts`). `cliente.ts` os importa e os estende. |
 
-Los assets de marca (logo, icono) van en `public/marca/`. Despues de cambiar el icono,
+Os arquivos de marca (logo, ícone) ficam em `public/marca/`. Depois de trocar o ícone,
 `npm run pwa:icons` regenera `public/icons/`.
 
-Como se aplica un cambio:
+Como uma mudança é aplicada:
 
-- **Marca**: al reiniciar la app (los colores se inyectan en SSR; el manifest y el
-  titulo salen de aqui).
-- **Pipeline**: al arrancar, `sincronizarPipeline()` crea o actualiza las etapas por su
-  `clave`; nunca borra etapas con operaciones.
-- **Campos del contacto**: aparecen en el formulario, la ficha, la tabla (`enTabla`) y
-  el panel del chat; el agente los califica si tienen `agente`.
-- **Modulos**: `modulos.nucleo` apaga funciones del nucleo; `modulos.activos` enciende
-  carpetas de `modules/`.
+- **Marca**: ao reiniciar o app (as cores são injetadas no SSR; o manifesto e o
+  título saem daqui).
+- **Pipeline**: na inicialização, `sincronizarPipeline()` cria ou atualiza as etapas pela
+  `clave`; nunca apaga etapas que tenham operações.
+- **Campos do contato**: aparecem no formulário, na ficha, na tabela (`enTabla`) e no
+  painel do chat; o agente os qualifica se tiverem `agente`.
+- **Módulos**: `modulos.nucleo` desliga funções do núcleo; `modulos.activos` liga
+  pastas de `modules/`.

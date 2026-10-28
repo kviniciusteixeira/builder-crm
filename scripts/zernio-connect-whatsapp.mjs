@@ -1,22 +1,22 @@
-// Conecta tu WABA existente a Zernio sin pasar por el browser (BYO-WABA) y la guarda
-// en `channel_accounts`.
+// Conecta sua WABA existente ao Zernio sem passar pelo browser (BYO-WABA) e a guarda
+// em `channel_accounts`.
 //
 //   node scripts/zernio-connect-whatsapp.mjs [--pin 123456]
 //
-// Este es el camino correcto cuando el numero YA esta en una WABA. El Embedded Signup
-// del browser no sirve en ese caso: Meta lo lista como "no cumple los requisitos"
-// porque no puede re-onboardear un numero que ya pertenece a una WABA. La coexistencia
-// tampoco aplica — esa es para numeros que viven SOLO en la app WhatsApp Business.
+// Este é o caminho correto quando o número JÁ está numa WABA. O Embedded Signup
+// do browser não serve nesse caso: a Meta o lista como "não cumpre os requisitos"
+// porque não pode re-onboardar um número que já pertence a uma WABA. A coexistência
+// também não se aplica — essa é para números que vivem SÓ no app WhatsApp Business.
 //
-// El numero y la WABA siguen siendo tuyos: Zernio solo recibe credenciales para
-// operarla. Reusa las que ya tenes en .env.local del flujo de Meta directo:
+// O número e a WABA continuam sendo seus: o Zernio só recebe credenciais para
+// operá-la. Reusa as que você já tem em .env.local do fluxo de Meta direto:
 //   WHATSAPP_ACCESS_TOKEN        (System User token permanente)
 //   WHATSAPP_BUSINESS_ACCOUNT_ID (WABA ID)
 //   WHATSAPP_PHONE_NUMBER_ID
 //
-// El token necesita los permisos whatsapp_business_management y
-// whatsapp_business_messaging. Si usas un token temporal de la consola de Meta va a
-// funcionar hoy y fallar en 24 horas: genera uno de System User.
+// O token precisa das permissões whatsapp_business_management e
+// whatsapp_business_messaging. Se você usa um token temporário do console da Meta vai
+// funcionar hoje e falhar em 24 horas: gere um de System User.
 
 import postgres from "postgres";
 import { config } from "dotenv";
@@ -31,10 +31,10 @@ const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
 const WABA_ID = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "";
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
 
-// PIN de verificacion en dos pasos del numero. Si el numero lo tiene activado — y
-// cualquier numero de negocio real lo tiene — sin esto Meta rechaza el registro en
-// Cloud API con el error 133005 y el numero queda conectado pero sin poder enviar.
-// Se pasa por env o por `--pin 123456`.
+// PIN de verificação em dois passos do número. Se o número o tem ativado — e
+// qualquer número de negócio real o tem — sem isto a Meta rejeita o registro na
+// Cloud API com o erro 133005 e o número fica conectado mas sem poder enviar.
+// Passa-se por env ou por `--pin 123456`.
 const pinArgIndex = process.argv.indexOf("--pin");
 const PIN =
   (pinArgIndex !== -1 ? process.argv[pinArgIndex + 1] : "") ||
@@ -84,7 +84,7 @@ async function main() {
   try {
     json = text ? JSON.parse(text) : null;
   } catch {
-    /* respuesta no-JSON */
+    /* resposta não-JSON */
   }
 
   if (!res.ok) {
@@ -142,9 +142,9 @@ async function main() {
         updated_at   = now()
     `;
 
-    // Las conversaciones de WhatsApp que quedaron del flujo de Meta directo apuntan a
-    // un adapter que ya no queremos usar. Se repuntan a la cuenta de Zernio para que el
-    // proximo saliente salga por el proveedor correcto.
+    // As conversas de WhatsApp que ficaram do fluxo de Meta direto apontam para
+    // um adapter que já não queremos usar. Reapontam-se para a conta do Zernio para que o
+    // próxima saída saia pelo provedor correto.
     const repointed = await sql`
       update conversations
       set account_id = (select id from channel_accounts where zernio_account_id = ${accountId})

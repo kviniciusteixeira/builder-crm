@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { opcionesDeCookie } from "@/lib/supabase/cookies";
 
 /**
- * La cookie de sesion lleva el JWT de acceso y el token de refresco. Sin `secure`, el
- * navegador la adjunta tambien a una peticion `http://` al dominio del CRM, y quien
- * mire esa peticion se lleva la sesion entera.
+ * O cookie de sessão leva o JWT de acesso e o token de refresh. Sem `secure`, o
+ * navegador o anexa também a uma requisição `http://` ao domínio do CRM, e quem
+ * olhar essa requisição leva a sessão inteira.
  *
- * Se prueba aparte porque el sintoma de perderlo es ninguno: la aplicacion funciona
- * identico con la cookie insegura.
+ * Testa-se à parte porque o sintoma de perdê-lo é nenhum: a aplicação funciona
+ * idêntica com o cookie inseguro.
  */
 
 const ORIGINAL = { ...process.env };
@@ -35,8 +35,8 @@ describe("cookies de sesion", () => {
   });
 
   it("en desarrollo secure queda apagado", () => {
-    // http://localhost no tiene certificado: con secure el navegador descarta la cookie
-    // y no se puede iniciar sesion en local.
+    // http://localhost não tem certificado: com secure o navegador descarta o cookie
+    // e não dá para iniciar sessão em local.
     entorno("NODE_ENV", "development");
     expect(opcionesDeCookie().secure).toBe(false);
     expect(opcionesDeCookie().httpOnly).toBe(true);

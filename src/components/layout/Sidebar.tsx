@@ -36,9 +36,9 @@ interface NavSection {
 }
 
 /**
- * El menu se arma desde la configuracion: las funciones del nucleo apagadas en
- * `modulos.nucleo` no aparecen, y los modulos activos agregan sus entradas en la
- * seccion que declaran en su manifiesto.
+ * O menu se monta a partir da configuração: as funções do núcleo apagadas em
+ * `modulos.nucleo` não aparecem, e os módulos ativos acrescentam as entradas na
+ * seção que declaram no manifesto.
  */
 function construirSecciones(esAdmin: boolean): NavSection[] {
   const deModulos = navModulos();

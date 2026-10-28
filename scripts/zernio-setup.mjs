@@ -1,10 +1,10 @@
-// Inspecciona la cuenta de Zernio y sincroniza las cuentas conectadas a `channel_accounts`.
+// Inspeciona a conta do Zernio e sincroniza as contas conectadas em `channel_accounts`.
 //
-//   node scripts/zernio-setup.mjs            # lista profiles, cuentas y conversaciones
-//   node scripts/zernio-setup.mjs --sync     # ademas upsertea las cuentas en la DB
+//   node scripts/zernio-setup.mjs            # lista profiles, contas e conversas
+//   node scripts/zernio-setup.mjs --sync     # além disso faz upsert das contas na DB
 //
-// Es la verificacion de la Fase 2: si esto lista tus cuentas de Instagram/Facebook,
-// el cliente y las credenciales estan bien y se puede seguir con el webhook.
+// É a verificação da Fase 2: se isto lista suas contas de Instagram/Facebook,
+// o cliente e as credenciais estão bem e dá para seguir com o webhook.
 
 import postgres from "postgres";
 import { config } from "dotenv";
@@ -35,7 +35,7 @@ async function api(path, query) {
   try {
     json = text ? JSON.parse(text) : null;
   } catch {
-    /* respuesta no-JSON */
+    /* resposta não-JSON */
   }
   if (!res.ok) {
     throw new Error(`${path} -> HTTP ${res.status}: ${text.slice(0, 300)}`);

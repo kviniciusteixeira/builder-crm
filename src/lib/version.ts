@@ -1,11 +1,11 @@
 /**
- * Version y commit de lo que esta corriendo. La version sale de package.json y se
- * congela al construir (next.config.ts la expone como NEXT_PUBLIC_APP_VERSION). El
- * commit solo si llego al build como SOURCE_COMMIT (Coolify y docker compose lo pasan
- * como build arg); si no, la app muestra solo la version.
+ * Versão e commit do que está rodando. A versão sai de package.json e se
+ * congela ao construir (next.config.ts a expõe como NEXT_PUBLIC_APP_VERSION). O
+ * commit só se chegou ao build como SOURCE_COMMIT (Coolify e docker compose o passam
+ * como build arg); senão, o app mostra só a versão.
  *
- * Se ve en /api/health y abajo en la barra lateral, para confirmar un despliegue con
- * un curl sin abrir la app.
+ * Vê-se em /api/health e embaixo na barra lateral, para confirmar um deploy com
+ * um curl sem abrir o app.
  */
 export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 export const BUILD_COMMIT = process.env.NEXT_PUBLIC_BUILD_COMMIT || null;

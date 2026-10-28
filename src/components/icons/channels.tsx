@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 import type { Channel } from "@/lib/channels/types";
 
 /**
- * Iconos de canal como SVG inline.
+ * Ícones de canal como SVG inline.
  *
- * `lucide-react` dejo de publicar iconos de marca (Instagram y Facebook ya no existen
- * en el paquete), y traer una libreria entera de iconos por tres glifos no se justifica.
- * Los emojis quedan descartados por convencion del proyecto.
+ * O `lucide-react` deixou de publicar ícones de marca (Instagram e Facebook já não existem
+ * no pacote), e trazer uma biblioteca inteira de ícones por três glifos não se justifica.
+ * Os emojis ficam descartados por convenção do projeto.
  */
 
 interface IconProps {
@@ -75,7 +75,7 @@ export function ChannelIcon({
   return <Icon className={className} />;
 }
 
-/** Colores por canal. Tokens propios para que funcionen igual en light y dark. */
+/** Cores por canal. Tokens próprios para que funcionem igual em light e dark. */
 export const CHANNEL_COLORS: Record<Channel, string> = {
   whatsapp: "text-emerald-600 dark:text-emerald-400",
   instagram: "text-pink-600 dark:text-pink-400",

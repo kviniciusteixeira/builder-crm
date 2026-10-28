@@ -1,16 +1,16 @@
 -- ============================================================================
--- Builder CRM - borrar un contacto tiene que llevarse lo que cuelga de el
+-- Builder CRM - apagar um contato tem que levar o que depende dele
 -- ============================================================================
--- Tres claves ajenas hacia contacts quedaron en NO ACTION: activities, deals y
--- messages. Con eso, DELETE /api/contacts/:id falla en cuanto el contacto tiene una
--- actividad, y todos la tienen: la ingesta, el agente y las automatizaciones escriben
--- actividades. El sintoma es un 500 al borrar, no un mensaje claro.
+-- Três chaves estrangeiras para contacts ficaram em NO ACTION: activities, deals e
+-- messages. Com isso, DELETE /api/contacts/:id falha assim que o contato tem uma
+-- atividade, e todos têm: a ingestão, o agente e as automações escrevem
+-- atividades. O sintoma é um 500 ao apagar, não uma mensagem clara.
 --
--- Las que SI tienen que sobrevivir al borrado no se tocan: automation_runs y
--- notifications quedan con SET NULL, porque son registro de lo que paso.
+-- As que TÊM que sobreviver ao apagamento não se tocam: automation_runs e
+-- notifications ficam com SET NULL, porque são registro do que aconteceu.
 --
--- Se busca la restriccion por su definicion y no por su nombre, para que funcione
--- aunque una instancia la tenga nombrada de otra forma.
+-- Busca-se a restrição pela definição e não pelo nome, para que funcione
+-- mesmo que uma instância a tenha nomeada de outra forma.
 -- ============================================================================
 
 do $$

@@ -1,8 +1,8 @@
-/* Service worker del CRM.
+/* Service worker do CRM.
  *
- * Hace UNA cosa: recibir push y mostrar la notificacion. A proposito NO tiene handler
- * de `fetch`: interceptar las requests es lo que rompe las PWA en iOS Safari (pantalla
- * en blanco al reabrir, sesion perdida). No hay cache offline: el CRM necesita red.
+ * Faz UMA coisa: receber push e mostrar a notificação. De propósito NÃO tem handler
+ * de `fetch`: interceptar as requests é o que quebra as PWA no iOS Safari (tela
+ * em branco ao reabrir, sessão perdida). Não há cache offline: o CRM precisa de rede.
  */
 
 self.addEventListener("install", () => {
@@ -39,7 +39,7 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
-      // Si el CRM ya esta abierto, enfocarlo y navegar; si no, abrir una ventana.
+      // Se o CRM já está aberto, focá-lo e navegar; se não, abrir uma janela.
       for (const client of list) {
         if ("focus" in client) {
           client.focus();
@@ -52,8 +52,8 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-/* El navegador rota la suscripcion (pasa sobre todo en iOS). Re-suscribimos con la
- * misma clave y avisamos al servidor cual era el endpoint viejo para reemplazarlo. */
+/* O navegador rotaciona a inscrição (acontece sobretudo no iOS). Reinscrevemos com a
+ * mesma chave e avisamos o servidor qual era o endpoint antigo para substituí-lo. */
 self.addEventListener("pushsubscriptionchange", (event) => {
   const old = event.oldSubscription;
   const key = old && old.options ? old.options.applicationServerKey : undefined;

@@ -4,11 +4,11 @@ import { tenants } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 /**
- * Tenant por defecto. El CRM es single-tenant por ahora: la migracion de la Fase 1 de
- * WhatsApp Coexistence backfilleo todo al tenant con slug 'default'.
+ * Tenant padrão. O CRM é single-tenant por agora: a migração da Fase 1 de
+ * WhatsApp Coexistence fez backfill de tudo no tenant com slug 'default'.
  *
- * Estaba duplicado dentro del webhook de GHL; los ingresos de Zernio lo necesitan
- * tambien, asi que vive aca.
+ * Estava duplicado dentro do webhook do GHL; os ingressos do Zernio também
+ * precisam, então vive aqui.
  */
 let cached: string | null = null;
 

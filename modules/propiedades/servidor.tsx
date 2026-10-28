@@ -11,7 +11,7 @@ import { embed, hasOpenAIKey, toVectorLiteral } from "./lib/embeddings";
 import { ListaPropiedades } from "./componentes/ListaPropiedades";
 
 // ============================================================
-// Catalogo
+// Catálogo
 // ============================================================
 
 const COLUMNAS_PUBLICAS = {
@@ -53,7 +53,7 @@ const listar: HandlerModulo = async (req) => {
 };
 
 // ============================================================
-// Tools del agente
+// Tools do agente
 // ============================================================
 
 interface ArgsBusqueda {
@@ -76,7 +76,7 @@ function normalizeOperacion(op?: string): string | null {
   return op;
 }
 
-/** Sin embeddings: filtros SQL sobre el catalogo (demo y clientes sin OpenAI). */
+/** Sem embeddings: filtros SQL sobre o catálogo (demo e clientes sem OpenAI). */
 async function buscarPorFiltros(args: ArgsBusqueda) {
   const cond: SQL[] = [];
   const op = normalizeOperacion(args.operacion);
@@ -128,7 +128,7 @@ async function buscarPropiedades(args: ArgsBusqueda) {
       amenities: r.amenities,
       link: r.public_url,
     }));
-    // Catalogo sin embeddings todavia (seed o sync sin OpenAI): caer a filtros.
+    // Catálogo ainda sem embeddings (seed ou sync sem OpenAI): cair para filtros.
     if (rows.length === 0) rows = await buscarPorFiltros(args);
   } else {
     rows = await buscarPorFiltros(args);
@@ -146,7 +146,7 @@ async function etiquetarContacto(contactId: string, tag: string | null | undefin
     if (!c || (c.tags ?? []).some((x) => x.toLowerCase() === t.toLowerCase())) return;
     await db.update(contacts).set({ tags: [...(c.tags ?? []), t], updatedAt: new Date() }).where(eq(contacts.id, contactId));
   } catch {
-    /* no bloquear la respuesta del agente por una etiqueta */
+    /* não bloquear a resposta do agente por uma etiqueta */
   }
 }
 
@@ -179,7 +179,7 @@ const tools: ToolModulo[] = [
       }
       const m = result.match;
       await etiquetarContacto(ctx.contactId, m.direccion);
-      // Solo lo publico: nunca telefono ni nombre del propietario.
+      // Só o público: nunca telefone nem nome do proprietário.
       return {
         ok: true,
         data: {
@@ -233,7 +233,7 @@ const tools: ToolModulo[] = [
 ];
 
 // ============================================================
-// Modulo
+// Módulo
 // ============================================================
 
 const DEMO = [

@@ -1,8 +1,8 @@
 /**
- * Resolucion de cuentas de WhatsApp por tenant. Reemplaza el modelo de
- * credenciales globales de env: cada numero conectado vive en `whatsapp_accounts`.
- * - Entrante (webhook): se rutea por `phone_number_id`.
- * - Saliente (envio/agente): se resuelve con que cuenta responder via el tenant.
+ * Resolução de contas de WhatsApp por tenant. Substitui o modelo de
+ * credenciais globais de env: cada número conectado vive em `whatsapp_accounts`.
+ * - Entrante (webhook): roteia-se por `phone_number_id`.
+ * - Saída (envio/agente): resolve-se com que conta responder via o tenant.
  */
 import { db } from "@/db";
 import { whatsappAccounts, contacts } from "@/db/schema";
@@ -28,7 +28,7 @@ function mapRow(row: typeof whatsappAccounts.$inferSelect): WhatsappAccount {
   };
 }
 
-/** Routing entrante: resuelve la cuenta del CRM por el phone_number_id del webhook. */
+/** Routing de entrada: resolve a conta do CRM pelo phone_number_id do webhook. */
 export async function getAccountByPhoneNumberId(
   phoneNumberId: string | null | undefined
 ): Promise<WhatsappAccount | null> {
@@ -41,7 +41,7 @@ export async function getAccountByPhoneNumberId(
   return row ? mapRow(row) : null;
 }
 
-/** Saliente: primera cuenta activa de un tenant (Fase 1 = una cuenta por tenant). */
+/** Saída: primeira conta ativa de um tenant (Fase 1 = uma conta por tenant). */
 export async function getAccountByTenant(
   tenantId: string | null | undefined
 ): Promise<WhatsappAccount | null> {
@@ -59,7 +59,7 @@ export async function getAccountByTenant(
   return row ? mapRow(row) : null;
 }
 
-/** Saliente: resuelve la cuenta con la que responder a un contacto (via su tenant). */
+/** Saída: resolve a conta com a qual responder a um contato (via o seu tenant). */
 export async function getAccountForContact(
   contactId: string
 ): Promise<WhatsappAccount | null> {
@@ -72,9 +72,9 @@ export async function getAccountForContact(
 }
 
 /**
- * Cuenta activa "principal" para operaciones no ligadas a un contacto (ej: ABM de
- * plantillas, que viven en el WABA). Fase 1 = single-tenant, devuelve la primera
- * cuenta activa. Fase 2: resolver por el tenant del usuario logueado.
+ * Conta ativa "principal" para operações não ligadas a um contato (ex.: ABM de
+ * templates, que vivem no WABA). Fase 1 = single-tenant, devolve a primeira
+ * conta ativa. Fase 2: resolver pelo tenant do usuário logado.
  */
 export async function getPrimaryAccount(): Promise<WhatsappAccount | null> {
   const [row] = await db

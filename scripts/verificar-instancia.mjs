@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// Autoverificacion de una instancia de Builder CRM (local o desplegada).
+// Autoverificação de uma instância do Builder CRM (local ou implantada).
 //
 //   node scripts/verificar-instancia.mjs --url https://crm.cliente.com \
 //     --email admin@cliente.com --password '...' --secreto '<AGENT_WORKER_SECRET>' \
 //     [--marca "Casa Sur"] [--etapas nuevo,calificado] [--modulos propiedades,visitas] \
 //     [--guion "Hola, busco un depto..."] [--sin-agente]
 //
-// Comprueba, en orden: health, login (Supabase Auth + /api/team/me), marca (manifest),
-// pipeline/config (/api/simulador/estado), conversacion de prueba por el simulador con
-// respuesta del agente y operacion en el pipeline, y modulos activos. Sale con 1 si
-// algo falla. Es lo que corre la skill probar-instancia (constitucion, principio III).
+// Confere, em ordem: health, login (Supabase Auth + /api/team/me), marca (manifest),
+// pipeline/config (/api/simulador/estado), conversa de teste pelo simulador com
+// resposta do agente e operação no pipeline, e módulos ativos. Sai com 1 se
+// algo falha. É o que roda a skill probar-instancia (constituição, princípio III).
 
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -17,17 +17,17 @@ import { fileURLToPath } from "node:url";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// `.env.local` se carga SOLO cuando no se pasa --url, o sea cuando se verifica la
-// instancia local. Verificando una remota seria una trampa: las credenciales de
-// Supabase del entorno local apuntan a otra base, el login falla con "Invalid login
-// credentials" y parece un problema de la instancia. Con --url hay que pasar
-// --supabase-url y --anon-key (o exportarlas en la terminal).
+// `.env.local` se carrega SÓ quando não se passa --url, ou seja quando se verifica a
+// instância local. Verificar uma remota seria uma armadilha: as credenciais de
+// Supabase do ambiente local apontam para outra base, o login falha com "Invalid login
+// credentials" e parece um problema da instância. Com --url há que passar
+// --supabase-url e --anon-key (ou exportá-las no terminal).
 if (!process.argv.includes("--url") && existsSync(join(raiz, ".env.local"))) {
   try {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
   } catch {
-    /* sin dotenv */
+    /* sem dotenv */
   }
 }
 
@@ -68,7 +68,7 @@ async function getJson(path, init = {}) {
   try {
     json = JSON.parse(text);
   } catch {
-    /* no json */
+    /* não é json */
   }
   return { res, json, text };
 }
@@ -88,9 +88,9 @@ try {
 }
 
 // 2. Login ----------------------------------------------------------------------------
-// Password grant contra Supabase Auth y cookie en el formato de @supabase/ssr para
-// llamar a las rutas con sesion. Si el formato cambia, el check de sesion queda como
-// "no verificado" pero el login en si (el grant) ya probo que la cuenta funciona.
+// Password grant contra o Supabase Auth e cookie no formato de @supabase/ssr para
+// chamar as rotas com sessão. Se o formato muda, o check de sessão fica como
+// "não verificado", mas o login em si (o grant) já provou que a conta funciona.
 const supabaseUrl = opt("--supabase-url", process.env.NEXT_PUBLIC_SUPABASE_URL);
 const anonKey = opt("--anon-key", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 if (!email || !password) {
@@ -111,8 +111,8 @@ if (!email || !password) {
     } else {
       ok("Login (Supabase Auth)", email);
 
-      // Que formas de entrar admite la instancia. Es informativo: el acceso real lo
-      // decide team_members, no el proveedor. Ver docs/GOOGLE-AUTH.md.
+      // Quais formas de entrar a instância admite. É informativo: o acesso real quem
+      // decide é team_members, não o provedor. Ver docs/GOOGLE-AUTH.md.
       try {
         const ajustes = await fetch(`${supabaseUrl.replace(/\/$/, "")}/auth/v1/settings`, {
           headers: { apikey: anonKey },
@@ -125,8 +125,8 @@ if (!email || !password) {
             .map(([nombre]) => nombre)
             .filter((n) => n !== "email" && n !== "phone");
           const formas = externos.length ? `email y ${externos.join(", ")}` : "solo email y contrasena";
-          // El correo lo declara la instancia (/api/health), no el proveedor: GoTrue no
-          // dice si tiene SMTP. Ver docs/CORREO.md.
+          // O e-mail é declarado pela instância (/api/health), não pelo provedor: o GoTrue não
+          // diz se tem SMTP. Ver docs/CORREIO.md.
           const correo = salud?.correo
             ? "invitaciones y recuperacion por correo: si"
             : "invitaciones por correo: no (el admin reparte contrasenas a mano)";
@@ -137,7 +137,7 @@ if (!email || !password) {
           });
         }
       } catch {
-        /* informativo: si no responde, no se informa */
+        /* informativo: se não responde, não se informa */
       }
 
       const ref = new URL(supabaseUrl).hostname.split(".")[0];
@@ -163,9 +163,9 @@ try {
   else if (marcaEsperada && json.name !== marcaEsperada) fallo("Marca (manifest)", `esperaba "${marcaEsperada}", hay "${json.name}"`);
   else {
     ok("Marca (manifest)", json.name);
-    // La plantilla viene con la marca de IA Builder Lab. Para una instancia de cliente
-    // eso hay que cambiarlo en config/cliente.ts, y olvidarselo no da ningun error:
-    // simplemente el cliente ve el logo de la comunidad. Por eso se avisa.
+    // O modelo vem com a marca de IA Builder Lab. Para uma instância de cliente
+    // isso há que mudar em config/cliente.ts, e esquecer não dá nenhum erro:
+    // simplesmente o cliente vê o logo da comunidade. Por isso se avisa.
     if (!marcaEsperada && json.name === "Builder CRM") {
       resultados.push({
         check: "Marca propia del cliente",
@@ -178,7 +178,7 @@ try {
   fallo("Marca (manifest)", err.message);
 }
 
-// 4. Pipeline, campos y modulos ---------------------------------------------------------
+// 4. Pipeline, campos e módulos ---------------------------------------------------------
 let estado = null;
 {
   const { res, json } = await getJson("/api/simulador/estado", { headers: bearer });
@@ -199,7 +199,7 @@ let estado = null;
   }
 }
 
-// 5. Conversacion de prueba -----------------------------------------------------------
+// 5. Conversa de teste ----------------------------------------------------------------
 if (sinAgente || !estado?.agente?.configurado) {
   salto("Conversacion de prueba", sinAgente ? "--sin-agente" : "sin agente configurado");
 } else {
@@ -227,9 +227,9 @@ if (sinAgente || !estado?.agente?.configurado) {
     if (respondio) ok("El agente responde", `"${(ultimo.agente.reply ?? "").slice(0, 80)}..." (${ultimo.agente.toolCalls ?? 0} tools)`);
     else fallo("El agente responde", ultimo?.agente?.reason ?? "sin respuesta");
 
-    // Lo que se comprueba es que el agente ACTUE sobre el CRM, no que use una tool
-    // concreta: cuando mueve la etapa lo decide el prompt del cliente, no el codigo.
-    // Si no dejo ningun rastro, eso si es un fallo: significa que las tools no llegan.
+    // O que se confere é que o agente AJA sobre o CRM, não que use uma tool
+    // concreta: quando move a etapa quem decide é o prompt do cliente, não o código.
+    // Se não deixou nenhum rastro, isso sim é uma falha: significa que as tools não chegam.
     const e = ultimo?.estado;
     const rastros = [];
     if (e?.etapa) rastros.push(`etapa: ${e.etapa}`);
@@ -265,7 +265,7 @@ if (sinAgente || !estado?.agente?.configurado) {
   }
 }
 
-// 6. Modulos -------------------------------------------------------------------------------
+// 6. Módulos -------------------------------------------------------------------------------
 for (const m of estado?.modulos ?? modulosEsperados) {
   if (!cookie) {
     salto(`Modulo ${m}`, "sin sesion");
@@ -277,7 +277,7 @@ for (const m of estado?.modulos ?? modulosEsperados) {
   else fallo(`Modulo ${m}`, `${r.res.status}`);
 }
 
-// Resumen -------------------------------------------------------------------------------------
+// Resumo --------------------------------------------------------------------------------------
 console.log(`\nVerificacion de ${base}${salud ? ` (v${salud.version})` : ""}\n`);
 const ancho = Math.max(...resultados.map((r) => r.check.length));
 for (const r of resultados) {

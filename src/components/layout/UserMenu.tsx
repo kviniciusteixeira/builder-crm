@@ -34,10 +34,10 @@ export function UserMenu() {
   const [cargando, setCargando] = useState(true);
   const [, startTransition] = useTransition();
 
-  // Se lee del CRM, no del cliente de Supabase del navegador: el nombre y el rol que
-  // importan estan en team_members, y asi el menu no depende de que el navegador pueda
-  // hablar con el servidor de autenticacion. Pase lo que pase deja de cargar: antes,
-  // si esa llamada fallaba, el pie del menu lateral se quedaba en gris para siempre.
+  // Lê-se do CRM, não do cliente de Supabase do navegador: o nome e o papel que
+  // importam estão em team_members, e assim o menu não depende de que o navegador possa
+  // falar com o servidor de autenticação. Aconteça o que acontecer, para de carregar: antes,
+  // se essa chamada falhava, o rodapé do menu lateral ficava cinza para sempre.
   useEffect(() => {
     let vivo = true;
     fetch("/api/team/me")
@@ -120,8 +120,8 @@ export function UserMenu() {
           <Settings className="h-4 w-4" />
           Configuracion
         </DropdownMenuItem>
-        {/* En modo local no hay sesion: el boton no tendria a donde ir y dejaria la
-            pantalla en blanco. */}
+        {/* No modo local não há sessão: o botão não teria para onde ir e deixaria a
+            tela em branco. */}
         {!leerConfigPublica().modoLocal && (
           <>
             <DropdownMenuSeparator />

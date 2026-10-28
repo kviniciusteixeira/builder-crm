@@ -33,7 +33,7 @@ export async function GET() {
     .from(deals)
     .leftJoin(contacts, eq(deals.contactId, contacts.id))
     .leftJoin(pipelineStages, eq(deals.stageId, pipelineStages.id))
-    // Un asesor ve las operaciones de SUS contactos.
+    // Um assessor vê as operações dos SEUS contatos.
     .where(ownerFilter(auth.member))
     .orderBy(desc(deals.createdAt));
 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       .returning();
     const result = resultRows[0];
 
-    // "Lead colocado en el pipeline": mismo evento, sin etapa anterior.
+    // "Lead colocado no pipeline": mesmo evento, sem etapa anterior.
     await setDealStage({ dealId: result.id, stageId: finalStageId, justCreated: true });
 
     return NextResponse.json(result, { status: 201 });

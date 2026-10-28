@@ -9,13 +9,13 @@ import { correoDeAccesoActivo } from "@/lib/auth-correo";
 export const dynamic = "force-dynamic";
 
 /**
- * Health check publico (sin sesion). Lo usan el HEALTHCHECK del contenedor, Coolify,
- * y `scripts/verificar-instancia.mjs`.
+ * Health check público (sem sessão). O HEALTHCHECK do contêiner, o Coolify
+ * e `scripts/verificar-instancia.mjs` o usam.
  *
  *   200 {"ok":true,"version":"1.0.0","commit":"abc1234","db":"ok","correo":false}
  *   503 {"ok":false,"error":"db_unavailable" | "env_invalida","faltan":[...]}
  *
- * Nunca expone valores de variables, solo nombres de las que faltan.
+ * Nunca expõe valores de variáveis, só nomes das que faltam.
  */
 export async function GET() {
   const faltan = envFaltantes();
@@ -46,15 +46,15 @@ export async function GET() {
     );
   }
 
-  // `correo` es una capacidad, no un secreto: lo usa `verificar-instancia.mjs` para
-  // decir si esta instancia puede invitar por correo o reparte contrasenas a mano.
+  // `correo` é uma capacidade, não um segredo: `verificar-instancia.mjs` o usa para
+  // dizer se esta instância pode convidar por e-mail ou se distribui senhas à mão.
   return NextResponse.json({
     ok: true,
     version: APP_VERSION,
     commit: BUILD_COMMIT,
     db: "ok",
     correo: correoDeAccesoActivo(),
-    // Para que nadie confunda una instancia de verdad con alguien probandolo en su PC.
+    // Para que ninguém confunda uma instância de verdade com alguém testando no próprio PC.
     modoLocal: modoLocal(),
   });
 }

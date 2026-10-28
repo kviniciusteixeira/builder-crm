@@ -2,29 +2,29 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { modoLocal } from "@/lib/modo-local";
 
 /**
- * El modo local apaga la autenticacion entera: no hay sesion, no hay roles y quien abre
- * la URL es administrador. Eso esta bien en la maquina de alguien que esta probando el
- * CRM, y es una puerta abierta en la instancia de un cliente.
+ * O modo local desliga a autenticação inteira: não há sessão, não há papéis e quem abre
+ * a URL é administrador. Isso está bem na máquina de alguém que está testando o
+ * CRM, e é uma porta aberta na instância de um cliente.
  *
- * Lo peligroso es que si se encendiera por error no fallaria nada: no hay excepcion, no
- * hay log, la UI se ve igual. El unico sintoma seria que cualquiera entra. Por eso el
- * segundo candado (NODE_ENV) tiene que aguantar aunque la variable venga puesta, que es
- * lo que pasa cuando alguien copia su .env.local al servidor.
+ * O perigoso é que, se ligasse por engano, nada falharia: não há exceção, não
+ * há log, a UI se vê igual. O único sintoma seria que qualquer um entra. Por isso o
+ * segundo cadeado (NODE_ENV) tem que aguentar mesmo que a variável venha definida, que é
+ * o que acontece quando alguém copia seu .env.local para o servidor.
  */
 
 const ORIGINAL = { ...process.env };
 
-// Los tipos de Next declaran NODE_ENV como de solo lectura; en el test hay que moverlo
-// igual, porque el candado que se esta probando es justamente ese. Se resuelve
-// `process.env` en cada llamada a proposito: afterEach lo reemplaza por un objeto nuevo
-// y una referencia guardada apuntaria al viejo.
+// Os tipos do Next declaram NODE_ENV como somente leitura; no teste há que movê-lo
+// mesmo assim, porque o cadeado que se está testando é justamente esse. Resolve-se
+// `process.env` em cada chamada de propósito: afterEach o substitui por um objeto novo
+// e uma referência guardada apontaria para o velho.
 function entorno(clave: string, valor: string) {
   (process.env as Record<string, string | undefined>)[clave] = valor;
 }
 
 beforeEach(() => {
   delete process.env.MODO_LOCAL;
-  // vitest corre en "test"; el valor que importa es que no sea "production".
+  // o vitest roda em "test"; o valor que importa é que não seja "production".
   entorno("NODE_ENV", "development");
 });
 

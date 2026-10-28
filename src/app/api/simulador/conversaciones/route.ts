@@ -5,7 +5,7 @@ import { autorizarSimulador, crearConversacionSimulada, listarConversacionesSimu
 
 export const dynamic = "force-dynamic";
 
-/** Admin con sesion o secreto del worker, y solo si el simulador esta activo. */
+/** Admin com sessão ou segredo do worker, e só se o simulador está ativo. */
 async function guard(request: NextRequest) {
   if (!moduloActivo("simulador")) {
     return { response: NextResponse.json({ error: "Simulador desactivado" }, { status: 404 }) };

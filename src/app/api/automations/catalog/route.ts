@@ -4,7 +4,7 @@ import { getCatalog } from "@/lib/automations";
 
 export const dynamic = "force-dynamic";
 
-/** Disparadores y acciones disponibles, con sus opciones ya resueltas. */
+/** Disparadores e ações disponíveis, com suas opções já resolvidas. */
 export async function GET() {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;

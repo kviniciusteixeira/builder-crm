@@ -2,11 +2,11 @@ import { createBrowserClient } from "@supabase/ssr";
 import { leerConfigPublica } from "@/lib/config-publica";
 
 /**
- * Cliente de Supabase para el navegador.
+ * Cliente de Supabase para o navegador.
  *
- * La URL y la clave anonima salen del bloque de configuracion que el layout escribe en
- * tiempo de ejecucion, no de las `NEXT_PUBLIC_*` horneadas en el build: la misma imagen
- * sirve para instancias distintas. Ver `src/lib/config-publica.ts`.
+ * A URL e a chave anônima saem do bloco de configuração que o layout escreve em
+ * tempo de execução, não das `NEXT_PUBLIC_*` gravadas no build: a mesma imagem
+ * serve para instâncias distintas. Ver `src/lib/config-publica.ts`.
  */
 export function createClient() {
   const { supabaseUrl, supabaseAnonKey } = leerConfigPublica();

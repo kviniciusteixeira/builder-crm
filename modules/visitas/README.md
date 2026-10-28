@@ -1,19 +1,19 @@
-# Modulo `visitas` — visitas y calendario
+# Módulo `visitas` — visitas e calendário
 
-Coordinacion de visitas presenciales (a una propiedad, un local, una obra) con agenda
-mensual. Es parte de la plantilla inmobiliaria, pero no tiene nada de inmobiliario:
-sirve para cualquier negocio que agende encuentros.
+Coordenação de visitas presenciais (a um imóvel, uma loja, uma obra) com agenda
+mensal. Faz parte do modelo imobiliário, mas não tem nada de imobiliário:
+serve para qualquer negócio que agende encontros.
 
-| Que | Donde |
+| O quê | Onde |
 |---|---|
-| Menu | "Visitas" (Operaciones) y "Calendario" (Productividad) |
-| Paginas | `/m/visitas` (lista por estado) y `/m/visitas/calendario` (mes) |
+| Menu | "Visitas" (Operaciones) e "Calendario" (Productividad) |
+| Páginas | `/m/visitas` (lista por estado) e `/m/visitas/calendario` (mês) |
 | API | `GET/POST /api/m/visitas`, `PATCH/DELETE /api/m/visitas/<id>` |
-| Tabla | `visitas` (`migrations/0000_visitas.sql`, RLS por contacto visible) |
-| Tool del agente | `agendar_visita` (deja la visita en coordinacion; una persona confirma) |
-| Seed | 4 visitas de ejemplo sobre los primeros contactos |
+| Tabela | `visitas` (`migrations/0000_visitas.sql`, RLS pelo contato visível) |
+| Tool do agente | `agendar_visita` (deixa a visita em coordenação; uma pessoa confirma) |
+| Seed | 4 visitas de exemplo sobre os primeiros contatos |
 
-Estados: `coordinating` (sin fecha confirmada), `scheduled` (fecha y hora),
-`completed`, `cancelled`. Un asesor ve solo las visitas de sus contactos.
+Estados: `coordinating` (sem data confirmada), `scheduled` (data e hora),
+`completed`, `cancelled`. Um assessor vê só as visitas dos seus contatos.
 
-Sin variables de entorno. La sincronizacion con Google Calendar no esta implementada.
+Sem variáveis de ambiente. A sincronização com o Google Calendar não está implementada.
